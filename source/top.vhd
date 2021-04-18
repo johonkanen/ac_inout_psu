@@ -7,8 +7,8 @@ library work;
 
 entity top is
     port (
-        enet_clk_125MHz             : std_logic;
-        pll_input_clock             : std_logic;
+        enet_clk_125MHz         : in std_logic;
+        pll_input_clock         : in std_logic;
         system_control_FPGA_in  : in system_control_FPGA_input_group;
         system_control_FPGA_out : out system_control_FPGA_output_group
     );
