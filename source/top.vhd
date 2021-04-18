@@ -8,17 +8,17 @@ library work;
 entity top is
     port (
         enet_clk_125MHz             : std_logic;
-        pll_input_clock             : std_logic
-        system_control_pkg_FPGA_in  : system_control_pkg_FPGA_input_group;
-        system_control_pkg_FPGA_out : system_control_pkg_FPGA_output_group
+        pll_input_clock             : std_logic;
+        system_control_FPGA_in  : in system_control_FPGA_input_group;
+        system_control_FPGA_out : out system_control_FPGA_output_group
     );
 end entity ;
 
 architecture rtl of top is
 
-    signal system_control_pkg_clocks   : system_control_pkg_clock_group;
-    signal system_control_pkg_data_in  : system_control_pkg_data_input_group;
-    signal system_control_pkg_data_out : system_control_pkg_data_output_group
+    signal system_control_clocks   : system_control_clock_group;
+    signal system_control_data_in  : system_control_data_input_group;
+    signal system_control_data_out : system_control_data_output_group;
 
 begin
 
@@ -29,7 +29,5 @@ begin
     	  system_control_FPGA_out,
     	  system_control_data_in,
     	  system_control_data_out);
-
-
 
 end rtl;

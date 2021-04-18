@@ -3,6 +3,9 @@ library ieee;
     use ieee.numeric_std.all;
 
 
+library work;
+    use work.system_components_pkg.all;
+
 package system_control_pkg is
 
 type system_control_clock_group is record
@@ -10,19 +13,19 @@ type system_control_clock_group is record
 end record;
 
 type system_control_FPGA_input_group is record
-    clock : std_logic;
+    system_components_FPGA_in  : system_components_FPGA_input_group;
 end record;
 
 type system_control_FPGA_output_group is record
-    clock : std_logic;
+    system_components_FPGA_out : system_components_FPGA_output_group;
 end record;
 
 type system_control_data_input_group is record
-    clock : std_logic;
+    system_components_data_in  : system_components_data_input_group;
 end record;
 
 type system_control_data_output_group is record
-    clock : std_logic;
+    system_components_data_out : system_components_data_output_group;
 end record;
 
 component system_control is
