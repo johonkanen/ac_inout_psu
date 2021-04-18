@@ -1,59 +1,20 @@
-name: Test
+name: 'VUnit Action'
+description: 'Automatically test your VHDL code with VUnit'
 
-on:
-  push:
-  pull_request:
+inputs:
+  cmd:
+    description: 'VUnit run script or command (Python)'
+    default: 'run.py'
+  image:
+    description: 'Container image to run the script/command on'
+    default: ghdl/vunit:mcode
 
-jobs:
+runs:
+  using: "composite"
+  steps:
+    - run: docker run --rm -v $(pwd):/src -w /src ${{ inputs.image }} ${{ inputs.cmd }}
+      shell: bash
 
-  action:
-    runs-on: ubuntu-latest
-    steps:
-
-    - uses: actions/checkout@v2
-
-    - name: Run VUnit tests
-      uses: ./
-      with:
-        cmd: test/run.py
-
-
-  container-job:
-    runs-on: ubuntu-latest
-    container: ghdl/vunit:mcode-master
-    steps:
-
-    - uses: actions/checkout@v2
-
-    - run: test/run.py
-
-
-  container-step:
-    runs-on: ubuntu-latest
-    steps:
-
-    - uses: actions/checkout@v2
-
-    - uses: docker://ghdl/vunit:mcode-master
-      with:
-        args: test/run.py
-# name: 'VUnit Action'
-# description: 'Automatically test your VHDL code with VUnit'
-#
-# inputs:
-#   cmd:
-#     description: 'VUnit run script or command (Python)'
-#     default: 'run.py'
-#   image:
-#     description: 'Container image to run the script/command on'
-#     default: ghdl/vunit:mcode
-#
-# runs:
-#   using: "composite"
-#   steps:
-#     - run: docker run --rm -v $(pwd):/src -w /src ${{ inputs.image }} ${{ inputs.cmd }}
-#       shell: bash
-#
-# branding:
-#   icon: cpu
-#   color: blue
+branding:
+  icon: cpu
+  color: blue
