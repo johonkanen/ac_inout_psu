@@ -45,6 +45,8 @@ set need_to_close_project 1
 source $project_root/get_vhdl_sources.tcl
 source $cyclone_10_tcl_dir/make_assignments.tcl
 
+set_global_assignment -name QIP_FILE $project_root/cyclone_10/IP/main_clocks/main_clocks.qip
+
 foreach x [get_vhdl_sources ../] \
 { \
     if {[lsearch -glob $x *common*] == 0} \
@@ -60,3 +62,13 @@ foreach x [get_vhdl_sources ../] \
         set_global_assignment -name VHDL_FILE $source_folder/$x \
     } 
 }
+
+set_global_assignment -name SDC_FILE $cyclone_10_tcl_dir/ac_inout_constraints.sdc
+
+source $cyclone_10_tcl_dir/set_io_locations.tcl
+    export_assignments
+
+execute_flow -compile
+
+
+
