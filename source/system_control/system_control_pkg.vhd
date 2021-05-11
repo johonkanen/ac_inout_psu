@@ -10,6 +10,7 @@ package system_control_pkg is
 
 type system_control_clock_group is record
     clock : std_logic;
+    reset_n : std_logic;
 end record;
 
 type system_control_FPGA_input_group is record

@@ -20,14 +20,30 @@ architecture rtl of top is
     signal system_control_data_in  : system_control_data_input_group;
     signal system_control_data_out : system_control_data_output_group;
 
+    component main_clocks IS
+        PORT
+        (
+            areset : IN STD_LOGIC    := '0';
+            inclk0 : IN STD_LOGIC    := '0';
+            c0     : OUT STD_LOGIC ;
+            locked : OUT STD_LOGIC
+        );
+    END component main_clocks;
+
 begin
+
+    u_main_clocks : main_clocks
+    port map( areset => '1',
+              inclk0 => pll_input_clock,
+              c0     => system_control_clocks.clock,
+              locked => system_control_clocks.reset_n);
 
 ------------------------------------------------------------------------
     u_system_control : system_control
-    port map( system_control_clocks,
-    	  system_control_FPGA_in,
-    	  system_control_FPGA_out,
-    	  system_control_data_in,
+    port map( system_control_clocks ,
+    	  system_control_FPGA_in    ,
+    	  system_control_FPGA_out   ,
+    	  system_control_data_in    ,
     	  system_control_data_out);
 
 end rtl;
