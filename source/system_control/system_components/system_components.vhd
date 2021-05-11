@@ -5,6 +5,7 @@ library ieee;
 library work;
     use work.system_components_pkg.all;
     use work.power_supply_control_pkg.all;
+    use work.uart_pkg.all;
 
 entity system_components is
     port (
@@ -18,12 +19,50 @@ end entity system_components;
 
 architecture rtl of system_components is
 
+    alias clock is system_components_clocks.clock;
+    alias reset_n is system_components_clocks.reset_n;
+
     signal power_supply_control_clocks   : power_supply_control_clock_group;
     signal power_supply_control_data_in  : power_supply_control_data_input_group;
     signal power_supply_control_data_out : power_supply_control_data_output_group;
     
+    signal uart_clocks   : uart_clock_group;
+    signal uart_data_in  : uart_data_input_group;
+    signal uart_data_out : uart_data_output_group;
+
+    signal uart_transmit_counter : natural range 0 to 2**16-1 := 0;
+    constant counter_at_100khz : natural := 120e6/100e3;
+    signal transmit_counter : natural range 0 to 2**16-1 := 0;
 
 begin
+
+    test_uart : process(clock)
+        
+    begin
+        if rising_edge(clock) then
+            init_uart(uart_data_in);
+            uart_transmit_counter <= uart_transmit_counter + 1;
+            if uart_transmit_counter = counter_at_100khz then
+                uart_transmit_counter <= 0;
+                transmit_16_bit_word_with_uart(uart_data_in, transmit_counter);
+                transmit_counter <= transmit_counter + 1; 
+                if transmit_counter = 44252 then
+                    uart_transmit_counter <= 0;
+                end if;
+            end if;
+
+        end if; --rising_edge
+    end process test_uart;	
+
+------------------------------------------------------------------------ 
+    uart_clocks <= (clock => system_components_clocks.clock);
+    u_uart : uart
+    port map( uart_clocks,
+    	  system_components_FPGA_in.uart_FPGA_in,
+    	  system_components_FPGA_out.uart_FPGA_out,
+    	  uart_data_in,
+    	  uart_data_out);
+------------------------------------------------------------------------ 
 
     u_power_supply_control : power_supply_control
     port map( power_supply_control_clocks,
