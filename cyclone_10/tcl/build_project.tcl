@@ -17,7 +17,7 @@ variable cyclone_10_tcl_dir [ file dirname [ file normalize [ info script ] ] ]
 set project_root $cyclone_10_tcl_dir/../../
 set source_folder $project_root/source
 set fpga_device 10CL025YU256I7G
-set output_dir ./out
+set output_dir ./output
 
 # if {[llength $output_dir] != 0} \
 # {
@@ -40,10 +40,7 @@ else \
     project_new -revision top ac_psu
 }
 set need_to_close_project 1
-
-
-
-    #
+#
 # read sources
 source $project_root/get_vhdl_sources.tcl
 source $cyclone_10_tcl_dir/make_assignments.tcl
@@ -63,4 +60,3 @@ foreach x [get_vhdl_sources ../] \
         set_global_assignment -name VHDL_FILE $source_folder/$x \
     } 
 }
-
