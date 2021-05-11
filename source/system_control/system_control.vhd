@@ -25,6 +25,8 @@ architecture rtl of system_control is
     
 begin
 
+    system_components_clocks <=( clock => system_control_clocks.clock,
+                               reset_n =>system_control_clocks.reset_n);
 ------------------------------------------------------------------------
     u_system_components : system_components
     port map( system_components_clocks,
