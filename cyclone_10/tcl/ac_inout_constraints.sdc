@@ -1,10 +1,11 @@
+
+# TODO, create script for dynamically assigning io locations
+
 #**************************************************************
 # Time Information
 #**************************************************************
 
 set_time_format -unit ns -decimal_places 3
-
-
 
 #**************************************************************
 # Create Clock
@@ -55,7 +56,7 @@ derive_clock_uncertainty
 # Set False Path
 #**************************************************************
 
-#set_false_path -from * -to [get_ports *led*]
+set_false_path -from * -to [get_ports *uart_tx*]
 #set_false_path -from * -to [get_ports *switch*]
 #set_false_path -from *u_power_supply_control|master_carrier[*] -to *ad_mux*
 #set_false_path -from *u_power_supply_control|master_carrier[*] -to *triggers*
@@ -80,4 +81,3 @@ derive_clock_uncertainty
 #**************************************************************
 # Set Input Transition
 #**************************************************************
-
