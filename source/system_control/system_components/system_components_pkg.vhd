@@ -14,12 +14,12 @@ package system_components_pkg is
     end record;
     
     type system_components_FPGA_input_group is record
-        -- power_supply_control_FPGA_in : power_supply_control_FPGA_input_group;
+        power_supply_control_FPGA_in : power_supply_control_FPGA_input_group;
         uart_FPGA_in : uart_FPGA_input_group;
     end record;
     
     type system_components_FPGA_output_group is record
-        -- power_supply_control_FPGA_out : power_supply_control_FPGA_output_group; 
+        power_supply_control_FPGA_out : power_supply_control_FPGA_output_group; 
         uart_FPGA_out : uart_FPGA_output_group;
     end record;
     
@@ -52,14 +52,7 @@ package system_components_pkg is
     -- 	  system_components_FPGA_in,
     --	  system_components_FPGA_out,
     --	  system_components_data_in,
-    --	  system_components_data_out);
-    
+    --	  system_components_data_out); 
 
 ------------------------------------------------------------------------
 end package system_components_pkg;
-
-------------------------------------------------------------------------
-package body system_components_pkg is
-
-------------------------------------------------------------------------
-end package body system_components_pkg;

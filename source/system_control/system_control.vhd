@@ -4,6 +4,7 @@ library ieee;
 
 library work;
     use work.system_control_pkg.all;
+    use work.system_control_internal_pkg.all;
     use work.system_components_pkg.all;
 
 entity system_control is
@@ -36,6 +37,7 @@ begin
             -- reset state
     
             else
+                start_gate_drive_powers(system_components_data_in);
     
             end if; -- rstn
         end if; --rising_edge

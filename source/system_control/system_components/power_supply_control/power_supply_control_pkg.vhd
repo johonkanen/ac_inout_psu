@@ -2,10 +2,14 @@ library ieee;
     use ieee.std_logic_1164.all;
     use ieee.numeric_std.all;
 
+library work;
+    use work.gate_drive_power_pkg.all;
+
 package power_supply_control_pkg is
 
     type power_supply_control_clock_group is record
         clock : std_logic;
+        reset_n : std_logic;
     end record;
     
     type power_supply_control_FPGA_input_group is record
@@ -14,14 +18,15 @@ package power_supply_control_pkg is
     
     type power_supply_control_FPGA_output_group is record
         clock : std_logic;
+        gate_drive_power_FPGA_out : gate_drive_power_FPGA_output_group;
     end record;
     
     type power_supply_control_data_input_group is record
-        clock : std_logic;
+        gate_drive_power_data_in  : gate_drive_power_data_input_group;
     end record;
     
     type power_supply_control_data_output_group is record
-        clock : std_logic;
+        gate_drive_power_data_out : gate_drive_power_data_output_group;
     end record;
     
     component power_supply_control is
