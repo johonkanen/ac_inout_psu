@@ -54,8 +54,3 @@ package power_supply_control_pkg is
     
 
 end package power_supply_control_pkg;
-
-package body power_supply_control_pkg is
-
-end package body power_supply_control_pkg;
-
