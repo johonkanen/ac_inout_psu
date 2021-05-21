@@ -24,6 +24,7 @@ proc get_vhdl_sources {void}\
 
             /system_control/system_control_pkg.vhd
             /system_control/system_control_internal_pkg.vhd
+            /system_control/system_control_internal_body.vhd
             /system_control/system_control.vhd
 
         top.vhd 
