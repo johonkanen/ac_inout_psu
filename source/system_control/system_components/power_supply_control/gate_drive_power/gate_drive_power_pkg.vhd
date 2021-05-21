@@ -4,7 +4,7 @@ library ieee;
 
 package gate_drive_power_pkg is
 
-    type list_of_gate_drive_power_supplies_for is (grid_afe, psu_afe, dab_primary, dab_secondary);
+    type list_of_gate_drive_power_supplies_for is (grid_afe_leg1 , grid_afe_leg2 , psu_afe_leg1 , psu_afe_leg2 , dab_primary , dab_secondary);
     type gate_drive_pwm_output_array is array (list_of_gate_drive_power_supplies_for range list_of_gate_drive_power_supplies_for'left to list_of_gate_drive_power_supplies_for'right) of std_logic;
 
     type gate_drive_power_clock_group is record
