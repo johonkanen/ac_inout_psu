@@ -4,7 +4,7 @@ library ieee;
 
 package uart_pkg is
 
-    constant CLKS_PER_BIT : integer := 25;
+    constant CLKS_PER_BIT : integer := 120e6/5e6;
     constant RX_bytes_in_word : integer := 2;
     constant TX_bytes_in_word : integer := 2;
 
