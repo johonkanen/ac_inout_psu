@@ -69,7 +69,7 @@ begin
 
 ------------------------------------------------------------------------ 
     u_power_supply_control : power_supply_control
-    port map( power_supply_control_clocks                       ,
+    port map( power_supply_control_clocks                          ,
     	  system_components_FPGA_in.power_supply_control_FPGA_in   ,
     	  system_components_FPGA_out.power_supply_control_FPGA_out ,
     	  power_supply_control_data_in                             ,

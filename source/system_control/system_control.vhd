@@ -29,11 +29,10 @@ architecture rtl of system_control is
     
 begin
 
+------------------------------------------------------------------------
     main_system_controller : process(core_clock)
 
-        type t_system_controller is (idle, bypass_input_relay, charge_gate_drivers, fault);
-        variable st_system_controller : t_system_controller;
-
+        type t_system_controller is (idle, bypass_input_relay, charge_gate_drivers, fault); 
     --------------------------------------------------
         procedure idle_system
         (
@@ -48,6 +47,8 @@ begin
         end idle_system;
         
     --------------------------------------------------
+        variable st_system_controller : t_system_controller;
+    --------------------------------------------------
     begin
         if rising_edge(core_clock) then
             if reset_n = '0' then
@@ -55,7 +56,7 @@ begin
                 idle_system(st_system_controller, system_components_data_in, system_components_data_out);
     
             else
-                stop_gate_drive_powers(system_components_data_in);
+                idle_system(st_system_controller, system_components_data_in, system_components_data_out);
     
             end if; -- rstn
         end if; --rising_edge
