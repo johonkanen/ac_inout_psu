@@ -9,10 +9,10 @@ library work;
 
 entity system_components is
     port (
-        system_components_clocks : in system_components_clock_group; 
-        system_components_FPGA_in : in system_components_FPGA_input_group;
-        system_components_FPGA_out : out system_components_FPGA_output_group; 
-        system_components_data_in : in system_components_data_input_group;
+        system_components_clocks   : in  system_components_clock_group;
+        system_components_FPGA_in  : in  system_components_FPGA_input_group;
+        system_components_FPGA_out : out system_components_FPGA_output_group;
+        system_components_data_in  : in  system_components_data_input_group;
         system_components_data_out : out system_components_data_output_group
     );
 end entity system_components;
@@ -31,20 +31,24 @@ architecture rtl of system_components is
     signal uart_data_out : uart_data_output_group;
 
     signal uart_transmit_counter : natural range 0 to 2**16-1 := 0;
-    constant counter_at_100khz : natural := 120e6/100e3;
-    signal transmit_counter : natural range 0 to 2**16-1 := 0;
+    constant counter_at_100khz   : natural                    := 120e6/100e3;
+    signal transmit_counter      : natural range 0 to 2**16-1 := 0;
 
+--------------------------------------------------
 begin
 
+--------------------------------------------------
     test_uart : process(clock)
         
     begin
         if rising_edge(clock) then
             init_uart(uart_data_in);
             uart_transmit_counter <= uart_transmit_counter + 1;
+
             if uart_transmit_counter = counter_at_100khz then
                 uart_transmit_counter <= 0;
                 transmit_16_bit_word_with_uart(uart_data_in, transmit_counter);
+
                 transmit_counter <= transmit_counter + 1; 
                 if transmit_counter = 44252 then
                     uart_transmit_counter <= 0;
@@ -57,18 +61,18 @@ begin
 ------------------------------------------------------------------------ 
     uart_clocks <= (clock => system_components_clocks.clock);
     u_uart : uart
-    port map( uart_clocks,
-    	  system_components_FPGA_in.uart_FPGA_in,
-    	  system_components_FPGA_out.uart_FPGA_out,
-    	  uart_data_in,
+    port map( uart_clocks                          ,
+    	  system_components_FPGA_in.uart_FPGA_in   ,
+    	  system_components_FPGA_out.uart_FPGA_out ,
+    	  uart_data_in                             ,
     	  uart_data_out);
 ------------------------------------------------------------------------ 
 
     -- u_power_supply_control : power_supply_control
-    -- port map( power_supply_control_clocks,
-    -- 	  system_components_FPGA_in.power_supply_control_FPGA_in,
-    -- 	  system_components_FPGA_out.power_supply_control_FPGA_out,
-    -- 	  power_supply_control_data_in,
+    -- port map( power_supply_control_clocks                       ,
+    -- 	  system_components_FPGA_in.power_supply_control_FPGA_in   ,
+    -- 	  system_components_FPGA_out.power_supply_control_FPGA_out ,
+    -- 	  power_supply_control_data_in                             ,
     -- 	  power_supply_control_data_out);
 
 
