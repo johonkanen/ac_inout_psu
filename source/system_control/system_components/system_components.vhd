@@ -55,8 +55,6 @@ begin
                     transmit_counter <= 0;
                 end if;
 
-                toggle <= not toggle;
-                system_components_FPGA_out.uart_FPGA_out.uart_tx <= toggle;
 
             end if;
 
@@ -64,13 +62,13 @@ begin
     end process test_uart;	
 
 ------------------------------------------------------------------------ 
-    -- uart_clocks <= (clock => system_components_clocks.clock);
-    -- u_uart : uart
-    -- port map( uart_clocks                          ,
-    -- 	  system_components_FPGA_in.uart_FPGA_in   ,
-    -- 	  system_components_FPGA_out.uart_FPGA_out ,
-    -- 	  uart_data_in                             ,
-    -- 	  uart_data_out);
+    uart_clocks <= (clock => system_components_clocks.clock);
+    u_uart : uart
+    port map( uart_clocks                          ,
+    	  system_components_FPGA_in.uart_FPGA_in   ,
+    	  system_components_FPGA_out.uart_FPGA_out ,
+    	  uart_data_in                             ,
+    	  uart_data_out);
 
 ------------------------------------------------------------------------ 
     power_supply_control_clocks <= (clock => clock, reset_n => reset_n);
