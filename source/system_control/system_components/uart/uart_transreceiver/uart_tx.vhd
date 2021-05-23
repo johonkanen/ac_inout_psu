@@ -46,7 +46,7 @@ architecture RTL of UART_TX is
 	signal r_TX_Done   : std_logic := '0';
 	
 	signal route_TX_Active : std_logic;
-	signal route_TX_Serial : std_logic;
+    alias route_TX_Serial is o_TX_Serial;
 
 begin
 
@@ -144,7 +144,6 @@ begin
 
 	o_TX_Done   <= r_TX_Done;
 	o_TX_Active <= route_TX_Active;
-	o_TX_Serial <= route_TX_Serial;         -- Drive Line High for Idle	
 	
 	
 
