@@ -71,6 +71,17 @@ package uart_pkg is
         data_to_be_transmitted_with_uart : integer);
 
 ------------------------------------------------------------------------
+    function uart_receiver_is_ready ( uart_output : uart_data_output_group)
+        return boolean;
+
+    function get_uart_rx_data ( uart_output : uart_data_output_group)
+        return integer;
+
+    procedure receive_data_from_uart (
+        uart_output : in uart_data_output_group;
+        signal received_data : out integer);
+    
+------------------------------------------------------------------------
 end package uart_pkg;
 
 package body uart_pkg is
@@ -100,7 +111,7 @@ package body uart_pkg is
         data_to_be_transmitted_with_uart : std_logic_vector
     ) is
     begin
-        uart_input.uart_tx_data <= data_to_be_transmitted_with_uart(15 downto 0);
+        uart_input.uart_tx_data <= data_to_be_transmitted_with_uart(7 downto 0) & data_to_be_transmitted_with_uart(15 downto 8);
         
     end load_16_bit_data_to_uart;
 
@@ -131,7 +142,45 @@ package body uart_pkg is
         
     end transmit_16_bit_word_with_uart;
 
+------------------------------------------------------------------------
+    function uart_receiver_is_ready
+    (
+        uart_output : uart_data_output_group
+    )
+    return boolean
+    is
+    begin
+        if uart_output.uart_rx_ready_when_1 = '1' then
+            return true;
+        else
+            return false;
+        end if;
+        
+    end uart_receiver_is_ready;
 
+------------------------------------------------------------------------
+    function get_uart_rx_data
+    (
+        uart_output : uart_data_output_group
+    )
+    return integer
+    is
+    begin
+        return to_integer(unsigned(uart_output.uart_rx_data));
+    end get_uart_rx_data;
+
+------------------------------------------------------------------------
+    procedure receive_data_from_uart
+    (
+        uart_output : in uart_data_output_group;
+        signal received_data : out integer
+    ) is
+    begin
+        if uart_receiver_is_ready(uart_output) then
+            received_data <= get_uart_rx_data(uart_output);
+        end if;
+        
+    end receive_data_from_uart;
 ------------------------------------------------------------------------
 end package body uart_pkg;
 

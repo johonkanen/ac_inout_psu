@@ -43,8 +43,7 @@ begin
     begin
         if rising_edge(clock) then
             init_uart(uart_data_in);
-            uart_transmit_counter <= uart_transmit_counter + 1;
-
+            uart_transmit_counter <= uart_transmit_counter + 1; 
             if uart_transmit_counter = counter_at_100khz then
                 uart_transmit_counter <= 0;
                 transmit_16_bit_word_with_uart(uart_data_in, transmit_counter);
@@ -68,12 +67,13 @@ begin
     	  uart_data_out);
 
 ------------------------------------------------------------------------ 
+    power_supply_control_clocks <= (clock => clock, reset_n => reset_n);
     u_power_supply_control : power_supply_control
     port map( power_supply_control_clocks                          ,
     	  system_components_FPGA_in.power_supply_control_FPGA_in   ,
     	  system_components_FPGA_out.power_supply_control_FPGA_out ,
-    	  power_supply_control_data_in                             ,
-    	  power_supply_control_data_out); 
+    	  system_components_data_in.power_supply_control_data_in   ,
+    	  system_components_data_out.power_supply_control_data_out); 
 
 ------------------------------------------------------------------------ 
 end rtl;
