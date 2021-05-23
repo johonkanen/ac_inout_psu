@@ -48,9 +48,6 @@ architecture rtl of UART_RX is
 
 	begin
 
-	-- Purpose: Double-register the incoming data.
-	-- This allows it to be used in the UART RX Clock Domain.
-	-- (It removes problems caused by metastabiliy)
 		p_SAMPLE : process (i_Clk)
 		begin
 			if rising_edge(i_Clk) then
@@ -98,8 +95,8 @@ architecture rtl of UART_RX is
 							r_Clk_Count <= r_Clk_Count + 1;
 							r_SM_Main   <= s_RX_Data_Bits;
 						else
-							r_Clk_Count            <= 0;
-							r_RX_Byte(r_Bit_Index) <= r_RX_Data;
+							r_Clk_Count <= 0;
+							r_RX_Byte   <= r_RX_Data & r_RX_Byte(r_RX_Byte'left downto 1);
 
 							-- Check if we have sent out all bits
 							if r_Bit_Index < 7 then
