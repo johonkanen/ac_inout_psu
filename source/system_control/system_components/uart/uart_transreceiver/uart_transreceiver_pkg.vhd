@@ -27,6 +27,7 @@ package uart_transreceiver_pkg is
     end record;
     
     type uart_transreceiver_data_output_group is record
+        received_data_packet : std_logic_vector(15 downto 0);
         uart_data_packet_is_received : boolean;
         uart_data_packet_transmission_is_ready : boolean;
         uart_tx_data_out : uart_tx_data_output_group;
@@ -58,7 +59,7 @@ package uart_transreceiver_pkg is
     function uart_data_has_been_received ( uart_transreceiver_out : uart_transreceiver_data_output_group )
         return boolean;
 ------------------------------------------------------------------------
-    function get_uart_rx_data ( uart_transreceiver_out : uart_transreceiver_data_output_group)
+    function get_received_data_packet ( uart_transreceiver_out : uart_transreceiver_data_output_group)
         return std_logic_vector;
 ------------------------------------------------------------------------
     function uart_data_packet_has_been_received ( uart_transreceiver_out : uart_transreceiver_data_output_group)
@@ -129,16 +130,16 @@ package body uart_transreceiver_pkg is
     end uart_data_has_been_received;
 
 ------------------------------------------------------------------------
-    function get_uart_rx_data
+    function get_received_data_packet
     (
         uart_transreceiver_out : uart_transreceiver_data_output_group
     )
     return std_logic_vector
     is
     begin
-        return get_uart_rx_data(uart_transreceiver_out.uart_rx_data_out);
+        return uart_transreceiver_out.received_data_packet;
         
-    end get_uart_rx_data;
+    end get_received_data_packet;
 
 ------------------------------------------------------------------------
     function uart_data_packet_has_been_received

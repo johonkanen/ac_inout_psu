@@ -30,11 +30,13 @@ architecture sim of tb_uart_transreceiver is
 
     signal simulation_counter : natural := 0;
 
-    subtype std8 is std_logic_vector(7 downto 0);
-    type std8_array is array (integer range <>) of std8;
+    subtype std16 is std_logic_vector(15 downto 0);
+    type std16_array is array (integer range <>) of std16;
 
-    constant test_data : std8_array(0 to 5) := (x"AC", x"DC", x"AB", x"BA", x"00", x"11");
+    constant test_data : std16_array(0 to 5) := (x"ACDC", x"FFFF", x"ABBA", x"BBBA", x"FBAA", x"1515");
     signal test_data_index : natural := 0;
+    signal jee : std_logic_vector(15 downto 0);
+    signal delay_timer : natural := 0;
 
 begin
 
@@ -83,19 +85,17 @@ begin
             end CASE;
 
             -- this is triggered when test_data_index is between 1 to 6
-            if uart_data_has_been_received(uart_transreceiver_data_out) and test_data_index <= test_data'right+1 then
-
-                if test_data_index <= test_data'right then
-                    transmit_data_with_uart(uart_transreceiver_data_in, test_data(test_data_index));
-                end if;
-                test_data_index <= test_data_index + 1;
-                report "uart rx received successfully with index " & integer'image(test_data_index-1);
-                assert get_uart_rx_data(uart_transreceiver_data_out) = test_data(test_data_index-1) report "uart rx failed with index " & integer'image(test_data_index-1) severity failure;
-            end if;
-
             if uart_data_packet_has_been_received(uart_transreceiver_data_out) then
-                report "uart rx data packet received successfully";
+                -- assert get_received_data_packet(uart_transreceiver_data_out) = test_data(test_data_index-1); report "uart rx failed with index " & integer'image(test_data_index-1) severity failure;
+                report "16 bit data packet received successfully";
+                delay_timer <= 13;
             end if; 
+            if delay_timer /= 0 then
+                delay_timer <= delay_timer - 1;
+            end if;
+            if delay_timer = 1 then
+                transmit_16_bit_word_with_uart(uart_transreceiver_data_in, x"ffff");
+            end if;
 
         end if; -- rstn
     end process clocked_reset_generator;	
@@ -107,6 +107,8 @@ begin
                                   );
 
     uart_transreceiver_clocks <= (clock => simulator_clock);
+
+    jee <= uart_transreceiver_data_out.received_data_packet;
 
     u_uart_transreceiver : uart_transreceiver
     port map( uart_transreceiver_clocks,

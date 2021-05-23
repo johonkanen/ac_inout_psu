@@ -42,6 +42,7 @@ begin
 
 ------------------------------------------------------------------------
     uart_transreceiver_data_out <= ( 
+                                       received_data_packet => uart_rx_data_packet,
                                        uart_data_packet_transmission_is_ready => uart_data_packet_transmission_is_ready ,
                                        uart_tx_data_out                       => uart_tx_data_out                       ,
                                        uart_rx_data_out                       => uart_rx_data_out                       ,
@@ -69,6 +70,7 @@ begin
             CASE uart_transmitter_state is
                 WHEN wait_for_transmit_request =>
                     uart_transmitter_state := wait_for_transmit_request;
+                    packet_counter <= 0;
 
                     if uart_transreceiver_data_in.uart_data_packet_transmission_is_requested then
                         packet_counter <= packet_counter + 1;
@@ -81,7 +83,7 @@ begin
                     uart_transmitter_state := uart_transmission_is_in_progress;
 
                     if uart_tx_is_ready(uart_tx_data_out) then
-                        delay_between_data_packet_transmissions <= 20;
+                        delay_between_data_packet_transmissions <= 40;
                     end if;
 
                     if delay_between_data_packet_transmissions = 1 then
@@ -92,6 +94,7 @@ begin
                     if uart_tx_is_ready(uart_tx_data_out) and packet_counter = 2 then
                         uart_transmitter_state := wait_for_transmit_request;
                         uart_data_packet_transmission_is_ready <= true;
+                        packet_counter <= 0;
                     end if; 
 
             end CASE;
@@ -110,7 +113,7 @@ begin
                 uart_rx_data_packet <= uart_rx_data_packet(7 downto 0) & get_uart_rx_data(uart_rx_data_out);
                 if uart_rx_word_counter = 0 then
                     uart_rx_word_counter <= 1;
-                    uart_rx_watchdog_timer <= 20e3;
+                    uart_rx_watchdog_timer <= 500;
                 else
                     uart_rx_word_counter <= 0;
                     uart_rx_watchdog_timer <= 0;

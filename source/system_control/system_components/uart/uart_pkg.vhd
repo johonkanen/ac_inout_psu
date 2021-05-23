@@ -21,14 +21,10 @@ package uart_pkg is
     
     type uart_data_input_group is record
         uart_transreceiver_data_in  : uart_transreceiver_data_input_group;
-        uart_is_started_with_1 : std_logic;
-        uart_tx_data           : std_logic_vector(15 downto 0);
     end record;
     
     type uart_data_output_group is record
         uart_transreceiver_data_out : uart_transreceiver_data_output_group;
-        uart_rx_ready_when_1 : std_logic;
-        uart_rx_data         : std_logic_vector(15 downto 0);
     end record;
     
     component uart is
@@ -71,9 +67,6 @@ package uart_pkg is
         data_to_be_transmitted_with_uart : integer);
 
 ------------------------------------------------------------------------
-    function uart_receiver_is_ready ( uart_output : uart_data_output_group)
-        return boolean;
-
     function get_uart_rx_data ( uart_output : uart_data_output_group)
         return integer;
 
@@ -101,7 +94,7 @@ package body uart_pkg is
         signal uart_input : out uart_data_input_group
     ) is
     begin
-        uart_input.uart_is_started_with_1 <= '1';
+        -- uart_input.uart_is_started_with_1 <= '1';
     end start_uart_transmitter; 
 
 ------------------------------------------------------------------------
@@ -111,7 +104,7 @@ package body uart_pkg is
         data_to_be_transmitted_with_uart : std_logic_vector
     ) is
     begin
-        uart_input.uart_tx_data <= data_to_be_transmitted_with_uart;
+        -- uart_input.uart_tx_data <= data_to_be_transmitted_with_uart;
         
     end load_16_bit_data_to_uart;
 
@@ -141,22 +134,6 @@ package body uart_pkg is
     end transmit_16_bit_word_with_uart;
 
 ------------------------------------------------------------------------
-    function uart_receiver_is_ready
-    (
-        uart_output : uart_data_output_group
-    )
-    return boolean
-    is
-    begin
-        if uart_output.uart_rx_ready_when_1 = '1' then
-            return true;
-        else
-            return false;
-        end if;
-        
-    end uart_receiver_is_ready;
-
-------------------------------------------------------------------------
     function get_uart_rx_data
     (
         uart_output : uart_data_output_group
@@ -164,7 +141,7 @@ package body uart_pkg is
     return integer
     is
     begin
-        return to_integer(unsigned(uart_output.uart_rx_data));
+        return 15;
     end get_uart_rx_data;
 
 ------------------------------------------------------------------------
@@ -173,9 +150,11 @@ package body uart_pkg is
         uart_output : in uart_data_output_group;
         signal received_data : out integer
     ) is
+        variable unsigned_data : unsigned(15 downto 0);
     begin
-        if uart_receiver_is_ready(uart_output) then
-            received_data <= get_uart_rx_data(uart_output);
+        if uart_data_packet_has_been_received(uart_output.uart_transreceiver_data_out) then
+            unsigned_data := unsigned(get_received_data_packet(uart_output.uart_transreceiver_data_out));
+            received_data <= to_integer(unsigned_data);
         end if;
         
     end receive_data_from_uart;

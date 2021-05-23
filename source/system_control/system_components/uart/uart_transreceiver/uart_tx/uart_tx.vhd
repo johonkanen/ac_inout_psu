@@ -24,7 +24,7 @@ architecture rtl of uart_tx is
 
 begin
 
-    uart_tx_FPGA_out <= (uart_tx => transmit_register(transmit_register'left));
+    uart_tx_FPGA_out <= (uart_tx => transmit_register(transmit_register'right));
 
 ------------------------------------------------------------------------
     uart_transmitter : process(clock)
@@ -35,7 +35,7 @@ begin
             signal shift_register : inout std_logic_vector
         ) is
         begin
-            shift_register <= shift_register(shift_register'left-1 downto 0) & '1';
+            shift_register <= '1' & shift_register(shift_register'left downto 1);
         end shift_and_register; 
 
         --------------------------------------------------
@@ -46,7 +46,7 @@ begin
         ) is
         begin
 
-            transmitter_register <= '0' & data_to_be_transmitted & '0';
+            transmitter_register <= '1' & data_to_be_transmitted & '0';
 
         end load_data_with_start_and_stop_bits_to;
 

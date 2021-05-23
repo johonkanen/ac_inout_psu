@@ -34,6 +34,9 @@ architecture rtl of system_components is
     constant counter_at_100khz   : natural                    := 120e6/100e3;
     signal transmit_counter      : natural range 0 to 2**16-1 := 0;
 
+    signal data_from_uart : natural range 0 to 2**16-1;
+    signal toggle : std_logic := '0';
+
 --------------------------------------------------
 begin
 
@@ -46,13 +49,16 @@ begin
             uart_transmit_counter <= uart_transmit_counter - 1; 
             if uart_transmit_counter = 0 then
                 uart_transmit_counter <= counter_at_100khz;
-                transmit_16_bit_word_with_uart(uart_data_in, transmit_counter);
+                transmit_16_bit_word_with_uart(uart_data_in, data_from_uart);
 
                 transmit_counter <= transmit_counter + 1; 
-                if transmit_counter = 44252 then
-                    transmit_counter <= 0;
+                if transmit_counter = 65535 then
+                    transmit_counter <= 3586;
                 end if;
+
+
             end if;
+            receive_data_from_uart(uart_data_out, data_from_uart);
 
         end if; --rising_edge
     end process test_uart;	

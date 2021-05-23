@@ -18,22 +18,22 @@ architecture rtl of uart_rx is
 
     alias clock is uart_rx_clocks.clock;
 
-        -- uart_rx_data : std_logic_vector(7 downto 0);
-        -- uart_rx_data_transmission_is_ready : boolean;
-
     signal receive_register : std_logic_vector(9 downto 0) := (others => '0');
     signal receive_bit_counter : natural range 0 to 127 := 23/2;
     signal counter_for_number_of_received_bits : natural range 0 to 15 := 0;
     signal received_data : std_logic_vector(7 downto 0);
+    signal input_buffer : std_logic_vector(1 downto 0);
+    signal uart_rx_data_transmission_is_ready : boolean := false;
 
-    signal counter_for_data_bit : natural := 0; 
+
+    signal counter_for_data_bit : natural range 0 to 127:= 0; 
 
     constant bit_counter_high : integer := 23;
     constant total_number_of_transmitted_bits_per_word : integer := 10;
 
 begin
 
-    uart_rx_data_out.uart_rx_data <= received_data;
+    uart_rx_data_out <= (uart_rx_data => received_data, uart_rx_data_transmission_is_ready => uart_rx_data_transmission_is_ready);
 
     uart_rx_receiver : process(clock)
 
@@ -77,35 +77,37 @@ begin
     begin
         if rising_edge(clock) then
 
-            uart_rx_data_out.uart_rx_data_transmission_is_ready <= false;
+            input_buffer <= input_buffer(input_buffer'left-1 downto 0) & uart_rx_FPGA_in.uart_rx;
+            uart_rx_data_transmission_is_ready <= false;
+
             CASE uart_rx_state is
                 WHEN wait_for_start_bit =>
                     counter_for_data_bit <= 0;
                     counter_for_number_of_received_bits <= 0;
                     uart_rx_state := wait_for_start_bit;
-                    if uart_rx_FPGA_in.uart_rx = '0' then
+                    if input_buffer(input_buffer'left) = '0' then
                         receive_bit_counter <= bit_counter_high;
                         uart_rx_state := receive_data;
                     end if;
 
                 WHEN receive_data =>
-                    counter_for_data_bit <= counter_for_data_bit + uart_rx_FPGA_in.uart_rx;
-                    if receive_bit_counter = 0 then
+                    counter_for_data_bit <= counter_for_data_bit + input_buffer(input_buffer'left);
+                    if receive_bit_counter /= 0 then
+                        receive_bit_counter <= receive_bit_counter - 1;
+                    else 
                         receive_bit_counter <= bit_counter_high;
                         counter_for_number_of_received_bits <= counter_for_number_of_received_bits + 1;
 
-                        if counter_for_number_of_received_bits = total_number_of_transmitted_bits_per_word then
+                        if counter_for_number_of_received_bits = total_number_of_transmitted_bits_per_word - 1 then
                             uart_rx_state := wait_for_start_bit;
                             counter_for_number_of_received_bits <= 0;
-                            uart_rx_data_out.uart_rx_data_transmission_is_ready <= true;
-                            received_data <= receive_register(8 downto 1);
+                            uart_rx_data_transmission_is_ready <= true;
+                            received_data <= receive_register(9 downto 2);
                         else 
-                            receive_register <= receive_register(receive_register'left-1 downto 0) & read_bit_as_1_if_counter_higher_than(bit_counter_high/2-1, counter_for_data_bit); 
+                            receive_register <= read_bit_as_1_if_counter_higher_than(bit_counter_high/2-1, counter_for_data_bit) & receive_register(receive_register'left downto 1);
                             counter_for_data_bit <= 0;
                         end if;
 
-                    else 
-                        receive_bit_counter <= receive_bit_counter - 1;
                     end if; 
             end CASE;
 
