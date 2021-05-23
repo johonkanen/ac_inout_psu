@@ -57,6 +57,7 @@ derive_clock_uncertainty
 #**************************************************************
 
 set_false_path -from * -to [get_ports *uart_tx*]
+set_false_path -from [get_ports *uart_rx*] -to *
 #set_false_path -from * -to [get_ports *switch*]
 #set_false_path -from *u_power_supply_control|master_carrier[*] -to *ad_mux*
 #set_false_path -from *u_power_supply_control|master_carrier[*] -to *triggers*
