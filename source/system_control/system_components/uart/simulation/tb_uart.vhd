@@ -20,7 +20,7 @@ architecture sim of tb_uart is
     signal clocked_reset : std_logic;
     constant clock_per : time := 1 ns;
     constant clock_half_per : time := 0.5 ns;
-    constant simtime_in_clocks : integer := 5000;
+    constant simtime_in_clocks : integer := 800;
 
     signal uart_clocks   : uart_clock_group;
     signal uart_FPGA_in  : uart_FPGA_input_group;
@@ -28,7 +28,7 @@ architecture sim of tb_uart is
     signal uart_data_in  : uart_data_input_group;
     signal uart_data_out : uart_data_output_group;
 
-    signal simulation_counter : natural := 0;
+    signal simulation_counter : natural := 3;
     signal uart_tx : std_logic;
 
     signal data_from_uart : natural := 0;
@@ -61,6 +61,20 @@ begin
 ------------------------------------------------------------------------
 
     clocked_reset_generator : process(simulator_clock, rstn)
+        function "-"
+        (
+            left : natural;
+            right : integer
+        )
+        return natural
+        is
+            variable usigned_left : unsigned(30 downto 0);
+            variable usigned_right : unsigned(30 downto 0);
+        begin
+            usigned_left := to_unsigned(left,31);
+            usigned_right := to_unsigned(right,31);
+            return to_integer(usigned_left - usigned_right);
+        end "-";
     begin
         if rstn = '0' then
         -- reset state
@@ -69,9 +83,10 @@ begin
         elsif rising_edge(simulator_clock) then
             clocked_reset <= '1';
             init_uart(uart_data_in);
-            simulation_counter <= simulation_counter + 1;
+            simulation_counter <= simulation_counter - 1;
 
             CASE simulation_counter is
+                when 0 => simulation_counter <= 650;
                 when 3 => 
                     transmit_16_bit_word_with_uart(uart_data_in, 44252);
                 when others =>
@@ -84,7 +99,6 @@ begin
     end process clocked_reset_generator;	
 ------------------------------------------------------------------------
 
-    -- data_from_uart <= uart_data_out.uart_rx_data;
     uart_FPGA_in.uart_rx <= uart_FPGA_out.uart_tx;
     uart_tx <= uart_FPGA_out.uart_tx;
     uart_clocks <= (clock => simulator_clock);
