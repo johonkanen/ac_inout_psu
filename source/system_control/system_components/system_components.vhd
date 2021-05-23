@@ -34,6 +34,8 @@ architecture rtl of system_components is
     constant counter_at_100khz   : natural                    := 120e6/100e3;
     signal transmit_counter      : natural range 0 to 2**16-1 := 0;
 
+    signal toggle : std_logic := '0';
+
 --------------------------------------------------
 begin
 
@@ -52,19 +54,23 @@ begin
                 if transmit_counter = 44252 then
                     transmit_counter <= 0;
                 end if;
+
+                toggle <= not toggle;
+                system_components_FPGA_out.uart_FPGA_out.uart_tx <= toggle;
+
             end if;
 
         end if; --rising_edge
     end process test_uart;	
 
 ------------------------------------------------------------------------ 
-    uart_clocks <= (clock => system_components_clocks.clock);
-    u_uart : uart
-    port map( uart_clocks                          ,
-    	  system_components_FPGA_in.uart_FPGA_in   ,
-    	  system_components_FPGA_out.uart_FPGA_out ,
-    	  uart_data_in                             ,
-    	  uart_data_out);
+    -- uart_clocks <= (clock => system_components_clocks.clock);
+    -- u_uart : uart
+    -- port map( uart_clocks                          ,
+    -- 	  system_components_FPGA_in.uart_FPGA_in   ,
+    -- 	  system_components_FPGA_out.uart_FPGA_out ,
+    -- 	  uart_data_in                             ,
+    -- 	  uart_data_out);
 
 ------------------------------------------------------------------------ 
     power_supply_control_clocks <= (clock => clock, reset_n => reset_n);

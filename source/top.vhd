@@ -36,7 +36,7 @@ begin
 
 ------------------------------------------------------------------------
     u_main_clocks : main_clocks
-    port map( areset => '1'                         ,
+    port map( areset => '0'                         ,
               inclk0 => pll_input_clock             ,
               c0     => system_control_clocks.clock ,
               locked => system_control_clocks.reset_n);
