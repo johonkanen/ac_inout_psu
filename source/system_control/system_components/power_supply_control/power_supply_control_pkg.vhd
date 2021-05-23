@@ -17,7 +17,6 @@ package power_supply_control_pkg is
     end record;
     
     type power_supply_control_FPGA_output_group is record
-        clock : std_logic;
         gate_drive_power_FPGA_out : gate_drive_power_FPGA_output_group;
     end record;
     
