@@ -111,7 +111,7 @@ package body uart_pkg is
         data_to_be_transmitted_with_uart : std_logic_vector
     ) is
     begin
-        uart_input.uart_tx_data <= data_to_be_transmitted_with_uart(7 downto 0) & data_to_be_transmitted_with_uart(15 downto 8);
+        uart_input.uart_tx_data <= data_to_be_transmitted_with_uart;
         
     end load_16_bit_data_to_uart;
 

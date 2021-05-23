@@ -20,7 +20,7 @@ architecture sim of tb_uart is
     signal clocked_reset : std_logic;
     constant clock_per : time := 1 ns;
     constant clock_half_per : time := 0.5 ns;
-    constant simtime_in_clocks : integer := 5000;
+    constant simtime_in_clocks : integer := 600;
 
     signal uart_clocks   : uart_clock_group;
     signal uart_FPGA_in  : uart_FPGA_input_group;
@@ -84,7 +84,6 @@ begin
     end process clocked_reset_generator;	
 ------------------------------------------------------------------------
 
-    -- data_from_uart <= uart_data_out.uart_rx_data;
     uart_FPGA_in.uart_rx <= uart_FPGA_out.uart_tx;
     uart_tx <= uart_FPGA_out.uart_tx;
     uart_clocks <= (clock => simulator_clock);

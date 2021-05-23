@@ -143,11 +143,11 @@ begin
 				WHEN latch_word =>				
 					
 					if i = '0' then
-						route_uart_tx_data <= i_TX_data_in(7 downto 0);
+						route_uart_tx_data <= i_TX_data_in(15 downto 8);
 						tx_start <= '1';
 						i <= '1';
 					else
-						route_uart_tx_data <= i_TX_data_in(15 downto 8);
+						route_uart_tx_data <= i_TX_data_in(7 downto 0);
 						tx_start <= '1';
 						i <= '0';
 					end if;
