@@ -2,6 +2,9 @@ proc get_vhdl_sources {void}\
 { 
     return \
     { 
+        /math_library/multiplier/multiplier_pkg.vhd
+        /math_library/multiplier/multiplier.vhd
+
                     /system_control/system_components/adc_interface/spi_sar_adc/spi_sar_adc_pkg.vhd 
                     /system_control/system_components/adc_interface/spi_sar_adc/ads7056_driver.vhd 
 
