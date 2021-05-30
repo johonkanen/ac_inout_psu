@@ -69,18 +69,26 @@ begin
             simulation_counter <= simulation_counter + 1;
 
             init_multiplier(multiplier_data_in);
+
+            multiply(multiplier_data_in, -22524, 1);
             CASE simulation_counter is
-                WHEN 5 => multiply(multiplier_data_in, 5, 65536);
-                WHEN 6 => multiply(multiplier_data_in, -25, 65536);
-                WHEN 7 => multiply(multiplier_data_in, 100, 65536);
-                WHEN 8 => multiply(multiplier_data_in, 1000, 65536);
+                WHEN 5 => multiply(multiplier_data_in, -5, 1);
+                WHEN 6 => multiply(multiplier_data_in, -25, 1);
+                WHEN 7 => multiply(multiplier_data_in, 100, 1);
+                WHEN 8 => multiply(multiplier_data_in, 1000, 1);
+                WHEN 9 =>
+                    simulation_counter <= 9;
+                    multiply(multiplier_data_in, multiplier_data_out, -1, -1);
+                    if multiplier_is_not_busy(multiplier_data_out) then
+                        simulation_counter <= 10;
+                    end if;
+
                 WHEN others => -- do nothing
             end CASE;
             if multiplier_is_ready(multiplier_data_out) then
-                int18_multiplier_output <= get_multiplier_result(multiplier_data_out,16);
-            end if;
+                int18_multiplier_output <= get_multiplier_result(multiplier_data_out,0);
+            end if; 
 
-    
         end if; -- rstn
     end process clocked_reset_generator;	
 ------------------------------------------------------------------------

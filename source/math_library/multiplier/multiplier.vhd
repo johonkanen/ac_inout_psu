@@ -81,7 +81,10 @@ begin
             multiplier_data_out.multiplier_raw_result <= signed_36_bit_result;
 
             shift_register <= shift_register(shift_register'left-1 downto 0) & boolean_to_std_logic(multiplier_data_in.multiply_is_requested); 
-            
+            multiplier_data_out.multiplier_is_busy <= false;
+            if shift_register(shift_register'left) /= '0' then
+                multiplier_data_out.multiplier_is_busy <= true;
+            end if; 
 
         end if; --rising_edge
     end process signed_18x18_multiplier;	
