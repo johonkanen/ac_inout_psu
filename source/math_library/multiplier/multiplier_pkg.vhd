@@ -56,6 +56,10 @@ package multiplier_pkg is
         radix : natural range 0 to 18) 
     return integer ;
 ------------------------------------------------------------------------
+    function multiplier_is_ready (
+        multiplier_output : multiplier_data_output_group)
+    return boolean;
+------------------------------------------------------------------------
 
 end package multiplier_pkg;
 
@@ -96,6 +100,21 @@ package body multiplier_pkg is
     end multiply;
 
 ------------------------------------------------------------------------
+    function multiplier_is_ready
+    (
+        multiplier_output : multiplier_data_output_group
+    )
+    return boolean
+    is
+    begin
+        if multiplier_output.multiplier_is_ready_when_1 = '1' then
+            return true;
+        else
+            return false;
+        end if;
+    end multiplier_is_ready;
+
+------------------------------------------------------------------------
     function get_multiplier_result
     (
         multiplier_output : multiplier_data_output_group;
@@ -106,7 +125,7 @@ package body multiplier_pkg is
         constant output_word_bit_width : natural := 18;
         alias multiplier_raw_result is multiplier_output.multiplier_raw_result;
     begin
-        bit_vector_slice := multiplier_output.multiplier_raw_result(multiplier_raw_result'left-radix downto output_word_bit_width - radix); 
+        bit_vector_slice := multiplier_output.multiplier_raw_result(multiplier_raw_result'left-output_word_bit_width + radix downto radix); 
         return to_integer(bit_vector_slice);
         
     end get_multiplier_result;
