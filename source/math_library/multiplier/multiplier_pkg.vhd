@@ -12,13 +12,14 @@ package multiplier_pkg is
     end record;
     
     type multiplier_data_input_group is record
-        start_multiplier : boolean;
+        multiply_is_requested : boolean;
         input_1 : integer;
         input_2 : integer;
     end record;
     
     type multiplier_data_output_group is record
         multiplier_raw_result : signed_36_bit;
+        multiplier_is_ready_when_1 : std_logic;
     end record;
     
     component multiplier is
@@ -36,8 +37,25 @@ package multiplier_pkg is
     -- u_multiplier : multiplier
     -- port map( multiplier_clocks,
     --	  multiplier_data_in,
-    --	  multiplier_data_out);
+    --	  multiplier_data_out); 
     
+------------------------------------------------------------------------
+    procedure init_multiplier (
+        signal multiplier_input : out multiplier_data_input_group);
+------------------------------------------------------------------------
+    procedure request_multiply (
+        signal multiplier_input : out multiplier_data_input_group);
+------------------------------------------------------------------------
+    procedure multiply (
+        signal multiplier_input : out multiplier_data_input_group;
+        data_a : in int18;
+        data_b : in int18);
+------------------------------------------------------------------------
+    function get_multiplier_result (
+        multiplier_output : multiplier_data_output_group;
+        radix : natural range 0 to 18) 
+    return integer ;
+------------------------------------------------------------------------
 
 end package multiplier_pkg;
 
@@ -49,17 +67,19 @@ package body multiplier_pkg is
         signal multiplier_input : out multiplier_data_input_group
     ) is
     begin
-        multiplier_input.start_multiplier <= false;
+        multiplier_input.multiply_is_requested <= false;
+        multiplier_input.input_1 <= 0;
+        multiplier_input.input_2 <= 0; 
     end init_multiplier;
 
 ------------------------------------------------------------------------
-    procedure start_multiplier
+    procedure request_multiply
     (
         signal multiplier_input : out multiplier_data_input_group
     ) is
     begin
-        multiplier_input.start_multiplier <= true;
-    end start_multiplier;
+        multiplier_input.multiply_is_requested <= true;
+    end request_multiply;
 
 ------------------------------------------------------------------------
     procedure multiply
@@ -71,7 +91,7 @@ package body multiplier_pkg is
     begin
         multiplier_input.input_1 <= data_a;
         multiplier_input.input_2 <= data_b; 
-        start_multiplier(multiplier_input);
+        request_multiply(multiplier_input);
         
     end multiply;
 
