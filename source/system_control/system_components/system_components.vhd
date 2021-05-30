@@ -42,6 +42,8 @@ architecture rtl of system_components is
     signal spi_sar_adc_data_in  : spi_sar_adc_data_input_group;
     signal spi_sar_adc_data_out : spi_sar_adc_data_output_group;
 
+    signal adc_data : natural range 0 to 2**16-1 := 0;
+
 --------------------------------------------------
 begin
 
@@ -65,7 +67,12 @@ begin
             end if;
             receive_data_from_uart(uart_data_out, uart_rx_data);
             if ad_conversion_is_ready(spi_sar_adc_data_out) then
-                transmit_16_bit_word_with_uart(uart_data_in, get_adc_data(spi_sar_adc_data_out));
+                adc_data <= get_adc_data(spi_sar_adc_data_out);
+                CASE uart_rx_data is
+                    WHEN 0 => transmit_16_bit_word_with_uart(uart_data_in, adc_data );
+                    WHEN 1 => transmit_16_bit_word_with_uart(uart_data_in, (adc_data + get_adc_data(spi_sar_adc_data_out))/2);
+                    WHEN others => transmit_16_bit_word_with_uart(uart_data_in, get_adc_data(spi_sar_adc_data_out));
+                end CASE;
             end if;
 
         end if; --rising_edge
