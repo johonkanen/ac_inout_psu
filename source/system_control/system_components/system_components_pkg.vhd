@@ -5,6 +5,7 @@ library ieee;
 library work;
     use work.power_supply_control_pkg.all;
     use work.uart_pkg.all;
+    use work.spi_sar_adc_pkg.all;
 
 package system_components_pkg is
 
@@ -15,12 +16,14 @@ package system_components_pkg is
     
     type system_components_FPGA_input_group is record
         power_supply_control_FPGA_in : power_supply_control_FPGA_input_group;
-        uart_FPGA_in : uart_FPGA_input_group;
+        uart_FPGA_in                 : uart_FPGA_input_group;
+        spi_sar_adc_FPGA_in          : spi_sar_adc_FPGA_input_group;
     end record;
     
     type system_components_FPGA_output_group is record
-        power_supply_control_FPGA_out : power_supply_control_FPGA_output_group; 
-        uart_FPGA_out : uart_FPGA_output_group;
+        power_supply_control_FPGA_out : power_supply_control_FPGA_output_group;
+        uart_FPGA_out                 : uart_FPGA_output_group;
+        spi_sar_adc_FPGA_out          : spi_sar_adc_FPGA_output_group;
     end record;
     
     type system_components_data_input_group is record
