@@ -48,9 +48,9 @@ set_global_assignment -name QIP_FILE $project_root/cyclone_10/IP/main_clocks/mai
 
 foreach x [get_vhdl_sources ../] \
 { \
-    if {[lsearch -glob $x *common*] == 0} \
+    if {[lsearch -glob $x *math_library*] == 0} \
     { \
-        set_global_assignment -name VHDL_FILE $source_folder/$x -library common_library
+        set_global_assignment -name VHDL_FILE $source_folder/$x -library math_library
     } \
     elseif {[lsearch -glob $x *cl10_hw_library*] == 0} \
     {
