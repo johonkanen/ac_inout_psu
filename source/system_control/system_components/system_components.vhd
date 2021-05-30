@@ -49,11 +49,11 @@ begin
             uart_transmit_counter <= uart_transmit_counter - 1; 
             if uart_transmit_counter = 0 then
                 uart_transmit_counter <= counter_at_100khz;
-                transmit_16_bit_word_with_uart(uart_data_in, uart_rx_data);
+                transmit_16_bit_word_with_uart(uart_data_in, transmit_counter);
 
-                transmit_counter <= transmit_counter + 1; 
-                if transmit_counter = 44252 then
-                    transmit_counter <= 0;
+                transmit_counter <= transmit_counter - 1; 
+                if transmit_counter = 0 then
+                    transmit_counter <= uart_rx_data;
                 end if;
 
 
