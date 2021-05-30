@@ -29,6 +29,7 @@ architecture sim of tb_multiplier is
     signal simulation_counter : natural := 0;
     signal multiplier_output : signed(35 downto 0);
     signal multiplier_is_ready_when_1 : std_logic;
+    signal int18_multiplier_output : int18 := 0;
 
 begin
 
@@ -69,12 +70,16 @@ begin
 
             init_multiplier(multiplier_data_in);
             CASE simulation_counter is
-                WHEN 5 => multiply(multiplier_data_in, 5, 7);
-                WHEN 6 => multiply(multiplier_data_in, -25, 1);
-                WHEN 7 => multiply(multiplier_data_in, 100, -100);
-                WHEN 8 => multiply(multiplier_data_in, 1000, 1000);
+                WHEN 5 => multiply(multiplier_data_in, 5, 65536);
+                WHEN 6 => multiply(multiplier_data_in, -25, 65536);
+                WHEN 7 => multiply(multiplier_data_in, 100, 65536);
+                WHEN 8 => multiply(multiplier_data_in, 1000, 65536);
                 WHEN others => -- do nothing
             end CASE;
+            if multiplier_is_ready(multiplier_data_out) then
+                int18_multiplier_output <= get_multiplier_result(multiplier_data_out,16);
+            end if;
+
     
         end if; -- rstn
     end process clocked_reset_generator;	
