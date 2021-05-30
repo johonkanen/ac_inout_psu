@@ -86,6 +86,7 @@ begin
     	  system_components_FPGA_out.spi_sar_adc_FPGA_out,
     	  spi_sar_adc_data_in,
     	  spi_sar_adc_data_out);
+
 ------------------------------------------------------------------------ 
     uart_clocks <= (clock => system_components_clocks.clock);
     u_uart : uart
