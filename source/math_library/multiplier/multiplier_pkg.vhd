@@ -82,8 +82,6 @@ package body multiplier_pkg is
     ) is
     begin
         multiplier_input.multiply_is_requested <= false;
-        multiplier_input.input_1 <= 0;
-        multiplier_input.input_2 <= 0; 
     end init_multiplier;
 
 ------------------------------------------------------------------------

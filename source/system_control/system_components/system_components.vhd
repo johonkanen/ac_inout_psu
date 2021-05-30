@@ -8,6 +8,9 @@ library work;
     use work.uart_pkg.all;
     use work.spi_sar_adc_pkg.all;
 
+library math_library;
+    use math_library.multiplier_pkg.all;
+
 entity system_components is
     port (
         system_components_clocks   : in  system_components_clock_group;
@@ -44,14 +47,27 @@ architecture rtl of system_components is
 
     signal adc_data : natural range 0 to 2**16-1 := 0;
 
+    signal multiplier_clocks   : multiplier_clock_group;
+    signal multiplier_data_in  : multiplier_data_input_group;
+    signal multiplier_data_out : multiplier_data_output_group;
+    
+
 --------------------------------------------------
 begin
 
+    multiplier_clocks <= (clock => system_components_clocks.clock);
+    u_multiplier : multiplier
+    port map( multiplier_clocks,
+    	  multiplier_data_in,
+    	  multiplier_data_out); 
 --------------------------------------------------
     test_uart : process(clock)
         
     begin
         if rising_edge(clock) then
+
+            init_multiplier(multiplier_data_in);
+
             idle_adc(spi_sar_adc_data_in);
             init_uart(uart_data_in);
             uart_transmit_counter <= uart_transmit_counter - 1; 
@@ -67,11 +83,12 @@ begin
             end if;
             receive_data_from_uart(uart_data_out, uart_rx_data);
             if ad_conversion_is_ready(spi_sar_adc_data_out) then
+                multiply(multiplier_data_in, multiplier_data_out, get_adc_data(spi_sar_adc_data_out), 49151);
                 adc_data <= get_adc_data(spi_sar_adc_data_out);
                 CASE uart_rx_data is
                     WHEN 0 => transmit_16_bit_word_with_uart(uart_data_in, adc_data );
                     WHEN 1 => transmit_16_bit_word_with_uart(uart_data_in, (adc_data + get_adc_data(spi_sar_adc_data_out))/2);
-                    WHEN others => transmit_16_bit_word_with_uart(uart_data_in, get_adc_data(spi_sar_adc_data_out));
+                    WHEN others => transmit_16_bit_word_with_uart(uart_data_in, get_multiplier_result(multiplier_data_out, 16));
                 end CASE;
             end if;
 
