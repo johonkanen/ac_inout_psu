@@ -51,6 +51,15 @@ architecture rtl of system_components is
     signal multiplier_data_in  : multiplier_data_input_group;
     signal multiplier_data_out : multiplier_data_output_group;
     
+    constant b0 : int18 := 250;
+    constant b1 : int18 := 3e3;
+    constant a1 : int18 := 65536-b1-b0;
+
+    signal filter_output : int18 := 0;
+    signal filter_memory : int18 := 0;
+
+    signal filter_is_triggered : boolean;
+    signal filter_counter : natural range 0 to 15 := 0;
 
 --------------------------------------------------
 begin
@@ -81,16 +90,47 @@ begin
                 end if; 
 
             end if;
+            filter_is_triggered <= false;
             receive_data_from_uart(uart_data_out, uart_rx_data);
             if ad_conversion_is_ready(spi_sar_adc_data_out) then
-                multiply(multiplier_data_in, multiplier_data_out, get_adc_data(spi_sar_adc_data_out), 49151);
+                filter_is_triggered <= true;
                 adc_data <= get_adc_data(spi_sar_adc_data_out);
                 CASE uart_rx_data is
-                    WHEN 0 => transmit_16_bit_word_with_uart(uart_data_in, adc_data );
+                    WHEN 0 => transmit_16_bit_word_with_uart(uart_data_in, filter_output );
                     WHEN 1 => transmit_16_bit_word_with_uart(uart_data_in, (adc_data + get_adc_data(spi_sar_adc_data_out))/2);
                     WHEN others => transmit_16_bit_word_with_uart(uart_data_in, get_multiplier_result(multiplier_data_out, 16));
                 end CASE;
             end if;
+
+            if filter_is_triggered then
+                filter_counter <= 0;
+            end if;
+
+            CASE filter_counter is
+                WHEN 0 =>
+                    multiply(multiplier_data_in, adc_data, b0);
+                    filter_counter <= filter_counter + 1;
+                WHEN 1 =>
+                    multiply(multiplier_data_in, adc_data, b1);
+                    filter_counter <= filter_counter + 1;
+                WHEN 2 =>
+                    if multiplier_is_ready(multiplier_data_out) then
+                        filter_output <= filter_memory + get_multiplier_result(multiplier_data_out, 16);
+                        filter_counter <= filter_counter + 1;
+                    end if;
+                WHEN 3 =>
+                    filter_memory <= get_multiplier_result(multiplier_data_out, 16);
+                    multiply(multiplier_data_in, filter_output, a1);
+                    filter_counter <= filter_counter + 1;
+                when 4 =>
+                    if multiplier_is_ready(multiplier_data_out) then
+                        filter_memory <= filter_memory + get_multiplier_result(multiplier_data_out, 16);
+                        filter_counter <= filter_counter + 1;
+                    end if;
+                WHEN others => -- do nothing
+            end CASE;
+
+
 
         end if; --rising_edge
     end process test_uart;	
