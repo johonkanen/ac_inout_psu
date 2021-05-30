@@ -31,6 +31,7 @@ architecture sim of tb_spi_sar_adc is
     signal simulation_counter : natural := 0;
     signal spi_adc_is_ready : boolean := false;
     signal spi_clock_out : std_logic;
+    signal adc_measurement_data : natural :=0;
 
 begin
 
@@ -76,15 +77,20 @@ begin
             end if;
 
             spi_adc_is_ready <= ad_conversion_is_ready(spi_sar_adc_data_out);
+
+            if ad_conversion_is_ready(spi_sar_adc_data_out) then
+                adc_measurement_data <= get_adc_data(spi_sar_adc_data_out);
+            end if;
+
                              
         end if; -- rstn
     end process clocked_reset_generator;	
 ------------------------------------------------------------------------
 
-    spi_sar_adc_clocks <= (clock => simulator_clock, reset_n => clocked_reset);
-
     spi_clock_out <= spi_sar_adc_FPGA_out.spi_clock;
+    spi_sar_adc_FPGA_in.spi_serial_data <= '1';
 
+    spi_sar_adc_clocks <= (clock => simulator_clock, reset_n => clocked_reset); 
     u_spi_sar_adc : spi_sar_adc
     port map( spi_sar_adc_clocks,
           spi_sar_adc_FPGA_in,
