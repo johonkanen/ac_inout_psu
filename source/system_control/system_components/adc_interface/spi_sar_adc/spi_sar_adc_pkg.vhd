@@ -6,6 +6,7 @@ package spi_sar_adc_pkg is
 
     type spi_sar_adc_clock_group is record
         clock : std_logic;
+        reset_n : std_logic;
     end record;
     
     type spi_sar_adc_FPGA_input_group is record
@@ -22,8 +23,10 @@ package spi_sar_adc_pkg is
     end record;
     
     type spi_sar_adc_data_output_group is record
-        ad_measurement_data : natural range 0 to 2**16-1;
+        ad_measurement_data : std_logic_vector(15 downto 0);
         adc_conversion_is_ready_when_1 : std_logic;
+        adc_sample_and_hold_ready_when_1 : std_logic;
+        adc_is_busy_when_1 : std_logic;
     end record;
     
     component spi_sar_adc is
@@ -110,7 +113,7 @@ package body spi_sar_adc_pkg is
     return integer
     is
     begin
-        return adc_output.ad_measurement_data;
+        return to_integer(unsigned(adc_output.ad_measurement_data));
     end get_adc_data;
 
 ------------------------------------------------------------------------
