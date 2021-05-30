@@ -1,7 +1,6 @@
 library IEEE;
 	use IEEE.STD_LOGIC_1164.ALL;
 	use IEEE.numeric_std.all;
-	use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 library work;
     use work.spi_sar_adc_pkg.all;
@@ -30,12 +29,11 @@ architecture ads_7056 of spi_sar_adc is
     alias b_spi_rx       is spi_sar_adc_data_out.ad_measurement_data              ;
     alias s_spi_busy     is spi_sar_adc_data_out.adc_is_busy_when_1               ;
 
-    constant g_u8_clk_cnt : integer := 2;
+    constant g_u8_clk_cnt : natural range 0 to 2**7-1 := 2;
     constant g_u8_clks_per_conversion : integer := 18;
     constant g_sh_counter_latch : integer := 8; -- TODO, figure out a number for this
 
-    signal clock_count : unsigned(3 downto 0); 
-    signal spi_rx_buffer : std_logic_vector(17 downto 0);
+    signal spi_rx_buffer : std_logic_vector(17 downto 0) := (others => '0');
     constant c_convert : std_logic := '0';
     constant c_idle : std_logic := '1';
     signal i : integer range 0 to 31;
@@ -47,10 +45,12 @@ architecture ads_7056 of spi_sar_adc is
     signal r_po_spi_clk_out : std_logic := '0';
     signal r_po_spi_cs : std_logic; 
     
-    signal spi_process_count : natural := 0;
-    signal spi_clk_div : natural := 0;
+    signal spi_process_count : natural range 0 to 2**7-1 := 0;
+    signal spi_clk_div : natural range 0 to 2**7-1 := 0;
 
 begin
+
+------------------------------------------------------------------------
     spi_control : process(si_spi_clk)
     begin
         if rising_edge(si_spi_clk) then
@@ -74,7 +74,7 @@ begin
                             spi_rx_buffer <= spi_rx_buffer(16 downto 0) & pi_spi_serial;
                         end if;
 
-                        if spi_process_count = g_u8_clk_cnt*to_unsigned(24,8)-g_u8_clk_cnt/2-1 then
+                        if spi_process_count = g_u8_clk_cnt*24 - g_u8_clk_cnt/2-1 then
                             st_ad_states <= t_idle;
                         else
                             st_ad_states <= t_calibrate;

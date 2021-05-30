@@ -2,6 +2,9 @@ proc get_vhdl_sources {void}\
 { 
     return \
     { 
+                    /system_control/system_components/adc_interface/spi_sar_adc/spi_sar_adc_pkg.vhd 
+                    /system_control/system_components/adc_interface/spi_sar_adc/ads7056_driver.vhd 
+
                         /system_control/system_components/power_supply_control/gate_drive_power/gate_drive_power_pkg.vhd
                         /system_control/system_components/power_supply_control/gate_drive_power/gate_drive_power_internal_pkg.vhd
                         /system_control/system_components/power_supply_control/gate_drive_power/gate_drive_power.vhd
