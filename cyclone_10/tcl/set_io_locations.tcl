@@ -1,5 +1,4 @@
 
-
 set_location_assignment PIN_M2 -to pll_input_clock
 
 set_location_assignment PIN_T6 -to system_control_FPGA_in.system_components_FPGA_in.uart_FPGA_in.uart_rx 
@@ -11,3 +10,7 @@ set_location_assignment PIN_R12 -to system_control_FPGA_out.system_components_FP
 set_location_assignment PIN_T5 -to  system_control_FPGA_out.system_components_FPGA_out.power_supply_control_FPGA_out.gate_drive_power_FPGA_out.gate_drive_power_pwm_output[3]
 set_location_assignment PIN_L1 -to  system_control_FPGA_out.system_components_FPGA_out.power_supply_control_FPGA_out.gate_drive_power_FPGA_out.gate_drive_power_pwm_output[4]
 set_location_assignment PIN_R4 -to  system_control_FPGA_out.system_components_FPGA_out.power_supply_control_FPGA_out.gate_drive_power_FPGA_out.gate_drive_power_pwm_output[5]
+
+set_location_assignment PIN_T2 -to system_control_FPGA_in.system_components_FPGA_in.spi_sar_adc_FPGA_in.spi_serial_data
+set_location_assignment PIN_R1 -to system_control_FPGA_out.system_components_FPGA_out.spi_sar_adc_FPGA_out.chip_select
+set_location_assignment PIN_P2 -to system_control_FPGA_out.system_components_FPGA_out.spi_sar_adc_FPGA_out.spi_clock
