@@ -15,3 +15,7 @@ set_location_assignment PIN_R4 -to  system_control_FPGA_out.system_components_FP
 set_location_assignment PIN_T2 -to system_control_FPGA_in.system_components_FPGA_in.spi_sar_adc_FPGA_in.spi_serial_data
 set_location_assignment PIN_R1 -to system_control_FPGA_out.system_components_FPGA_out.spi_sar_adc_FPGA_out.chip_select
 set_location_assignment PIN_P2 -to system_control_FPGA_out.system_components_FPGA_out.spi_sar_adc_FPGA_out.spi_clock
+
+set_location_assignment PIN_L16 -to system_control_FPGA_out.system_components_FPGA_out.test_ad_mux[0]	
+set_location_assignment PIN_L15 -to system_control_FPGA_out.system_components_FPGA_out.test_ad_mux[1]	
+set_location_assignment PIN_N15 -to system_control_FPGA_out.system_components_FPGA_out.test_ad_mux[2]	

@@ -24,6 +24,7 @@ package system_components_pkg is
         power_supply_control_FPGA_out : power_supply_control_FPGA_output_group;
         uart_FPGA_out                 : uart_FPGA_output_group;
         spi_sar_adc_FPGA_out          : spi_sar_adc_FPGA_output_group;
+        test_ad_mux                  : std_logic_vector(2 downto 0);
     end record;
     
     type system_components_data_input_group is record
