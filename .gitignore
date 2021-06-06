@@ -1,4 +1,6 @@
 *~*
 *.swp*
 *.cf
+*.vcd
+*.swo
 /compile*

@@ -39,9 +39,9 @@ architecture rtl of uart_tx is
 
     end load_data_with_start_and_stop_bits_to;
 
-    signal transmit_register : std_logic_vector(9 downto 0) := (others => '0');
-    signal transmit_bit_counter : natural range 0 to 15;
-    constant clock_in_uart_bit : natural := 6;
+    signal transmit_register : std_logic_vector(9 downto 0) := (others => '1');
+    signal transmit_bit_counter : natural range 0 to 127;
+    constant clock_in_uart_bit : natural := 24;
     constant bit_counter_high : natural := clock_in_uart_bit - 1;
     signal transmit_data_bit_counter : natural range 0 to 15;
 
@@ -59,6 +59,7 @@ begin
     begin
         if rising_edge(clock) then
 
+            uart_tx_data_out.uart_tx_is_ready <= false;
             CASE st_uart_tansmitter is
                 WHEN idle =>
                     st_uart_tansmitter := idle;
@@ -75,6 +76,7 @@ begin
                         transmit_data_bit_counter <= transmit_data_bit_counter + 1;
                         if transmit_data_bit_counter = transmit_register'high then
                             st_uart_tansmitter := idle;
+                            uart_tx_data_out.uart_tx_is_ready <= true;
                         end if;
                     else
                         transmit_bit_counter <= transmit_bit_counter - 1;

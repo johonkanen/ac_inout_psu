@@ -19,7 +19,6 @@ package uart_tx_pkg is
     
     type uart_tx_data_output_group is record
         uart_tx_is_ready : boolean;
-        uart_tx_is_busy : boolean;
     end record;
     
     component uart_tx is
@@ -50,9 +49,6 @@ package uart_tx_pkg is
         transmitted_data : std_logic_vector(7 downto 0));
 ------------------------------------------------------------------------
     function uart_tx_is_ready ( uart_tx_output : uart_tx_data_output_group)
-        return boolean;
-------------------------------------------------------------------------
-    function uart_tx_is_busy ( uart_tx_output : uart_tx_data_output_group)
         return boolean;
 ------------------------------------------------------------------------
     
@@ -93,15 +89,5 @@ package body uart_tx_pkg is
     begin
         return uart_tx_output.uart_tx_is_ready;
     end uart_tx_is_ready;
-------------------------------------------------------------------------
-    function uart_tx_is_busy
-    (
-        uart_tx_output : uart_tx_data_output_group
-    )
-    return boolean
-    is
-    begin
-        return uart_tx_output.uart_tx_is_busy;
-    end uart_tx_is_busy;
 ------------------------------------------------------------------------
 end package body uart_tx_pkg; 
