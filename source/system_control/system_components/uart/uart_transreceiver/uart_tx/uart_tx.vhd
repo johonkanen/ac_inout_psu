@@ -3,8 +3,7 @@ library ieee;
     use ieee.numeric_std.all;
 
 library work;
-    use work.uart_tx_pkg.all;
-
+    use work.uart_tx_pkg.all; 
 
 entity uart_tx is
     port (
@@ -27,19 +26,6 @@ architecture rtl of uart_tx is
     begin
         shift_register <= shift_register(shift_register'left-1 downto 0) & '1';
     end shift_and_register; 
-
-    --------------------------------------------------
-    procedure shift_and_register_when
-    (
-        shift_is_requested : boolean;
-        signal shift_register : inout std_logic_vector 
-    ) is
-    begin
-        if shift_is_requested then
-            shift_and_register(shift_register);
-        end if;
-        
-    end shift_and_register_when;
 
     --------------------------------------------------
     procedure load_data_with_start_and_stop_bits_to
@@ -87,7 +73,7 @@ begin
                         transmit_bit_counter <= bit_counter_high;
                         shift_and_register(transmit_register); 
                         transmit_data_bit_counter <= transmit_data_bit_counter + 1;
-                        if transmit_data_bit_counter = 9 then
+                        if transmit_data_bit_counter = transmit_register'high then
                             st_uart_tansmitter := idle;
                         end if;
                     else
