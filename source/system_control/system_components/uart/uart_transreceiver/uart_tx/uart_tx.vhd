@@ -39,12 +39,10 @@ architecture rtl of uart_tx is
 
     end load_data_with_start_and_stop_bits_to;
 
+    --------------------------------------------------
     signal transmit_register : std_logic_vector(9 downto 0) := (others => '1');
     signal transmit_bit_counter : natural range 0 to 127;
-    constant clock_in_uart_bit : natural := 24;
-    constant bit_counter_high : natural := clock_in_uart_bit - 1;
-    signal transmit_data_bit_counter : natural range 0 to 15;
-
+    signal transmit_data_bit_counter : natural range 0 to 15; 
 
 begin
 
@@ -70,6 +68,7 @@ begin
                         st_uart_tansmitter := transmit; 
                     end if;
                 WHEN transmit =>
+                    st_uart_tansmitter := transmit;
                     if transmit_bit_counter = 0 then
                         transmit_bit_counter <= bit_counter_high;
                         shift_and_register(transmit_register); 

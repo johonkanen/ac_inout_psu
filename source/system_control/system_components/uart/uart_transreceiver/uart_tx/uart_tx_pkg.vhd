@@ -4,6 +4,10 @@ library ieee;
 
 package uart_tx_pkg is
 
+    constant clock_in_uart_bit : natural := 24;
+    constant bit_counter_high : natural := clock_in_uart_bit - 1;
+    constant total_number_of_transmitted_bits_per_word : natural := 10;
+
     type uart_tx_clock_group is record
         clock : std_logic;
     end record;
