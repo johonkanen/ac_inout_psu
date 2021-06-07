@@ -33,6 +33,8 @@ architecture rtl of uart_rx is
 
 begin
 
+    uart_rx_data_out.uart_rx_data <= received_data;
+
     uart_rx_receiver : process(clock)
 
     --------------------------------------------------
@@ -75,6 +77,7 @@ begin
     begin
         if rising_edge(clock) then
 
+            uart_rx_data_out.uart_rx_data_transmission_is_ready <= false;
             CASE uart_rx_state is
                 WHEN wait_for_start_bit =>
                     counter_for_data_bit <= 0;
@@ -94,6 +97,8 @@ begin
                         if counter_for_number_of_received_bits = total_number_of_transmitted_bits_per_word then
                             uart_rx_state := wait_for_start_bit;
                             counter_for_number_of_received_bits <= 0;
+                            uart_rx_data_out.uart_rx_data_transmission_is_ready <= true;
+                            received_data <= receive_register(8 downto 1);
                         else 
                             receive_register <= receive_register(receive_register'left-1 downto 0) & read_bit_as_1_if_counter_higher_than(bit_counter_high/2-1, counter_for_data_bit); 
                             counter_for_data_bit <= 0;
