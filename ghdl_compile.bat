@@ -2,7 +2,7 @@ echo off
 set source=source/
 
         ghdl -a --ieee=synopsys %source%/system_control/system_components/uart/uart_transreceiver/uart_tx/uart_tx_pkg.vhd
-        ghdl -a --ieee=synopsys %source%/system_control/system_components/uart/uart_transreceiver/uart_rx/uart_rx.vhd
+        ghdl -a --ieee=synopsys %source%/system_control/system_components/uart/uart_transreceiver/uart_rx/uart_rx_pkg.vhd
         ghdl -a --ieee=synopsys %source%/system_control/system_components/uart/uart_transreceiver/uart_transreceiver.vhd
     ghdl -a --ieee=synopsys %source%/system_control/system_components/uart/uart_pkg.vhd
     rem ghdl -a --ieee=synopsys %source%/system_control/system_components/uart/uart.vhd

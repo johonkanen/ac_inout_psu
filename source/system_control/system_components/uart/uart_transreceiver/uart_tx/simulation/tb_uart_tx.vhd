@@ -74,7 +74,7 @@ begin
         return std_logic
         is
         begin
-            if counter_for_bit >= limit_for_bit_being_high then
+            if counter_for_bit > limit_for_bit_being_high then
                 return '1';
             else
                 return '0';
@@ -134,7 +134,7 @@ begin
                             st_receive := wait_for_start_bit;
                             counter_for_number_of_received_bits <= 0;
                         else 
-                            receive_register <= receive_register(receive_register'left-1 downto 0) & read_bit_as_1_if_counter_higher_than(bit_counter_high/2, counter_for_data_bit); 
+                            receive_register <= receive_register(receive_register'left-1 downto 0) & read_bit_as_1_if_counter_higher_than(bit_counter_high/2-1, counter_for_data_bit); 
                             counter_for_data_bit <= 0;
                         end if;
 

@@ -1,140 +1,110 @@
-----------------------------------------------------------------------
--- File Downloaded from http://www.nandland.com
-----------------------------------------------------------------------
--- This file contains the UART Receiver.  This receiver is able to
--- receive 8 bits of serial data, one start bit, one stop bit,
--- and no parity bit.  When receive is complete o_rx_dv will be
--- driven high for one clock cycle.
--- 
--- Set Generic g_CLKS_PER_BIT as follows:
--- g_CLKS_PER_BIT = (Frequency of i_Clk)/(Frequency of UART)
--- Example: 10 MHz Clock, 115200 baud UART
--- (10000000)/(115200) = 87
---
 library ieee;
-use ieee.std_logic_1164.ALL;
-use ieee.numeric_std.all;
+    use ieee.std_logic_1164.all;
+    use ieee.numeric_std.all;
 
-entity UART_RX is
-	generic(
-				g_CLKS_PER_BIT : integer     -- default value
-			);
-	port(
-			i_Clk       : in  std_logic;
-			i_RX_Serial : in  std_logic;
-			
-			o_RX_ready_event    : out std_logic;
-			o_RX_Byte   		: out std_logic_vector(7 downto 0)
-		);
-end UART_RX;
+library work;
+    use work.uart_rx_pkg.all;
 
-architecture rtl of UART_RX is
+entity uart_rx is
+    port (
+        uart_rx_clocks   : in uart_rx_clock_group;
+        uart_rx_FPGA_in  : in uart_rx_FPGA_input_group;
+        uart_rx_data_in  : in uart_rx_data_input_group;
+        uart_rx_data_out : out uart_rx_data_output_group
+    );
+end entity;
 
-	type t_SM_Main is (	s_Idle,
-						s_RX_Start_Bit,
-						s_RX_Data_Bits,
-						s_RX_Stop_Bit,
-						s_Cleanup
-						);
-	signal r_SM_Main : t_SM_Main := s_Idle;
+architecture rtl of uart_rx is
 
-	signal r_RX_Data_R : std_logic := '0';
-	signal r_RX_Data   : std_logic := '0';
+    alias clock is uart_rx_clocks.clock;
 
-	signal r_Clk_Count : integer range 0 to g_CLKS_PER_BIT-1;
-	signal r_Bit_Index : integer range 0 to 7 := 0;  -- 8 Bits Total
-	signal r_RX_Byte   : std_logic_vector(7 downto 0) := (others => '0');
-	signal r_RX_busy   : std_logic := '0';
+        -- uart_rx_data : std_logic_vector(7 downto 0);
+        -- uart_rx_data_transmission_is_ready : boolean;
 
-	begin
+    signal receive_register : std_logic_vector(9 downto 0) := (others => '0');
+    signal receive_bit_counter : natural range 0 to 127 := 23/2;
+    signal counter_for_number_of_received_bits : natural range 0 to 15 := 0;
+    signal received_data : std_logic_vector(7 downto 0);
 
-	-- Purpose: Double-register the incoming data.
-	-- This allows it to be used in the UART RX Clock Domain.
-	-- (It removes problems caused by metastabiliy)
-		p_SAMPLE : process (i_Clk)
-		begin
-			if rising_edge(i_Clk) then
-				r_RX_Data_R <= i_RX_Serial;
-				r_RX_Data   <= r_RX_Data_R;
-			end if;
-		end process p_SAMPLE;
+    signal counter_for_data_bit : natural := 0; 
 
-		-- Purpose: Control RX state machine
-		p_UART_RX : process (i_Clk)
-		begin
-			if rising_edge(i_Clk) then
+    constant bit_counter_high : integer := 23;
+    constant total_number_of_transmitted_bits_per_word : integer := 10;
 
-				CASE r_SM_Main is
+begin
 
-					WHEN s_Idle =>
-						r_RX_busy     <= '0';
-						r_Clk_Count <= 0;
-						r_Bit_Index <= 0;
+    uart_rx_receiver : process(clock)
 
-						if r_RX_Data = '0' then       -- Start bit detected
-							r_SM_Main <= s_RX_Start_Bit;
-						else
-							r_SM_Main <= s_Idle;
-						end if;
+    --------------------------------------------------
+        function read_bit_as_1_if_counter_higher_than
+        (
+            limit_for_bit_being_high : natural;
+            counter_for_bit : natural 
+        )
+        return std_logic
+        is
+        begin
+            if counter_for_bit > limit_for_bit_being_high then
+                return '1';
+            else
+                return '0';
+            end if;
+            
+        end read_bit_as_1_if_counter_higher_than;
 
-					-- Check middle of start bit to make sure it's still low
-					WHEN s_RX_Start_Bit =>
-					
-						if r_Clk_Count = (g_CLKS_PER_BIT-1)/2 then
-							if r_RX_Data = '0' then
-								r_Clk_Count <= 0;  -- reset counter since we found the middle
-								r_SM_Main   <= s_RX_Data_Bits;
-							else
-								r_SM_Main   <= s_Idle;
-							end if;
-						else
-							r_Clk_Count <= r_Clk_Count + 1;
-							r_SM_Main   <= s_RX_Start_Bit;
-						end if;
+    --------------------------------------------------
+        function "+"
+        (
+            left : integer;
+            right : std_logic 
+        )
+        return integer
+        is
+        begin
+            if right = '1' then
+                return left + 1;
+            else
+                return left;
+            end if;
+        end "+";
 
-					-- Wait g_CLKS_PER_BIT-1 clock cycles to sample serial data
-					WHEN s_RX_Data_Bits =>
-						if r_Clk_Count < g_CLKS_PER_BIT-1 then
-							r_Clk_Count <= r_Clk_Count + 1;
-							r_SM_Main   <= s_RX_Data_Bits;
-						else
-							r_Clk_Count            <= 0;
-							r_RX_Byte(r_Bit_Index) <= r_RX_Data;
+    --------------------------------------------------
+        type list_of_uart_rx_states is (wait_for_start_bit, receive_data);
+        variable uart_rx_state : list_of_uart_rx_states := wait_for_start_bit;
+        
+    begin
+        if rising_edge(clock) then
 
-							-- Check if we have sent out all bits
-							if r_Bit_Index < 7 then
-								r_Bit_Index <= r_Bit_Index + 1;
-								r_SM_Main   <= s_RX_Data_Bits;
-							else
-								r_Bit_Index <= 0;
-								r_SM_Main   <= s_RX_Stop_Bit;
-							end if;
-						end if;
+            CASE uart_rx_state is
+                WHEN wait_for_start_bit =>
+                    counter_for_data_bit <= 0;
+                    counter_for_number_of_received_bits <= 0;
+                    uart_rx_state := wait_for_start_bit;
+                    if uart_rx_FPGA_in.uart_rx = '0' then
+                        receive_bit_counter <= bit_counter_high;
+                        uart_rx_state := receive_data;
+                    end if;
 
-					-- Receive Stop bit.  Stop bit = 1
-					WHEN s_RX_Stop_Bit =>
-						-- Wait g_CLKS_PER_BIT-1 clock cycles for Stop bit to finish
-						if r_Clk_Count < g_CLKS_PER_BIT-1 then
-							r_Clk_Count <= r_Clk_Count + 1;
-							r_SM_Main   <= s_RX_Stop_Bit;
-						else
-							r_RX_busy     <= '1';
-							r_Clk_Count <= 0;
-							r_SM_Main   <= s_Cleanup;
-						end if;
+                WHEN receive_data =>
+                    counter_for_data_bit <= counter_for_data_bit + uart_rx_FPGA_in.uart_rx;
+                    if receive_bit_counter = 0 then
+                        receive_bit_counter <= bit_counter_high;
+                        counter_for_number_of_received_bits <= counter_for_number_of_received_bits + 1;
 
-					-- Stay here 1 clock
-					WHEN s_Cleanup =>
-						r_SM_Main <= s_Idle;
-						r_RX_busy   <= '0';
+                        if counter_for_number_of_received_bits = total_number_of_transmitted_bits_per_word then
+                            uart_rx_state := wait_for_start_bit;
+                            counter_for_number_of_received_bits <= 0;
+                        else 
+                            receive_register <= receive_register(receive_register'left-1 downto 0) & read_bit_as_1_if_counter_higher_than(bit_counter_high/2-1, counter_for_data_bit); 
+                            counter_for_data_bit <= 0;
+                        end if;
 
-					WHEN others =>
-						r_SM_Main <= s_Idle;
-				end CASE;
-			end if;
-		end process p_UART_RX;
--- combinatorial part
-	o_RX_ready_event   <= r_RX_busy;
-	o_RX_Byte <= r_RX_Byte;
+                    else 
+                        receive_bit_counter <= receive_bit_counter - 1;
+                    end if; 
+            end CASE;
+
+        end if; --rising_edge
+    end process uart_rx_receiver;	
 
 end rtl;
