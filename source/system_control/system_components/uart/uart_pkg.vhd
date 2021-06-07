@@ -2,31 +2,31 @@ library ieee;
     use ieee.std_logic_1164.all;
     use ieee.numeric_std.all;
 
+library work;
+    use work.uart_transreceiver_pkg.all;
+
 package uart_pkg is
-
-    constant CLKS_PER_BIT : integer := 25;
-    constant RX_bytes_in_word : integer := 2;
-    constant TX_bytes_in_word : integer := 2;
-
 
     type uart_clock_group is record
         clock : std_logic;
     end record;
     
     type uart_FPGA_input_group is record
-        uart_rx : std_logic;
+        uart_transreceiver_FPGA_in  : uart_transreceiver_FPGA_input_group;
     end record;
     
     type uart_FPGA_output_group is record
-        uart_tx : std_logic;
+        uart_transreceiver_FPGA_out : uart_transreceiver_FPGA_output_group;
     end record;
     
     type uart_data_input_group is record
+        uart_transreceiver_data_in  : uart_transreceiver_data_input_group;
         uart_is_started_with_1 : std_logic;
         uart_tx_data           : std_logic_vector(15 downto 0);
     end record;
     
     type uart_data_output_group is record
+        uart_transreceiver_data_out : uart_transreceiver_data_output_group;
         uart_rx_ready_when_1 : std_logic;
         uart_rx_data         : std_logic_vector(15 downto 0);
     end record;
@@ -81,7 +81,7 @@ package body uart_pkg is
         signal uart_input : out uart_data_input_group
     ) is
     begin
-        uart_input.uart_is_started_with_1 <= '0';
+        init_uart(uart_input.uart_transreceiver_data_in);
     end init_uart;
 
 ------------------------------------------------------------------------
@@ -111,8 +111,8 @@ package body uart_pkg is
         data_to_be_transmitted_with_uart : std_logic_vector(15 downto 0)
     ) is
     begin
-        load_16_bit_data_to_uart(uart_input, data_to_be_transmitted_with_uart);
-        start_uart_transmitter(uart_input);
+
+        transmit_16_bit_word_with_uart(uart_input.uart_transreceiver_data_in, data_to_be_transmitted_with_uart);
         
     end transmit_16_bit_word_with_uart;
 
@@ -124,10 +124,8 @@ package body uart_pkg is
     ) is
         variable unsigned_data : unsigned(15 downto 0);
     begin
-        unsigned_data := to_unsigned(data_to_be_transmitted_with_uart,16);
-
-        load_16_bit_data_to_uart(uart_input, std_logic_vector(unsigned_data));
-        start_uart_transmitter(uart_input);
+        unsigned_data := to_unsigned(data_to_be_transmitted_with_uart,16); 
+        transmit_16_bit_word_with_uart(uart_input.uart_transreceiver_data_in, std_logic_vector(unsigned_data));
         
     end transmit_16_bit_word_with_uart;
 

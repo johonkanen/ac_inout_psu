@@ -85,15 +85,18 @@ begin
             -- this is triggered when test_data_index is between 1 to 6
             if uart_data_has_been_received(uart_transreceiver_data_out) and test_data_index <= test_data'right+1 then
 
-                -- if test_data_index <= test_data'right then
-                --     transmit_data_with_uart(uart_transreceiver_data_in, test_data(test_data_index));
-                -- end if;
+                if test_data_index <= test_data'right then
+                    transmit_data_with_uart(uart_transreceiver_data_in, test_data(test_data_index));
+                end if;
                 test_data_index <= test_data_index + 1;
                 report "uart rx received successfully with index " & integer'image(test_data_index-1);
                 assert get_uart_rx_data(uart_transreceiver_data_out) = test_data(test_data_index-1) report "uart rx failed with index " & integer'image(test_data_index-1) severity failure;
             end if;
 
-    
+            if uart_data_packet_has_been_received(uart_transreceiver_data_out) then
+                report "uart rx data packet received successfully";
+            end if; 
+
         end if; -- rstn
     end process clocked_reset_generator;	
 ------------------------------------------------------------------------
