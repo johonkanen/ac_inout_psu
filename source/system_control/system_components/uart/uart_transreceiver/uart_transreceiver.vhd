@@ -19,12 +19,69 @@ end entity;
 
 architecture rtl of uart_transreceiver is
 
+    alias clock is uart_transreceiver_clocks.clock;
+
     signal uart_rx_clocks   : uart_rx_clock_group;
     signal uart_rx_data_in  : uart_rx_data_input_group;
+    signal uart_rx_data_out  : uart_rx_data_output_group;
     
     signal uart_tx_clocks   : uart_tx_clock_group;
+    signal uart_tx_data_in  : uart_tx_data_input_group;
+    signal uart_tx_data_out : uart_tx_data_output_group;
+
+    signal delay_between_data_packet_transmissions : natural range 0 to 2**8-1 := 0;
+    signal packet_counter : natural range 0 to 3;
 
 begin
+
+    uart_transreceiver_data_out.uart_tx_data_out <= uart_tx_data_out;
+    
+    uart_transmit_package_manager : process(clock)
+
+        type list_of_uart_transmitter_states is (wait_for_transmit_request, uart_transmission_is_in_progress);
+        variable uart_transmitter_state : list_of_uart_transmitter_states := wait_for_transmit_request;
+        
+    begin
+        if rising_edge(clock) then
+
+            if delay_between_data_packet_transmissions /= 0 then
+                delay_between_data_packet_transmissions <= delay_between_data_packet_transmissions - 1;
+            end if;
+
+            uart_transreceiver_data_out.uart_data_packet_transmission_is_ready <= false;
+            init_uart(uart_tx_data_in);
+            CASE uart_transmitter_state is
+                WHEN wait_for_transmit_request =>
+                    uart_transmitter_state := wait_for_transmit_request;
+
+                    if uart_transreceiver_data_in.uart_data_packet_transmission_is_requested then
+                        packet_counter <= packet_counter + 1;
+                        transmit_8bit_data_package(uart_tx_data_in, uart_transreceiver_data_in.uart_data_packet(15 downto 8));
+                        uart_transmitter_state := uart_transmission_is_in_progress;
+                    end if;
+
+                WHEN uart_transmission_is_in_progress =>
+
+                    uart_transmitter_state := uart_transmission_is_in_progress;
+
+                    if uart_tx_is_ready(uart_tx_data_out) then
+                        delay_between_data_packet_transmissions <= 20;
+                    end if;
+
+                    if delay_between_data_packet_transmissions = 1 then
+                        packet_counter <= packet_counter + 1;
+                        transmit_8bit_data_package(uart_tx_data_in, uart_transreceiver_data_in.uart_data_packet(7 downto 0));
+                    end if;
+
+                    if uart_tx_is_ready(uart_tx_data_out) and packet_counter = 2 then
+                        uart_transmitter_state := wait_for_transmit_request;
+                        uart_transreceiver_data_out.uart_data_packet_transmission_is_ready <= true;
+                    end if; 
+
+            end CASE;
+
+        end if; --rising_edge
+    end process uart_transmit_package_manager;	
 
 ------------------------------------------------------------------------
     uart_rx_clocks <= (clock => uart_transreceiver_clocks.clock);
@@ -39,8 +96,8 @@ begin
     u_uart_tx : uart_tx
     port map( uart_tx_clocks,
     	  uart_transreceiver_FPGA_out.uart_tx_FPGA_out,
-    	  uart_transreceiver_data_in.uart_tx_data_in,
-    	  uart_transreceiver_data_out.uart_tx_data_out);
+    	  uart_tx_data_in,
+    	  uart_tx_data_out);
 
 ------------------------------------------------------------------------
 end rtl; 

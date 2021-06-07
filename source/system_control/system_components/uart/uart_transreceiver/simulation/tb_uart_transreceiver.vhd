@@ -76,18 +76,21 @@ begin
             init_uart(uart_transreceiver_data_in);
 
             CASE simulation_counter is
-                WHEN 5 => transmit_data_with_uart(uart_transreceiver_data_in, test_data(test_data_index));
+                WHEN 5 => 
+                    transmit_16_bit_word_with_uart(uart_transreceiver_data_in, x"ACDC");
                     test_data_index <= test_data_index + 1;
                 WHEN others => -- do nothing
             end CASE;
 
+            -- this is triggered when test_data_index is between 1 to 6
             if uart_data_has_been_received(uart_transreceiver_data_out) and test_data_index <= test_data'right+1 then
+
+                -- if test_data_index <= test_data'right then
+                --     transmit_data_with_uart(uart_transreceiver_data_in, test_data(test_data_index));
+                -- end if;
                 test_data_index <= test_data_index + 1;
-                if test_data_index <= test_data'right then
-                    transmit_data_with_uart(uart_transreceiver_data_in, test_data(test_data_index));
-                end if;
                 report "uart rx received successfully with index " & integer'image(test_data_index-1);
-                assert get_uart_rx_data(uart_transreceiver_data_out) = test_data(test_data_index-1) report "uart rx failed" severity failure;
+                assert get_uart_rx_data(uart_transreceiver_data_out) = test_data(test_data_index-1) report "uart rx failed with index " & integer'image(test_data_index-1) severity failure;
             end if;
 
     

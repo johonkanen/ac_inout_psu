@@ -22,9 +22,12 @@ package uart_transreceiver_pkg is
     
     type uart_transreceiver_data_input_group is record
         uart_tx_data_in : uart_tx_data_input_group;
+        uart_data_packet : std_logic_vector(15 downto 0);
+        uart_data_packet_transmission_is_requested : boolean;
     end record;
     
     type uart_transreceiver_data_output_group is record
+        uart_data_packet_transmission_is_ready : boolean;
         uart_tx_data_out : uart_tx_data_output_group;
         uart_rx_data_out : uart_rx_data_output_group;
     end record;
@@ -42,6 +45,10 @@ package uart_transreceiver_pkg is
 ------------------------------------------------------------------------
     procedure init_uart (
         signal uart_transreceiver_in : out uart_transreceiver_data_input_group);
+------------------------------------------------------------------------
+    procedure transmit_16_bit_word_with_uart (
+        signal uart_transreceiver_in : out uart_transreceiver_data_input_group;
+        data_packet : in std_logic_vector(15 downto 0));
 ------------------------------------------------------------------------
     procedure transmit_data_with_uart (
         signal uart_transreceiver_in : out uart_transreceiver_data_input_group;
@@ -79,8 +86,21 @@ package body uart_transreceiver_pkg is
     begin
 
         init_uart(uart_transreceiver_in.uart_tx_data_in);
+        uart_transreceiver_in.uart_data_packet_transmission_is_requested <= false;
         
     end init_uart;
+
+------------------------------------------------------------------------
+    procedure transmit_16_bit_word_with_uart
+    (
+        signal uart_transreceiver_in : out uart_transreceiver_data_input_group;
+        data_packet : in std_logic_vector(15 downto 0)
+    ) is
+    begin
+        uart_transreceiver_in.uart_data_packet_transmission_is_requested <= true;
+        uart_transreceiver_in.uart_data_packet <= data_packet;
+
+    end transmit_16_bit_word_with_uart;
 
 ------------------------------------------------------------------------
     procedure transmit_data_with_uart
