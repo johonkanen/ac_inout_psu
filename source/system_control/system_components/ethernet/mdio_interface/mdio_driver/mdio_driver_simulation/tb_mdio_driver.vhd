@@ -138,8 +138,8 @@ begin
                           reset_n => clocked_reset);
 
     mdio_driver_FPGA_in.MDIO_serial_data_in <= mdio_driver_FPGA_out.MDIO_serial_data_out;
-    mdio_data_out <= mdio_driver_FPGA_out.MDIO_serial_data_out;
-    mdio_clock_out <= mdio_driver_FPGA_out.mdio_clock;
+    mdio_data_out                           <= mdio_driver_FPGA_out.MDIO_serial_data_out;
+    mdio_clock_out                          <= mdio_driver_FPGA_out.mdio_clock;
 
     u_mdio_driver : mdio_driver
     port map(

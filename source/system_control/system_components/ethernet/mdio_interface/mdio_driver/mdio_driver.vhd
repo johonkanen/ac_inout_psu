@@ -32,8 +32,6 @@ architecture rtl of mdio_driver is
     constant MDIO_write_command : std_logic_vector(5 downto 0) := "110101";
     constant MDIO_read_command  : std_logic_vector(5 downto 0) := "110110";
 
-    -- TODO, make an array for registers
-
     signal mdio_transmit_shift_register : std_logic_vector(15 downto 0);
     signal mdio_receive_shift_register  : std_logic_vector(15 downto 0);
 
@@ -53,6 +51,9 @@ begin
     mdio_io_driver : process(core_clock)
 
     --------------------------------------------------
+        type list_of_mdio_states is (idle, send_phy_read_command, send_read_command_address, read_data, send_phy_write_command, send_write_command_address, write_data);
+        variable mdio_state : list_of_mdio_states;
+
         type t_mdio_states is (idle, send_phy_read_command, send_read_command_address, read_data, 
                                     send_phy_write_command, send_write_command_address, write_data);
 
@@ -149,7 +150,6 @@ begin
                         if bit_counter = 58 then
                             bit_counter <= 0;
                             st_mdio_states := read_data;
-                            -- mdio_transmit_shift_register <= "ZZZZZZZZZZZZZZZZ";
                             mdio_driver_FPGA_out.MDIO_io_direction_1_output <= '0';
 
                         end if;
