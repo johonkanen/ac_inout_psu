@@ -42,7 +42,7 @@ begin
             generate_mdio_io_waveforms(mdio_transmit_control); 
 
             if mdio_driver_data_in.mdio_data_write_is_requested then
-                load_mdio_transmit_register(mdio_transmit_control, MDIO_write_command    &
+                write_data_to_mdio(mdio_transmit_control, MDIO_write_command             &
                                     mdio_driver_data_in.phy_address(4 downto 0)          &
                                     mdio_driver_data_in.phy_register_address(4 downto 0) &
                                     mdio_driver_data_in.data_to_mdio(15 downto 0));

@@ -24,7 +24,7 @@ package mdio_driver_internal_pkg is
     procedure generate_mdio_io_waveforms (
         signal mdio_transmit : inout mdio_transmit_control_group);
 --------------------------------------------------
-    procedure load_mdio_transmit_register (
+    procedure write_data_to_mdio (
         signal mdio_control : out mdio_transmit_control_group;
         data : std_logic_vector );
 --------------------------------------------------
@@ -66,7 +66,7 @@ package body mdio_driver_internal_pkg is
     ) is
     begin
         if mdio_input.mdio_data_write_is_requested then
-            load_mdio_transmit_register(mdio_control, MDIO_write_command    &
+            write_data_to_mdio(mdio_control, MDIO_write_command    &
                                 mdio_input.phy_address(4 downto 0)          &
                                 mdio_input.phy_register_address(4 downto 0) &
                                 mdio_input.data_to_mdio(15 downto 0));
@@ -74,7 +74,7 @@ package body mdio_driver_internal_pkg is
 
     end write_data_with_mdio;
 --------------------------------------------------
-    procedure load_mdio_transmit_register
+    procedure write_data_to_mdio
     (
         signal mdio_control : out mdio_transmit_control_group;
         data : std_logic_vector
@@ -83,7 +83,7 @@ package body mdio_driver_internal_pkg is
     begin
         mdio_control.mdio_transmit_register(mdio_control.mdio_transmit_register'left downto mdio_control.mdio_transmit_register'left-data'high) <= data;
         
-    end load_mdio_transmit_register;
+    end write_data_to_mdio;
 --------------------------------------------------
 
 

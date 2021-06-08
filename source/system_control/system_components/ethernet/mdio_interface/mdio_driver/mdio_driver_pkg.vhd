@@ -20,6 +20,7 @@ package mdio_driver_pkg is
     end record;
     
     type mdio_driver_data_input_group is record
+        MDIO_serial_data_in          : std_logic;
         mdio_data_read_is_requested  : boolean;
         mdio_data_write_is_requested : boolean;
         data_to_mdio                 : std_logic_vector(15 downto 0);
@@ -28,7 +29,8 @@ package mdio_driver_pkg is
     end record;
     
     type mdio_driver_data_output_group is record
-        mdio_driver_is_ready : boolean;
+        mdio_write_is_ready : boolean;
+        mdio_read_is_ready : boolean;
         data_from_mdio       : std_logic_vector(15 downto 0);
     end record;
     
@@ -51,7 +53,7 @@ package mdio_driver_pkg is
         return std_logic_vector;
 
 ----------------------------------------------------------------
-    function mdio_is_ready ( mdio_output : mdio_driver_data_output_group)
+    function mdio_write_is_ready ( mdio_output : mdio_driver_data_output_group)
         return boolean;
 ----------------------------------------------------------------
     procedure read_data_from_mdio (
@@ -105,16 +107,16 @@ package body mdio_driver_pkg is
     end get_data_from_mdio;
 
 --------------------------------------------------------------------
-    function mdio_is_ready
+    function mdio_write_is_ready
     (
         mdio_output : mdio_driver_data_output_group
     )
     return boolean
     is
     begin
-        return mdio_output.mdio_driver_is_ready;
+        return mdio_output.mdio_write_is_ready;
         
-    end mdio_is_ready;
+    end mdio_write_is_ready;
 
 --------------------------------------------------------------------
 --------------------------------------------------------------------
