@@ -7,52 +7,84 @@ library work;
 
 package mdio_driver_internal_pkg is
 
-        procedure transmit_phy_command_address (
-            signal shift_register : out std_logic_vector(15 downto 0);
-            phy_address : std_logic_vector(7 downto 0);     -- only last 5 bits are read
-            register_address : std_logic_vector(7 downto 0)); -- only last 5 bits are read
+    constant MDIO_write_command : std_logic_vector(5 downto 0) := "110101";
+    constant MDIO_read_command  : std_logic_vector(5 downto 0) := "110110";
 
-        procedure set_mdio_direction_to_write (
-            signal mdio_driver_FPGA_output : out mdio_driver_FPGA_output_group);
+    constant mdio_clock_divisor_counter_high : integer := 4;
 
-        procedure set_mdio_direction_to_read (
-            signal mdio_driver_FPGA_output : out mdio_driver_FPGA_output_group);
+    type mdio_transmit_control_group is record
+        mdio_transmit_register          : std_logic_vector(33 downto 0);
+        mdio_clock                      : std_logic;
+        mdio_clock_counter              : natural range 0 to 15;
+        MDIO_io_direction_is_out_when_1 : std_logic;
+    end record; 
+    constant mdio_transmit_control_init : mdio_transmit_control_group := ((others=>'0') ,'0',0,'1');
+
+--------------------------------------------------
+    procedure generate_mdio_io_waveforms (
+        signal mdio_transmit : inout mdio_transmit_control_group);
+--------------------------------------------------
+    procedure load_mdio_transmit_register (
+        signal mdio_control : out mdio_transmit_control_group;
+        data : std_logic_vector );
+--------------------------------------------------
+    procedure write_data_with_mdio (
+        mdio_input : in mdio_driver_data_input_group;
+        signal mdio_control : out mdio_transmit_control_group);
 
 end package mdio_driver_internal_pkg;
 
 package body mdio_driver_internal_pkg is
 
-    --------------------------------------------------
-    procedure set_mdio_direction_to_write
+--------------------------------------------------
+    procedure generate_mdio_io_waveforms
     (
-        signal mdio_driver_FPGA_output : out mdio_driver_FPGA_output_group
+        signal mdio_transmit : inout mdio_transmit_control_group
     ) is
     begin
-        mdio_driver_FPGA_output.MDIO_io_direction_is_out_when_1 <= '1';
-        
-    end set_mdio_direction_to_write;
 
-    --------------------------------------------------
-    procedure set_mdio_direction_to_read
+        mdio_transmit.mdio_clock_counter <= mdio_transmit.mdio_clock_counter + 1;
+        if mdio_transmit.mdio_clock_counter = mdio_clock_divisor_counter_high then 
+            mdio_transmit.mdio_clock_counter <= 0;
+        end if;
+
+        mdio_transmit.mdio_clock <= '1';
+        if mdio_transmit.mdio_clock_counter > mdio_clock_divisor_counter_high/2-1 then
+            mdio_transmit.mdio_clock <= '0'; 
+        end if; 
+
+        if mdio_transmit.mdio_clock_counter = mdio_clock_divisor_counter_high/2-2 then
+            mdio_transmit.mdio_transmit_register <= mdio_transmit.mdio_transmit_register(mdio_transmit.mdio_transmit_register'left-1 downto 0) & '0';
+        end if;
+        
+    end generate_mdio_io_waveforms;
+--------------------------------------------------
+    procedure write_data_with_mdio
     (
-        signal mdio_driver_FPGA_output : out mdio_driver_FPGA_output_group
+        mdio_input : in mdio_driver_data_input_group;
+        signal mdio_control : out mdio_transmit_control_group
     ) is
     begin
-        mdio_driver_FPGA_output.MDIO_io_direction_is_out_when_1 <= '0';
-        
-    end set_mdio_direction_to_read;
+        if mdio_input.mdio_data_write_is_requested then
+            load_mdio_transmit_register(mdio_control, MDIO_write_command    &
+                                mdio_input.phy_address(4 downto 0)          &
+                                mdio_input.phy_register_address(4 downto 0) &
+                                mdio_input.data_to_mdio(15 downto 0));
+        end if;
 
-    --------------------------------------------------
-        procedure transmit_phy_command_address
-        (
-            signal shift_register : out std_logic_vector(15 downto 0);
-            phy_address : std_logic_vector(7 downto 0);     -- only last 5 bits are read
-            register_address : std_logic_vector(7 downto 0) -- only last 5 bits are read
-        ) is
-        begin
-            shift_register <= phy_address(4 downto 0) & register_address(4 downto 0) & "10" &x"0";
-            
-        end transmit_phy_command_address;
+    end write_data_with_mdio;
+--------------------------------------------------
+    procedure load_mdio_transmit_register
+    (
+        signal mdio_control : out mdio_transmit_control_group;
+        data : std_logic_vector
+        
+    ) is
+    begin
+        mdio_control.mdio_transmit_register(mdio_control.mdio_transmit_register'left downto mdio_control.mdio_transmit_register'left-data'high) <= data;
+        
+    end load_mdio_transmit_register;
+--------------------------------------------------
 
 
 end package body mdio_driver_internal_pkg;

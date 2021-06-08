@@ -83,6 +83,17 @@ end package mdio_driver_pkg;
 
 package body mdio_driver_pkg is
 
+------------------------------------------------------------------------
+    procedure init_mdio_driver
+    (
+        signal mdio_input : out mdio_driver_data_input_group
+    ) is
+    begin
+        mdio_input.mdio_data_read_is_requested  <= false;
+        mdio_input.mdio_data_write_is_requested <= false;
+    end init_mdio_driver;
+------------------------------------------------------------------------
+
     function get_data_from_mdio
     (
         mdio_output : in mdio_driver_data_output_group
@@ -106,15 +117,6 @@ package body mdio_driver_pkg is
     end mdio_is_ready;
 
 --------------------------------------------------------------------
-    procedure init_mdio_driver
-    (
-        signal mdio_input : out mdio_driver_data_input_group
-    ) is
-    begin
-        mdio_input.mdio_data_read_is_requested  <= false;
-        mdio_input.mdio_data_write_is_requested <= false;
-    end init_mdio_driver;
-
 --------------------------------------------------------------------
     procedure read_data_from_mdio
     (
@@ -137,8 +139,8 @@ package body mdio_driver_pkg is
         data_to_mdio : in std_logic_vector(15 downto 0)
     ) is
     begin
+        assert (unsigned(register_address) < 32) report "invalid address written to mdio " & integer'image(to_integer(unsigned(register_address))) severity failure;
         mdio_input.mdio_data_write_is_requested <= true;
-        mdio_input.mdio_data_read_is_requested  <= true;
         mdio_input.phy_address                  <= phy_address;
         mdio_input.phy_register_address         <= register_address;
         mdio_input.data_to_mdio                 <= data_to_mdio;
