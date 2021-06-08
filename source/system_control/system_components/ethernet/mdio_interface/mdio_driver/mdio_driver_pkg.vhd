@@ -15,7 +15,7 @@ package mdio_driver_pkg is
     
     type mdio_driver_FPGA_output_group is record
         MDIO_serial_data_out       : std_logic;
-        MDIO_io_direction_1_output : std_logic;
+        MDIO_io_direction_is_out_when_1 : std_logic;
         mdio_clock                 : std_logic;
     end record;
     
@@ -36,7 +36,6 @@ package mdio_driver_pkg is
         port (
             mdio_driver_clocks : in mdio_driver_clock_group;
     
-            mdio_driver_FPGA_in : in mdio_driver_FPGA_input_group;
             mdio_driver_FPGA_out : out mdio_driver_FPGA_output_group;
     
             mdio_driver_data_in : in mdio_driver_data_input_group;
