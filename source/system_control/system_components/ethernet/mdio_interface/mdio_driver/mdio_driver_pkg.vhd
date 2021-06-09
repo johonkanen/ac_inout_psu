@@ -52,7 +52,7 @@ package mdio_driver_pkg is
         return std_logic_vector;
 
 ----------------------------------------------------------------
-    function mdio_write_is_ready ( mdio_output : mdio_driver_data_output_group)
+    function mdio_data_write_is_ready ( mdio_output : mdio_driver_data_output_group)
         return boolean;
 ----------------------------------------------------------------
     procedure read_data_from_mdio (
@@ -62,8 +62,8 @@ package mdio_driver_pkg is
 ----------------------------------------------------------------
     procedure write_data_to_mdio (
         signal mdio_input : out mdio_driver_data_input_group;
-        phy_address       : std_logic_vector(7 downto 0);
-        register_address  : std_logic_vector(7 downto 0);
+        phy_address       : in std_logic_vector(7 downto 0);
+        register_address  : in std_logic_vector(7 downto 0);
         data_to_mdio      : in std_logic_vector(15 downto 0));
         
 end package mdio_driver_pkg;
@@ -106,7 +106,7 @@ package body mdio_driver_pkg is
     end get_data_from_mdio;
 
 --------------------------------------------------------------------
-    function mdio_write_is_ready
+    function mdio_data_write_is_ready
     (
         mdio_output : mdio_driver_data_output_group
     )
@@ -115,9 +115,20 @@ package body mdio_driver_pkg is
     begin
         return mdio_output.mdio_write_is_ready;
         
-    end mdio_write_is_ready;
+    end mdio_data_write_is_ready;
 
 --------------------------------------------------------------------
+    function mdio_data_read_is_ready
+    (
+        mdio_output : mdio_driver_data_output_group
+    )
+    return boolean
+    is
+    begin
+        return mdio_output.mdio_read_is_ready;
+        
+    end mdio_data_read_is_ready;
+
 --------------------------------------------------------------------
     procedure read_data_from_mdio
     (
@@ -135,12 +146,13 @@ package body mdio_driver_pkg is
     procedure write_data_to_mdio
     (
         signal mdio_input : out mdio_driver_data_input_group;
-        phy_address : std_logic_vector(7 downto 0);
-        register_address : std_logic_vector(7 downto 0);
-        data_to_mdio : in std_logic_vector(15 downto 0)
+        phy_address       : in std_logic_vector(7 downto 0);
+        register_address  : in std_logic_vector(7 downto 0);
+        data_to_mdio      : in std_logic_vector(15 downto 0)
     ) is
     begin
         assert (unsigned(register_address) < 32) report "invalid address written to mdio " & integer'image(to_integer(unsigned(register_address))) severity failure;
+        assert (unsigned(phy_address) < 32) report "invalid phy address written to mdio " & integer'image(to_integer(unsigned(register_address))) severity failure;
         mdio_input.mdio_data_write_is_requested <= true;
         mdio_input.phy_address                  <= phy_address;
         mdio_input.phy_register_address         <= register_address;

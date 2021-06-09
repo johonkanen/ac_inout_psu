@@ -89,12 +89,18 @@ begin
 
             init_mdio_driver(mdio_driver_data_in);
             if simulator_counter = 10 then
-                write_data_to_mdio(mdio_driver_data_in, x"0f", x"0e", x"acdc");
+                write_data_to_mdio(mdio_driver_data_in, x"1f", x"1f", x"acdc");
             end if;
 
             mdio_clock_buffer <= mdio_driver_FPGA_out.mdio_clock;
             if mdio_clock_buffer = '1' and mdio_driver_FPGA_out.mdio_clock = '0' then
                 mdio_receive_shift_register <= mdio_receive_shift_register(mdio_receive_shift_register'left-1 downto 0) & mdio_driver_FPGA_out.MDIO_serial_data_out;
+            end if;
+
+            if mdio_data_write_is_ready(mdio_driver_data_out) then
+                -- assert mdio_receive_shift_register = "11" & x"5ffeacdc" report " not jee " severity failure;
+                report "mdio write is ready";
+                read_data_from_mdio(mdio_driver_data_in, x"1f", x"1f");
             end if;
 
         end if; --rising_edge
