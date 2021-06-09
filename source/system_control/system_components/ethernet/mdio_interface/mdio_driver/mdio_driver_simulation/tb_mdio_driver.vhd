@@ -77,7 +77,7 @@ begin
     end process clocked_reset_generator;	
 
 ------------------------------------------------------------------------
-    test_mdio_driver : process(simulator_clock)
+    test_mdio_driver : process(simulator_clock,mdio_driver_FPGA_out.mdio_clock)
         constant reference_data_offset : integer := -4;
 
 
@@ -92,18 +92,18 @@ begin
                 write_data_to_mdio(mdio_driver_data_in, x"1f", x"1f", x"acdc");
             end if;
 
-            mdio_clock_buffer <= mdio_driver_FPGA_out.mdio_clock;
-            if mdio_clock_buffer = '1' and mdio_driver_FPGA_out.mdio_clock = '0' then
-                mdio_receive_shift_register <= mdio_receive_shift_register(mdio_receive_shift_register'left-1 downto 0) & mdio_driver_FPGA_out.MDIO_serial_data_out;
-            end if;
-
             if mdio_data_write_is_ready(mdio_driver_data_out) then
-                -- assert mdio_receive_shift_register = "11" & x"5ffeacdc" report " not jee " severity failure;
-                report "mdio write is ready";
+                assert mdio_receive_shift_register = "11" & x"5ffeacdc" report " not jee " severity failure;
+                report "mdio write successful";
                 read_data_from_mdio(mdio_driver_data_in, x"1f", x"1f");
             end if;
 
         end if; --rising_edge
+
+        if falling_edge(mdio_driver_FPGA_out.mdio_clock) then
+            mdio_receive_shift_register <= mdio_receive_shift_register(mdio_receive_shift_register'left-1 downto 0) & mdio_driver_FPGA_out.MDIO_serial_data_out;
+        end if;
+
     end process test_mdio_driver;	
 
     mdio_serial_data <= mdio_driver_FPGA_out.MDIO_serial_data_out;

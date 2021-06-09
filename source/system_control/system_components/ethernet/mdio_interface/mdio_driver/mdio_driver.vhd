@@ -30,8 +30,8 @@ begin
 
     mdio_driver_data_out <= (
                                 mdio_write_is_ready => mdio_transmit_control.mdio_transmit_is_ready,
-                                mdio_read_is_ready  => false,
-                                data_from_mdio      => x"ffff"
+                                mdio_read_is_ready  => mdio_transmit_control.mdio_receive_is_ready,
+                                data_from_mdio      => mdio_transmit_control.mdio_data_receive_register
                             ); 
 
 ------------------------------------------------------------------------
@@ -48,7 +48,7 @@ begin
             generate_mdio_io_waveforms(mdio_transmit_control); 
 
             write_data_with_mdio(mdio_driver_data_in, mdio_transmit_control);
-            -- read_data_with_mdio(mdio_driver_data_in, mdio_transmit_control);
+            read_data_with_mdio(mdio_driver_data_in, mdio_transmit_control);
 
         end if; --rising_edge
     end process mdio_io_driver;	

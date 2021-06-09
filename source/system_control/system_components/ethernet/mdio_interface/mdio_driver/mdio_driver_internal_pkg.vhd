@@ -12,7 +12,7 @@ package mdio_driver_internal_pkg is
     constant MDIO_read_command         : std_logic_vector(5 downto 0) := "110110";
 
     constant mdio_clock_divisor_counter_high : integer := 4;
-    constant mdio_transmit_counter_high : integer := (mdio_clock_divisor_counter_high+1)*33;
+    constant mdio_transmit_counter_high : integer := (mdio_clock_divisor_counter_high+1)*34;
 
     type mdio_transmit_control_group is record
         mdio_transmit_register          : std_logic_vector(33 downto 0);
@@ -38,6 +38,11 @@ package mdio_driver_internal_pkg is
     procedure write_data_with_mdio (
         mdio_input : in mdio_driver_data_input_group;
         signal mdio_control : out mdio_transmit_control_group);
+--------------------------------------------------
+    procedure read_data_with_mdio (
+        mdio_input : in mdio_driver_data_input_group;
+        signal mdio_control : out mdio_transmit_control_group);
+--------------------------------------------------
 
 end package mdio_driver_internal_pkg;
 
