@@ -6,6 +6,7 @@ library work;
     use work.power_supply_control_pkg.all;
     use work.uart_pkg.all;
     use work.spi_sar_adc_pkg.all;
+    use work.mdio_driver_pkg.all;
 
 package system_components_pkg is
 
@@ -25,6 +26,8 @@ package system_components_pkg is
         uart_FPGA_out                 : uart_FPGA_output_group;
         spi_sar_adc_FPGA_out          : spi_sar_adc_FPGA_output_group;
         test_ad_mux                  : std_logic_vector(2 downto 0);
+        mdio_driver_FPGA_out : mdio_driver_FPGA_output_group;
+
     end record;
     
     type system_components_data_input_group is record

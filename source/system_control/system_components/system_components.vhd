@@ -7,6 +7,7 @@ library work;
     use work.power_supply_control_pkg.all;
     use work.uart_pkg.all;
     use work.spi_sar_adc_pkg.all;
+    use work.mdio_driver_pkg.all;
 
 library math_library;
     use math_library.multiplier_pkg.all;
@@ -46,6 +47,12 @@ architecture rtl of system_components is
 
 
     signal test_counter : natural range 0 to 2**16-1;
+
+    signal mdio_driver_clocks   : mdio_driver_clock_group;
+    signal mdio_driver_FPGA_in  : mdio_driver_FPGA_input_group;
+    signal mdio_driver_FPGA_out : mdio_driver_FPGA_output_group;
+    signal mdio_driver_data_in  : mdio_driver_data_input_group;
+    signal mdio_driver_data_out : mdio_driver_data_output_group; 
 
     function integer_to_std
     (
@@ -161,6 +168,10 @@ begin
                     WHEN others =>  transmit_16_bit_word_with_uart(uart_data_in, uart_rx_data); 
                 end CASE;
 
+                write_data_to_mdio(mdio_driver_data_in, x"0f", x"0e", x"acdc");
+
+            end if;
+
                 filter_data(bandpass_filter, get_square_wave_from_counter(test_counter));
                 test_counter <= test_counter + 1; 
             end if;
@@ -194,6 +205,15 @@ begin
     	  system_components_FPGA_out.power_supply_control_FPGA_out ,
     	  system_components_data_in.power_supply_control_data_in   ,
     	  system_components_data_out.power_supply_control_data_out); 
+
+------------------------------------------------------------------------ 
+    mdio_driver_clocks <= (clock => clock);
+    u_mdio_driver : mdio_driver
+    port map(
+        mdio_driver_clocks   ,
+        system_components_FPGA_out.mdio_driver_FPGA_out ,
+        mdio_driver_data_in  ,
+        mdio_driver_data_out);
 
 ------------------------------------------------------------------------ 
 end rtl;
