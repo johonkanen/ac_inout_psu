@@ -29,12 +29,13 @@ architecture sim of tb_mdio_driver is
     signal mdio_driver_data_out : mdio_driver_data_output_group;
 
     signal simulator_counter          : natural := 0;
-    signal data_from_mdio             : std_logic_vector(15 downto 0);
-    signal mdio_data_output_reference : std_logic;
-
 
     signal mdio_receive_shift_register  : std_logic_vector(33 downto 0) := (others => '0');
     signal mdio_clock_buffer : std_logic;
+
+    signal mdio_clock : std_logic;
+    signal mdio_serial_data : std_logic;
+    signal mdio_write_is_ready : boolean;
 
 begin
 
@@ -88,7 +89,7 @@ begin
 
             init_mdio_driver(mdio_driver_data_in);
             if simulator_counter = 10 then
-                write_data_to_mdio(mdio_driver_data_in, x"0f", x"0f", x"acdc");
+                write_data_to_mdio(mdio_driver_data_in, x"0f", x"0e", x"acdc");
             end if;
 
             mdio_clock_buffer <= mdio_driver_FPGA_out.mdio_clock;
@@ -99,9 +100,11 @@ begin
         end if; --rising_edge
     end process test_mdio_driver;	
 
+    mdio_serial_data <= mdio_driver_FPGA_out.MDIO_serial_data_out;
+    mdio_clock <= mdio_driver_FPGA_out.mdio_clock;
     
-    mdio_driver_clocks <= (clock => simulator_clock,
-                          reset_n => clocked_reset);
+    mdio_driver_clocks <= (clock => simulator_clock);
+    mdio_write_is_ready <= mdio_driver_data_out.mdio_write_is_ready;
 
     u_mdio_driver : mdio_driver
     port map(

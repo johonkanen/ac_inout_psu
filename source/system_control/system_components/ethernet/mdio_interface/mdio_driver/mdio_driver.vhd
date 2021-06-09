@@ -28,6 +28,12 @@ begin
                             MDIO_io_direction_is_out_when_1 => '1'                                              ,
                             MDIO_clock                      => mdio_transmit_control.mdio_clock);
 
+    mdio_driver_data_out <= (
+                                mdio_write_is_ready => mdio_transmit_control.mdio_transmit_is_ready,
+                                mdio_read_is_ready  => false,
+                                data_from_mdio      => x"ffff"
+                            ); 
+
 ------------------------------------------------------------------------
     mdio_io_driver : process(core_clock)
 
@@ -41,12 +47,8 @@ begin
 
             generate_mdio_io_waveforms(mdio_transmit_control); 
 
-            if mdio_driver_data_in.mdio_data_write_is_requested then
-                write_data_to_mdio(mdio_transmit_control, MDIO_write_command             &
-                                    mdio_driver_data_in.phy_address(4 downto 0)          &
-                                    mdio_driver_data_in.phy_register_address(4 downto 0) &
-                                    mdio_driver_data_in.data_to_mdio(15 downto 0));
-            end if;
+            write_data_with_mdio(mdio_driver_data_in, mdio_transmit_control);
+            -- read_data_with_mdio(mdio_driver_data_in, mdio_transmit_control);
 
         end if; --rising_edge
     end process mdio_io_driver;	

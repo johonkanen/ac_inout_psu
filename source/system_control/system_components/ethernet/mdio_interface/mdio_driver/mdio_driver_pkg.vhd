@@ -6,7 +6,6 @@ package mdio_driver_pkg is
 
     type mdio_driver_clock_group is record
         clock : std_logic;
-        reset_n : std_logic;
     end record;
     
     type mdio_driver_FPGA_input_group is record
