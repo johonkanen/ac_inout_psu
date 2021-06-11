@@ -5,17 +5,17 @@ proc get_vhdl_sources {void}\
         /math_library/multiplier/multiplier_pkg.vhd
         /math_library/first_order_filter/first_order_filter_pkg.vhd
 
-            /system_control/system_components/ethernet/mdio_interface/mdio_driver/mdio_driver_pkg.vhd
-            /system_control/system_components/ethernet/mdio_interface/mdio_driver/mdio_driver_internal_pkg.vhd
+            /system_control/system_components/ethernet/mdio_mmd_access_control/mdio_driver/mdio_driver_pkg.vhd
+            /system_control/system_components/ethernet/mdio_mmd_access_control/mdio_driver/mdio_driver_internal_pkg.vhd
 
 
 
 
-                        /system_control/system_components/ethernet/mdio_interface/mdio_driver/mdio_driver_pkg.vhd
-                        /system_control/system_components/ethernet/mdio_interface/mdio_driver/mdio_driver_internal_pkg.vhd
-                        /system_control/system_components/ethernet/mdio_interface/mdio_driver/mdio_driver.vhd
-                    # /system_control/system_components/ethernet/mdio_interface/mdio_interface_pkg.vhd 
-                    # /system_control/system_components/ethernet/mdio_interface/mdio_interface_pkg.vhd 
+                        /system_control/system_components/ethernet/mdio_mmd_access_control/mdio_driver/mdio_driver_pkg.vhd
+                        /system_control/system_components/ethernet/mdio_mmd_access_control/mdio_driver/mdio_driver_internal_pkg.vhd
+                        /system_control/system_components/ethernet/mdio_mmd_access_control/mdio_driver/mdio_driver.vhd
+                    # /system_control/system_components/ethernet/mdio_mmd_access_control/mdio_mmd_access_control_pkg.vhd 
+                    # /system_control/system_components/ethernet/mdio_mmd_access_control/mdio_mmd_access_control_pkg.vhd 
                 # /system_control/system_components/ethernet/ethernet_pkg.vhd
                 # /system_control/system_components/ethernet/ethernet.vhd
 

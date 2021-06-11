@@ -5,22 +5,22 @@ library ieee;
 library work;
     use work.mdio_driver_pkg.all;
 
-package mdio_interface_pkg is
+package mdio_mmd_access_control_pkg is
 
-    type mdio_interface_clock_group is record
+    type mdio_mmd_access_control_clock_group is record
         clock : std_logic;
         reset_n : std_logic;
     end record;
     
-    type mdio_interface_FPGA_input_group is record
+    type mdio_mmd_access_control_FPGA_input_group is record
         mdio_driver_FPGA_in : mdio_driver_FPGA_input_group;
     end record;
     
-    type mdio_interface_FPGA_output_group is record
+    type mdio_mmd_access_control_FPGA_output_group is record
         mdio_driver_FPGA_out : mdio_driver_FPGA_output_group;
     end record;
     
-    type mdio_interface_data_input_group is record
+    type mdio_mmd_access_control_data_input_group is record
         mdio_driver_data_in : mdio_driver_data_input_group;
         mmd_read_is_requested : boolean;
         mmd_write_is_requested : boolean;
@@ -28,60 +28,60 @@ package mdio_interface_pkg is
         data_to_mmd : std_logic_vector(15 downto 0);
     end record;
     
-    type mdio_interface_data_output_group is record
+    type mdio_mmd_access_control_data_output_group is record
         mdio_driver_data_out : mdio_driver_data_output_group;
         data_from_mmd : std_logic_vector(15 downto 0);
         mmd_is_ready : boolean;
     end record;
     
-    component mdio_interface is
+    component mdio_mmd_access_control is
         port (
-            mdio_interface_clocks   : in mdio_interface_clock_group;
-            mdio_interface_FPGA_in  : in mdio_interface_FPGA_input_group;
-            mdio_interface_FPGA_out : out mdio_interface_FPGA_output_group;
-            mdio_interface_data_in  : in mdio_interface_data_input_group;
-            mdio_interface_data_out : out mdio_interface_data_output_group
+            mdio_mmd_access_control_clocks   : in mdio_mmd_access_control_clock_group;
+            mdio_mmd_access_control_FPGA_in  : in mdio_mmd_access_control_FPGA_input_group;
+            mdio_mmd_access_control_FPGA_out : out mdio_mmd_access_control_FPGA_output_group;
+            mdio_mmd_access_control_data_in  : in mdio_mmd_access_control_data_input_group;
+            mdio_mmd_access_control_data_out : out mdio_mmd_access_control_data_output_group
         );
-    end component mdio_interface;
+    end component mdio_mmd_access_control;
     
-    -- signal mdio_interface_clocks   : mdio_interface_clock_group;
-    -- signal mdio_interface_data_in  : mdio_interface_data_input_group;
-    -- signal mdio_interface_data_out : mdio_interface_data_output_group
+    -- signal mdio_mmd_access_control_clocks   : mdio_mmd_access_control_clock_group;
+    -- signal mdio_mmd_access_control_data_in  : mdio_mmd_access_control_data_input_group;
+    -- signal mdio_mmd_access_control_data_out : mdio_mmd_access_control_data_output_group
     
-    -- u_mdio_interface : mdio_interface
-    -- port map( mdio_interface_clocks,
-    -- 	  mdio_interface_FPGA_in,
-    --	  mdio_interface_FPGA_out,
-    --	  mdio_interface_data_in,
-    --	  mdio_interface_data_out);
+    -- u_mdio_mmd_access_control : mdio_mmd_access_control
+    -- port map( mdio_mmd_access_control_clocks,
+    -- 	  mdio_mmd_access_control_FPGA_in,
+    --	  mdio_mmd_access_control_FPGA_out,
+    --	  mdio_mmd_access_control_data_in,
+    --	  mdio_mmd_access_control_data_out);
 
 ------------------------------------------------------------------------
     procedure enable_ethernet_physical_control (
-        signal ethernet_physical_control_input : out mdio_interface_data_input_group);
+        signal ethernet_physical_control_input : out mdio_mmd_access_control_data_input_group);
 
 ------------------------------------------------------------------------
     procedure read_mmd_register (
-        signal ethernet_physical_control_input : out mdio_interface_data_input_group;
+        signal ethernet_physical_control_input : out mdio_mmd_access_control_data_input_group;
         mmd_address : std_logic_vector(7 downto 0));
 ------------------------------------------------------------------------
     procedure write_mmd_register (
-        signal ethernet_physical_control_input : out mdio_interface_data_input_group;
+        signal ethernet_physical_control_input : out mdio_mmd_access_control_data_input_group;
         mmd_address : std_logic_vector(7 downto 0);
         data_to_mmd : std_logic_vector(15 downto 0));
 
 ------------------------------------------------------------------------
-    function mmd_is_ready ( ethernet_physical_control_output : mdio_interface_data_output_group)
+    function mmd_is_ready ( ethernet_physical_control_output : mdio_mmd_access_control_data_output_group)
         return boolean;
 
 ------------------------------------------------------------------------
-end package mdio_interface_pkg;
+end package mdio_mmd_access_control_pkg;
 
-package body mdio_interface_pkg is
+package body mdio_mmd_access_control_pkg is
 
 ------------------------------------------------------------------------
     procedure enable_ethernet_physical_control
     (
-        signal ethernet_physical_control_input : out mdio_interface_data_input_group
+        signal ethernet_physical_control_input : out mdio_mmd_access_control_data_input_group
     ) is
     begin
         ethernet_physical_control_input.mmd_read_is_requested <= false;
@@ -92,7 +92,7 @@ package body mdio_interface_pkg is
 ------------------------------------------------------------------------
     procedure read_mmd_register
     (
-        signal ethernet_physical_control_input : out mdio_interface_data_input_group;
+        signal ethernet_physical_control_input : out mdio_mmd_access_control_data_input_group;
         mmd_address : std_logic_vector(7 downto 0)
     ) is
     begin
@@ -104,7 +104,7 @@ package body mdio_interface_pkg is
 ------------------------------------------------------------------------
     procedure write_mmd_register
     (
-        signal ethernet_physical_control_input : out mdio_interface_data_input_group;
+        signal ethernet_physical_control_input : out mdio_mmd_access_control_data_input_group;
         mmd_address : std_logic_vector(7 downto 0);
         data_to_mmd : std_logic_vector(15 downto 0)
     ) is
@@ -118,7 +118,7 @@ package body mdio_interface_pkg is
 ------------------------------------------------------------------------
     function mmd_is_ready
     (
-        ethernet_physical_control_output : mdio_interface_data_output_group
+        ethernet_physical_control_output : mdio_mmd_access_control_data_output_group
     )
     return boolean
     is
@@ -130,7 +130,7 @@ package body mdio_interface_pkg is
 ------------------------------------------------------------------------
     function get_mmd_data
     (
-        ethernet_physical_control_output : mdio_interface_data_output_group
+        ethernet_physical_control_output : mdio_mmd_access_control_data_output_group
     )
     return std_logic_vector
     is
@@ -140,5 +140,5 @@ package body mdio_interface_pkg is
     end get_mmd_data;
 
 ------------------------------------------------------------------------
-end package body mdio_interface_pkg;
+end package body mdio_mmd_access_control_pkg;
 

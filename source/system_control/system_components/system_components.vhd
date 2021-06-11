@@ -170,8 +170,6 @@ begin
 
                 write_data_to_mdio(mdio_driver_data_in, x"0f", x"0e", x"acdc");
 
-            end if;
-
                 filter_data(bandpass_filter, get_square_wave_from_counter(test_counter));
                 test_counter <= test_counter + 1; 
             end if;

@@ -51,6 +51,11 @@ begin
 ------------------------------------------------------------------------
     sim_clock_gen : process
     begin
+        report " ";
+        report "*************************";
+        report "**  ethernet MDIO test **";
+        report "*************************";
+        report " ";
         simulator_clock <= '0';
         rstn <= '0';
         simulator_clock <= '0';
@@ -77,11 +82,7 @@ begin
     end process clocked_reset_generator;	
 
 ------------------------------------------------------------------------
-    test_mdio_driver : process(simulator_clock,mdio_driver_FPGA_out.mdio_clock)
-        constant reference_data_offset : integer := -4;
-
-
-        
+    test_mdio_driver : process(simulator_clock,mdio_driver_FPGA_out.mdio_clock) 
     begin
         if rising_edge(simulator_clock) then
 
@@ -94,7 +95,9 @@ begin
 
             if mdio_data_write_is_ready(mdio_driver_data_out) then
                 assert mdio_receive_shift_register = "11" & x"5ffeacdc" report " not jee " severity failure;
-                report "mdio write successful";
+                report " ";
+                report "mdio write successful!";
+                report " ";
                 read_data_from_mdio(mdio_driver_data_in, x"1f", x"1f");
             end if;
 
