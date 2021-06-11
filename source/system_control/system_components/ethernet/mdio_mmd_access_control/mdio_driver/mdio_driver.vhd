@@ -21,8 +21,10 @@ architecture rtl of mdio_driver is
     alias core_clock is mdio_driver_clocks.clock; 
     signal mdio_transmit_control : mdio_transmit_control_group := mdio_transmit_control_init;
 
+------------------------------------------------------------------------
 begin
 
+------------------------------------------------------------------------
     mdio_driver_FPGA_out <= ( 
                             MDIO_serial_data_out            => mdio_transmit_control.mdio_transmit_register(mdio_transmit_control.mdio_transmit_register'left) ,
                             MDIO_io_direction_is_out_when_1 => '1'                                              ,
