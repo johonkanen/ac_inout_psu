@@ -10,6 +10,7 @@ library work;
 
 library math_library;
     use math_library.multiplier_pkg.all;
+    use math_library.first_order_filter_pkg.all;
 
 entity system_components is
     port (
@@ -49,16 +50,6 @@ architecture rtl of system_components is
     signal multiplier_data_in  : multiplier_data_input_group;
     signal multiplier_data_out : multiplier_data_output_group;
     
-    constant b0 : int18 := 50;
-    constant b1 : int18 := 3e2;
-    constant a1 : int18 := 2**17-1-b1-b0;
-
-    signal filter_output : int18 := 0;
-    signal filter_memory : int18 := 0;
-
-    signal filter_is_triggered : boolean;
-    signal filter_counter : natural range 0 to 15 := 0;
-
     signal test_counter : natural range 0 to 2**16-1;
 
     function integer_to_std
@@ -69,12 +60,13 @@ architecture rtl of system_components is
     return std_logic_vector
     is
     begin
-        return std_logic_vector(to_unsigned(number_to_be_converted,bits_in_word));
-
-        
+        return std_logic_vector(to_unsigned(number_to_be_converted,bits_in_word)); 
     end integer_to_std;
 
-
+--------------------------------------------------
+    constant b0 : int18 := 50;
+    constant b1 : int18 := 3e2;
+    signal low_pass_filter : first_order_filter := init_filter_state;
 
 --------------------------------------------------
 begin
@@ -93,74 +85,39 @@ begin
         if rising_edge(clock) then
 
             init_multiplier(multiplier_data_in);
+            create_first_order_filter(low_pass_filter, multiplier_data_in, multiplier_data_out, b0, b1);
 
             idle_adc(spi_sar_adc_data_in);
             init_uart(uart_data_in);
+            receive_data_from_uart(uart_data_out, uart_rx_data);
+            system_components_FPGA_out.test_ad_mux <= integer_to_std(number_to_be_converted => uart_rx_data, bits_in_word => 3);
+
             uart_transmit_counter <= uart_transmit_counter - 1; 
             if uart_transmit_counter = 0 then
                 uart_transmit_counter <= counter_at_100khz;
-                start_ad_conversion(spi_sar_adc_data_in);
+                start_ad_conversion(spi_sar_adc_data_in); 
+            end if; 
 
-            end if;
-
-            system_components_FPGA_out.test_ad_mux <= integer_to_std(number_to_be_converted => uart_rx_data, bits_in_word => 3);
-            filter_is_triggered <= false;
-            receive_data_from_uart(uart_data_out, uart_rx_data);
             if ad_conversion_is_ready(spi_sar_adc_data_out) then
-                test_counter <= test_counter + 1;
-                filter_is_triggered <= true;
-                adc_data <= get_adc_data(spi_sar_adc_data_out);
+
                 CASE uart_rx_data is
-                    WHEN 10 => transmit_16_bit_word_with_uart(uart_data_in, filter_output );
-                    WHEN 11 => transmit_16_bit_word_with_uart(uart_data_in, (adc_data + get_adc_data(spi_sar_adc_data_out))/2);
+                    WHEN 10 => transmit_16_bit_word_with_uart(uart_data_in, get_filter_output(low_pass_filter) );
+                    WHEN 11 => transmit_16_bit_word_with_uart(uart_data_in, (low_pass_filter.filter_input - get_filter_output(low_pass_filter))/2+32768);
                     WHEN 12 => transmit_16_bit_word_with_uart(uart_data_in, get_adc_data(spi_sar_adc_data_out)); 
                     WHEN 13 => transmit_16_bit_word_with_uart(uart_data_in, get_adc_data(spi_sar_adc_data_out));
                     WHEN 14 => transmit_16_bit_word_with_uart(uart_data_in, test_counter);
-                    WHEN others =>  transmit_16_bit_word_with_uart(uart_data_in, uart_rx_data); 
+                    WHEN others =>  transmit_16_bit_word_with_uart(uart_data_in, test_counter); 
                 end CASE;
+
+                if test_counter > 32767 then
+                    filter_data(low_pass_filter, 55e3);
+                else
+                    filter_data(low_pass_filter, 10e3);
+                end if;
+                test_counter <= test_counter + 1; 
+
+                adc_data <= get_adc_data(spi_sar_adc_data_out);
             end if;
-
-            if filter_is_triggered then
-                filter_counter <= 0;
-            end if;
-
-            CASE filter_counter is
-                WHEN 0 =>
-                    multiply(multiplier_data_in, test_counter, b0);
-                    filter_counter <= filter_counter + 1;
-
-                WHEN 1 =>
-                    multiply(multiplier_data_in, test_counter, b1);
-                    filter_counter <= filter_counter + 1;
-
-                WHEN 2 =>
-                    filter_counter <= filter_counter + 1;
-                    multiply(multiplier_data_in, 0, 0);
-
-                WHEN 3 =>
-                    filter_counter <= filter_counter + 1;
-
-                WHEN 4 =>
-                    filter_output <= filter_memory + get_multiplier_result(multiplier_data_out, 17);
-                    multiply(multiplier_data_in, filter_output, a1);
-                    filter_counter <= filter_counter + 1;
-                    
-                WHEN 5 =>
-                    filter_memory <= get_multiplier_result(multiplier_data_out, 17);
-                    filter_counter <= filter_counter + 1;
-
-                WHEN 6 =>
-                    filter_counter <= filter_counter + 1;
-
-                WHEN 7 =>
-                    filter_counter <= filter_counter + 1;
-
-                when 8 =>
-                    filter_memory <= filter_memory + get_multiplier_result(multiplier_data_out, 17);
-                    filter_counter <= filter_counter + 1;
-
-                WHEN others => -- do nothing
-            end CASE; 
 
         end if; --rising_edge
     end process test_with_uart;	
