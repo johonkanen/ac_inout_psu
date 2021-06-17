@@ -8,8 +8,6 @@ library math_library;
 package first_order_filter_pkg is
 
 ------------------------------------------------------------------------
-
-------------------------------------------------------------------------
     type first_order_filter is record
         process_counter : natural range 0 to 15;
         filter_is_ready : boolean;
@@ -34,8 +32,11 @@ package first_order_filter_pkg is
         data_to_filter : in int18);
 --------------------------------------------------
     function get_filter_output ( filter : in first_order_filter)
-        return int18;
-
+        return int18; 
+------------------------------------------------------------------------
+    function filter_is_ready ( filter : first_order_filter)
+        return boolean;
+------------------------------------------------------------------------
 
 end package first_order_filter_pkg;
 
@@ -51,42 +52,53 @@ package body first_order_filter_pkg is
         constant b1 : int18
     ) is
         constant a1 : int18 := 2**17-1-b1-b0;
+        alias filter_is_ready is filter.filter_is_ready;
+        alias filter_is_busy is filter.filter_is_busy;
+        alias process_counter is filter.process_counter;
+        alias filter_memory is filter.filter_memory;
+        alias filter_input is filter.filter_input;
+        alias filter_output is filter.filter_output;
     begin
-            CASE filter.process_counter is
+            filter_is_ready <= false;
+            filter_is_busy <= true;
+            CASE process_counter is
                 WHEN 0 =>
-                    multiply(multiplier_in, filter.filter_input, b0);
-                    filter.process_counter <= filter.process_counter + 1;
+                    multiply(multiplier_in, filter_input, b0);
+                    process_counter <= process_counter + 1;
 
                 WHEN 1 =>
-                    multiply(multiplier_in, filter.filter_input, b1);
-                    filter.process_counter <= filter.process_counter + 1;
+                    multiply(multiplier_in, filter_input, b1);
+                    process_counter <= process_counter + 1;
 
                 WHEN 2 =>
-                    filter.process_counter <= filter.process_counter + 1;
+                    process_counter <= process_counter + 1;
 
                 WHEN 3 =>
-                    filter.process_counter <= filter.process_counter + 1;
+                    process_counter <= process_counter + 1;
 
                 WHEN 4 =>
-                    filter.filter_output <= filter.filter_memory + get_multiplier_result(multiplier_out, 17);
-                    multiply(multiplier_in, filter.filter_output, a1);
-                    filter.process_counter <= filter.process_counter + 1;
+                    filter_output <= filter_memory + get_multiplier_result(multiplier_out, 17);
+                    multiply(multiplier_in, filter_output, a1);
+                    process_counter <= process_counter + 1;
                     
                 WHEN 5 =>
-                    filter.filter_memory <= get_multiplier_result(multiplier_out, 17);
-                    filter.process_counter <= filter.process_counter + 1;
+                    filter_memory <= get_multiplier_result(multiplier_out, 17);
+                    process_counter <= process_counter + 1;
 
                 WHEN 6 =>
-                    filter.process_counter <= filter.process_counter + 1;
+                    process_counter <= process_counter + 1;
 
                 WHEN 7 =>
-                    filter.process_counter <= filter.process_counter + 1;
+                    process_counter <= process_counter + 1;
 
                 when 8 =>
-                    filter.filter_memory <= filter.filter_memory + get_multiplier_result(multiplier_out, 17);
-                    filter.process_counter <= filter.process_counter + 1;
+                    filter_memory <= filter_memory + get_multiplier_result(multiplier_out, 17);
+                    process_counter <= process_counter + 1;
+                    filter_is_ready <= true;
 
                 WHEN others => -- do nothing
+                    filter_is_busy <= false;
+
             end CASE; 
         
     end create_first_order_filter;
@@ -112,6 +124,17 @@ package body first_order_filter_pkg is
     begin
         return filter.filter_output;
     end get_filter_output;
+
+------------------------------------------------------------------------
+    function filter_is_ready
+    (
+        filter : first_order_filter
+    )
+    return boolean
+    is
+    begin
+        return filter.filter_is_ready;
+    end filter_is_ready;
 ------------------------------------------------------------------------
 
 

@@ -63,10 +63,24 @@ architecture rtl of system_components is
         return std_logic_vector(to_unsigned(number_to_be_converted,bits_in_word)); 
     end integer_to_std;
 
+    function get_square_wave_from_counter
+    (
+        counter_value : integer
+    )
+    return int18
+    is
+    begin
+        if counter_value > 32767 then
+            return 55e3;
+        else
+            return 15e3;
+        end if;
+    end get_square_wave_from_counter;
+
 --------------------------------------------------
-    constant b0 : int18 := 50;
-    constant b1 : int18 := 3e2;
+    -- filter instantiation
     signal low_pass_filter : first_order_filter := init_filter_state;
+    signal low_pass_filter2 : first_order_filter := init_filter_state;
 
 --------------------------------------------------
 begin
@@ -85,7 +99,12 @@ begin
         if rising_edge(clock) then
 
             init_multiplier(multiplier_data_in);
-            create_first_order_filter(low_pass_filter, multiplier_data_in, multiplier_data_out, b0, b1);
+            create_first_order_filter(low_pass_filter, multiplier_data_in, multiplier_data_out, 50, 3e2);
+            create_first_order_filter(low_pass_filter2, multiplier_data_in, multiplier_data_out, 1500, 3200);
+
+            if filter_is_ready(low_pass_filter) then
+                filter_data(low_pass_filter2, get_square_wave_from_counter(test_counter));
+            end if;
 
             idle_adc(spi_sar_adc_data_in);
             init_uart(uart_data_in);
@@ -103,17 +122,13 @@ begin
                 CASE uart_rx_data is
                     WHEN 10 => transmit_16_bit_word_with_uart(uart_data_in, get_filter_output(low_pass_filter) );
                     WHEN 11 => transmit_16_bit_word_with_uart(uart_data_in, (low_pass_filter.filter_input - get_filter_output(low_pass_filter))/2+32768);
-                    WHEN 12 => transmit_16_bit_word_with_uart(uart_data_in, get_adc_data(spi_sar_adc_data_out)); 
-                    WHEN 13 => transmit_16_bit_word_with_uart(uart_data_in, get_adc_data(spi_sar_adc_data_out));
-                    WHEN 14 => transmit_16_bit_word_with_uart(uart_data_in, test_counter);
-                    WHEN others =>  transmit_16_bit_word_with_uart(uart_data_in, test_counter); 
+                    WHEN 12 => transmit_16_bit_word_with_uart(uart_data_in, get_filter_output(low_pass_filter2));
+                    WHEN 13 => transmit_16_bit_word_with_uart(uart_data_in, (low_pass_filter2.filter_input - get_filter_output(low_pass_filter2))/2+32768);
+                    WHEN 14 => transmit_16_bit_word_with_uart(uart_data_in, get_adc_data(spi_sar_adc_data_out));
+                    WHEN others =>  transmit_16_bit_word_with_uart(uart_data_in, uart_rx_data); 
                 end CASE;
 
-                if test_counter > 32767 then
-                    filter_data(low_pass_filter, 55e3);
-                else
-                    filter_data(low_pass_filter, 10e3);
-                end if;
+                filter_data(low_pass_filter, get_square_wave_from_counter(test_counter));
                 test_counter <= test_counter + 1; 
 
                 adc_data <= get_adc_data(spi_sar_adc_data_out);
