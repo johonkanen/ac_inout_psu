@@ -44,8 +44,6 @@ architecture rtl of system_components is
     signal spi_sar_adc_data_in  : spi_sar_adc_data_input_group;
     signal spi_sar_adc_data_out : spi_sar_adc_data_output_group;
 
-    signal adc_data : natural range 0 to 2**16-1 := 0;
-
     signal multiplier_clocks   : multiplier_clock_group;
     signal multiplier_data_in  : multiplier_data_input_group;
     signal multiplier_data_out : multiplier_data_output_group;
@@ -130,8 +128,6 @@ begin
 
                 filter_data(low_pass_filter, get_square_wave_from_counter(test_counter));
                 test_counter <= test_counter + 1; 
-
-                adc_data <= get_adc_data(spi_sar_adc_data_out);
             end if;
 
         end if; --rising_edge

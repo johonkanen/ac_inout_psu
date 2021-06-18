@@ -53,11 +53,11 @@ package body first_order_filter_pkg is
     ) is
         constant a1 : int18 := 2**17-1-b1-b0;
         alias filter_is_ready is filter.filter_is_ready;
-        alias filter_is_busy is filter.filter_is_busy;
+        alias filter_is_busy  is filter.filter_is_busy;
         alias process_counter is filter.process_counter;
-        alias filter_memory is filter.filter_memory;
-        alias filter_input is filter.filter_input;
-        alias filter_output is filter.filter_output;
+        alias filter_memory   is filter.filter_memory;
+        alias filter_input    is filter.filter_input;
+        alias filter_output   is filter.filter_output;
     begin
             filter_is_ready <= false;
             filter_is_busy <= true;
