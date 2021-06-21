@@ -22,8 +22,7 @@ package first_order_filter_pkg is
 --------------------------------------------------
     procedure create_first_order_filter (
         signal filter : inout first_order_filter;
-        signal multiplier_in : out multiplier_data_input_group;
-        multiplier_out :  in multiplier_data_output_group;
+        signal multiplier : inout multiplier_record;
         constant b0 : int18;
         constant b1 : int18);
 --------------------------------------------------
@@ -46,8 +45,7 @@ package body first_order_filter_pkg is
     procedure create_first_order_filter
     (
         signal filter : inout first_order_filter;
-        signal multiplier_in : out multiplier_data_input_group;
-        multiplier_out :  in multiplier_data_output_group;
+        signal multiplier : inout multiplier_record;
         constant b0 : int18;
         constant b1 : int18
     ) is
@@ -63,11 +61,11 @@ package body first_order_filter_pkg is
             filter_is_busy <= true;
             CASE process_counter is
                 WHEN 0 =>
-                    multiply(multiplier_in, filter_input, b0);
+                    multiply(multiplier, filter_input, b0);
                     process_counter <= process_counter + 1;
 
                 WHEN 1 =>
-                    multiply(multiplier_in, filter_input, b1);
+                    multiply(multiplier, filter_input, b1);
                     process_counter <= process_counter + 1;
 
                 WHEN 2 =>
@@ -77,12 +75,12 @@ package body first_order_filter_pkg is
                     process_counter <= process_counter + 1;
 
                 WHEN 4 =>
-                    filter_output <= filter_memory + get_multiplier_result(multiplier_out, 17);
-                    multiply(multiplier_in, filter_output, a1);
+                    filter_output <= filter_memory + get_multiplier_result(multiplier, 17);
+                    multiply(multiplier, filter_output, a1);
                     process_counter <= process_counter + 1;
                     
                 WHEN 5 =>
-                    filter_memory <= get_multiplier_result(multiplier_out, 17);
+                    filter_memory <= get_multiplier_result(multiplier, 17);
                     process_counter <= process_counter + 1;
 
                 WHEN 6 =>
@@ -92,7 +90,7 @@ package body first_order_filter_pkg is
                     process_counter <= process_counter + 1;
 
                 when 8 =>
-                    filter_memory <= filter_memory + get_multiplier_result(multiplier_out, 17);
+                    filter_memory <= filter_memory + get_multiplier_result(multiplier, 17);
                     process_counter <= process_counter + 1;
                     filter_is_ready <= true;
 

@@ -88,8 +88,8 @@ begin
                 WHEN others => -- do nothing
             end CASE;
             if multiplier_is_ready(hw_multiplier) then
-                int18_multiplier_output <= get_multiplier_result(hw_multiplier,0);
-                report integer'image((to_integer(hw_multiplier.signed_data_a)))  &" * " & integer'image((to_integer(hw_multiplier.signed_data_b))) & " = " & integer'image((get_multiplier_result(hw_multiplier,0)));
+                int18_multiplier_output <= get_multiplier_result(hw_multiplier,1);
+                report integer'image((to_integer(hw_multiplier.signed_data_a)))  &" * " & integer'image((to_integer(hw_multiplier.signed_data_b))) & " = " & integer'image((get_multiplier_result(hw_multiplier,1)));
             end if; 
 
         end if; -- rstn

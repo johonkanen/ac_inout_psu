@@ -13,12 +13,13 @@ package multiplier_pkg is
         data_a_buffer        : signed(17 downto 0);
         data_b_buffer        : signed(17 downto 0);
         signed_36_bit_result : signed(35 downto 0);
+        signed_36_bit_buffer : signed(35 downto 0);
         shift_register       : std_logic_vector(1 downto 0);
         multiplier_is_busy   : boolean;
         multiplier_is_requested_with_1 : std_logic;
     end record;
 
-    constant multiplier_init_values : multiplier_record := ( (others => '0'),(others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), false, '0');
+    constant multiplier_init_values : multiplier_record := ( (others => '0'),(others => '0'),(others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), false, '0');
 
     -- signal multiplier_clocks   : multiplier_clock_group;
     -- signal multiplier_data_in  : multiplier_data_input_group;
@@ -77,7 +78,8 @@ package body multiplier_pkg is
         multiplier.data_a_buffer <= signed_data_a;
         multiplier.data_b_buffer <= signed_data_b;
 
-        signed_36_bit_result <= multiplier.data_a_buffer * multiplier.data_b_buffer; 
+        multiplier.signed_36_bit_buffer <= multiplier.data_a_buffer * multiplier.data_b_buffer; 
+        signed_36_bit_result <= multiplier.signed_36_bit_buffer;
         multiplier_is_requested_with_1 <= '0';
         shift_register <= shift_register(shift_register'left-1 downto 0) & multiplier_is_requested_with_1;
         multiplier_is_busy <= false;

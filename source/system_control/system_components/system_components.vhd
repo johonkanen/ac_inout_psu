@@ -44,10 +44,7 @@ architecture rtl of system_components is
     signal spi_sar_adc_data_in  : spi_sar_adc_data_input_group;
     signal spi_sar_adc_data_out : spi_sar_adc_data_output_group;
 
-    signal multiplier_clocks   : multiplier_clock_group;
-    signal multiplier_data_in  : multiplier_data_input_group;
-    signal multiplier_data_out : multiplier_data_output_group;
-    
+
     signal test_counter : natural range 0 to 2**16-1;
 
     function integer_to_std
@@ -76,6 +73,8 @@ architecture rtl of system_components is
     end get_square_wave_from_counter;
 
 --------------------------------------------------
+    -- multiplier instantiation
+    signal multiplier : multiplier_record;
     -- filter instantiation
     signal low_pass_filter : first_order_filter := init_filter_state;
     signal low_pass_filter2 : first_order_filter := init_filter_state;
@@ -84,21 +83,14 @@ architecture rtl of system_components is
 begin
 
 --------------------------------------------------
-    multiplier_clocks <= (clock => system_components_clocks.clock);
-    u_multiplier : multiplier
-    port map( multiplier_clocks ,
-    	  multiplier_data_in    ,
-    	  multiplier_data_out); 
-
---------------------------------------------------
     test_with_uart : process(clock)
         
     begin
         if rising_edge(clock) then
 
-            init_multiplier(multiplier_data_in);
-            create_first_order_filter(low_pass_filter, multiplier_data_in, multiplier_data_out, 50, 3e2);
-            create_first_order_filter(low_pass_filter2, multiplier_data_in, multiplier_data_out, 1500, 3200);
+            create_multiplier(multiplier);
+            create_first_order_filter(low_pass_filter, multiplier, 50, 3e2);
+            create_first_order_filter(low_pass_filter2, multiplier, 1500, 3200);
 
             if filter_is_ready(low_pass_filter) then
                 filter_data(low_pass_filter2, get_square_wave_from_counter(test_counter));

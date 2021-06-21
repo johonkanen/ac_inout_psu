@@ -3,7 +3,6 @@ proc get_vhdl_sources {void}\
     return \
     { 
         /math_library/multiplier/multiplier_pkg.vhd
-        /math_library/multiplier/multiplier.vhd
         /math_library/first_order_filter/first_order_filter_pkg.vhd
 
                     /system_control/system_components/adc_interface/spi_sar_adc/spi_sar_adc_pkg.vhd 
