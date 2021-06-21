@@ -92,9 +92,6 @@ begin
             create_first_order_filter(low_pass_filter, multiplier, 50, 3e2);
             create_first_order_filter(low_pass_filter2, multiplier, 1500, 3200);
 
-            if filter_is_ready(low_pass_filter) then
-                filter_data(low_pass_filter2, get_square_wave_from_counter(test_counter));
-            end if;
 
             idle_adc(spi_sar_adc_data_in);
             init_uart(uart_data_in);
@@ -120,6 +117,10 @@ begin
 
                 filter_data(low_pass_filter, get_square_wave_from_counter(test_counter));
                 test_counter <= test_counter + 1; 
+            end if;
+
+            if filter_is_ready(low_pass_filter) then
+                filter_data(low_pass_filter2, low_pass_filter.filter_input - get_filter_output(low_pass_filter));
             end if;
 
         end if; --rising_edge
