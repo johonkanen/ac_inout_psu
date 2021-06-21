@@ -79,6 +79,51 @@ architecture rtl of system_components is
     signal low_pass_filter : first_order_filter := init_filter_state;
     signal low_pass_filter2 : first_order_filter := init_filter_state;
 
+------------------------------------------------------------------------
+    type bandpass_filter_record is record
+        high_pass_filter : first_order_filter;
+        low_pass_filter : first_order_filter;
+        multiplier : multiplier_record;
+    end record;
+
+------------------------------------------------------------------------
+    procedure create_bandpass_filter
+    (
+        signal bandpass_filter : inout bandpass_filter_record
+    ) is
+    begin
+        create_multiplier(bandpass_filter.multiplier);
+        create_first_order_filter(bandpass_filter.low_pass_filter, bandpass_filter.multiplier, 50, 3e2);
+        create_first_order_filter(bandpass_filter.high_pass_filter, bandpass_filter.multiplier, 1500, 3200);
+        if filter_is_ready(bandpass_filter.low_pass_filter) then
+            filter_data(bandpass_filter.high_pass_filter, bandpass_filter.low_pass_filter.filter_input - get_filter_output(bandpass_filter.low_pass_filter));
+        end if; 
+    end create_bandpass_filter;
+
+------------------------------------------------------------------------
+    procedure filter_data
+    (
+        signal bandpass_filter : inout bandpass_filter_record;
+        data_to_filter : in int18
+    ) is
+    begin
+        filter_data(bandpass_filter.low_pass_filter, data_to_filter);
+        
+    end filter_data;
+
+    function get_filter_output
+    (
+        bandpass_filter : bandpass_filter_record
+    )
+    return integer
+    is
+    begin
+        return get_filter_output(bandpass_filter.high_pass_filter);
+    end get_filter_output;
+
+    signal bandpass_filter : bandpass_filter_record;
+
+
 --------------------------------------------------
 begin
 
@@ -88,10 +133,7 @@ begin
     begin
         if rising_edge(clock) then
 
-            create_multiplier(multiplier);
-            create_first_order_filter(low_pass_filter, multiplier, 50, 3e2);
-            create_first_order_filter(low_pass_filter2, multiplier, 1500, 3200);
-
+            create_bandpass_filter(bandpass_filter);
 
             idle_adc(spi_sar_adc_data_in);
             init_uart(uart_data_in);
@@ -107,20 +149,15 @@ begin
             if ad_conversion_is_ready(spi_sar_adc_data_out) then
 
                 CASE uart_rx_data is
-                    WHEN 10 => transmit_16_bit_word_with_uart(uart_data_in, get_filter_output(low_pass_filter) );
-                    WHEN 11 => transmit_16_bit_word_with_uart(uart_data_in, (low_pass_filter.filter_input - get_filter_output(low_pass_filter))/2+32768);
-                    WHEN 12 => transmit_16_bit_word_with_uart(uart_data_in, get_filter_output(low_pass_filter2));
-                    WHEN 13 => transmit_16_bit_word_with_uart(uart_data_in, (low_pass_filter2.filter_input - get_filter_output(low_pass_filter2))/2+32768);
+                    WHEN 10 => transmit_16_bit_word_with_uart(uart_data_in, get_filter_output(bandpass_filter.low_pass_filter) );
+                    WHEN 11 => transmit_16_bit_word_with_uart(uart_data_in, (bandpass_filter.low_pass_filter.filter_input - get_filter_output(bandpass_filter.low_pass_filter))/2+32768);
+                    WHEN 12 => transmit_16_bit_word_with_uart(uart_data_in, get_filter_output(bandpass_filter));
                     WHEN 14 => transmit_16_bit_word_with_uart(uart_data_in, get_adc_data(spi_sar_adc_data_out));
                     WHEN others =>  transmit_16_bit_word_with_uart(uart_data_in, uart_rx_data); 
                 end CASE;
 
-                filter_data(low_pass_filter, get_square_wave_from_counter(test_counter));
+                filter_data(bandpass_filter, get_square_wave_from_counter(test_counter));
                 test_counter <= test_counter + 1; 
-            end if;
-
-            if filter_is_ready(low_pass_filter) then
-                filter_data(low_pass_filter2, low_pass_filter.filter_input - get_filter_output(low_pass_filter));
             end if;
 
         end if; --rising_edge
