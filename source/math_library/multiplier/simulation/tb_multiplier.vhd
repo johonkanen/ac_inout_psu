@@ -22,14 +22,12 @@ architecture sim of tb_multiplier is
     constant clock_half_per : time := 0.5 ns;
     constant simtime_in_clocks : integer := 50;
 
-    signal multiplier_clocks   : multiplier_clock_group;
-    signal multiplier_data_in  : multiplier_data_input_group;
-    signal multiplier_data_out : multiplier_data_output_group;
-
     signal simulation_counter : natural := 0;
     signal multiplier_output : signed(35 downto 0);
     signal multiplier_is_ready_when_1 : std_logic;
     signal int18_multiplier_output : int18 := 0;
+
+    signal hw_multiplier : multiplier_record := multiplier_init_values;
 
 begin
 
@@ -59,6 +57,7 @@ begin
 ------------------------------------------------------------------------
 
     clocked_reset_generator : process(simulator_clock, rstn)
+
     begin
         if rstn = '0' then
         -- reset state
@@ -68,37 +67,32 @@ begin
             clocked_reset <= '1';
             simulation_counter <= simulation_counter + 1;
 
-            init_multiplier(multiplier_data_in);
+            create_multiplier(hw_multiplier);
 
-            multiply(multiplier_data_in, -22524, 1);
             CASE simulation_counter is
-                WHEN 5 => multiply(multiplier_data_in, -5, 1);
-                WHEN 6 => multiply(multiplier_data_in, -25, 1);
-                WHEN 7 => multiply(multiplier_data_in, 100, 1);
-                WHEN 8 => multiply(multiplier_data_in, 1000, 1);
-                WHEN 9 =>
-                    simulation_counter <= 9;
-                    multiply(multiplier_data_in, multiplier_data_out, -1, -1);
-                    if multiplier_is_not_busy(multiplier_data_out) then
-                        simulation_counter <= 10;
+                WHEN 4 => multiply(hw_multiplier, -3, 1);
+                WHEN 5 => multiply(hw_multiplier, -5, 1);
+                WHEN 6 => multiply(hw_multiplier, -25, 1);
+                WHEN 7 => multiply(hw_multiplier, 100, 1);
+                WHEN 8 => multiply(hw_multiplier, 1000, 1);
+                WHEN 9 => multiply(hw_multiplier, 985, 1);
+                WHEN 10 => multiply(hw_multiplier, 10090, 1);
+                WHEN 11 => multiply(hw_multiplier, 33586, 1);
+                WHEN 12 =>
+                    simulation_counter <= 12;
+                    sequential_multiply(hw_multiplier, -1, -1);
+                    if multiplier_is_not_busy(hw_multiplier) then
+                        simulation_counter <= 13;
                     end if;
 
                 WHEN others => -- do nothing
             end CASE;
-            if multiplier_is_ready(multiplier_data_out) then
-                int18_multiplier_output <= get_multiplier_result(multiplier_data_out,0);
+            if multiplier_is_ready(hw_multiplier) then
+                int18_multiplier_output <= get_multiplier_result(hw_multiplier,0);
+                report integer'image((to_integer(hw_multiplier.signed_data_a)))  &" * " & integer'image((to_integer(hw_multiplier.signed_data_b))) & " = " & integer'image((get_multiplier_result(hw_multiplier,0)));
             end if; 
 
         end if; -- rstn
     end process clocked_reset_generator;	
 ------------------------------------------------------------------------
-    multiplier_output <= multiplier_data_out.multiplier_raw_result;
-    multiplier_is_ready_when_1 <= multiplier_data_out.multiplier_is_ready_when_1;
-
-    multiplier_clocks <= (clock => simulator_clock);
-
-    u_multiplier : multiplier
-    port map( multiplier_clocks,
-    	  multiplier_data_in,
-    	  multiplier_data_out);
 end sim;

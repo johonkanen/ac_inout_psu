@@ -67,6 +67,34 @@ architecture rtl of multiplier is
         end if;
     end std_logic_to_boolean;
 
+    type multiplier_record is record
+        signed_data_a        : signed(17 downto 0);
+        signed_data_b        : signed(17 downto 0);
+        signed_36_bit_result : signed(35 downto 0);
+        shift_register       : std_logic_vector(1 downto 0);
+        multiplier_is_busy   : boolean;
+        multiplier_is_requested_with_1 : std_logic;
+    end record;
+
+    procedure create_multiplier
+    (
+        signal multiplier : inout multiplier_record
+    ) is
+
+        alias signed_36_bit_result is multiplier.signed_36_bit_result;
+        alias shift_register is multiplier.shift_register;
+        alias multiplier_is_busy is multiplier.multiplier_is_busy;
+        alias multiplier_is_requested_with_1 is multiplier.multiplier_is_requested_with_1;
+    begin
+        
+        signed_36_bit_result <= signed_data_a * signed_data_b; 
+        shift_register <= shift_register(shift_register'left-1 downto 0) & multiplier_is_requested_with_1;
+        multiplier_is_busy <= false;
+        if shift_register /= "00" then
+            multiplier_is_busy <= true;
+        end if;
+    end create_multiplier;
+
 begin
 
     signed_18x18_multiplier : process(clock)
