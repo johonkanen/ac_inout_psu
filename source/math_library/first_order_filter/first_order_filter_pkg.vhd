@@ -56,6 +56,7 @@ package body first_order_filter_pkg is
         alias filter_memory   is filter.filter_memory;
         alias filter_input    is filter.filter_input;
         alias filter_output   is filter.filter_output;
+        variable y : int18;
     begin
             filter_is_ready <= false;
             filter_is_busy <= true;
@@ -70,8 +71,9 @@ package body first_order_filter_pkg is
 
                 WHEN 2 =>
                     if multiplier_is_ready(multiplier) then
-                        filter_output <= filter_memory + get_multiplier_result(multiplier, 17);
-                        multiply(multiplier, filter_memory + get_multiplier_result(multiplier, 17), a1);
+                        y := filter_memory + get_multiplier_result(multiplier, 17);
+                        filter_output <= y;
+                        multiply(multiplier, y, a1);
                         process_counter <= process_counter + 1;
                     end if;
 

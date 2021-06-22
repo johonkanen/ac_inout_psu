@@ -70,12 +70,12 @@ begin
 
             simulation_counter <= simulation_counter + 1;
             CASE simulation_counter is
-                WHEN 1 => multiply(hw_multiplier, -3   , 1);
-                WHEN 2 => multiply(hw_multiplier, -5   , 1);
-                WHEN 3 => multiply(hw_multiplier, -25  , 1);
-                WHEN 4 => multiply(hw_multiplier, 100  , 1);
-                WHEN 5 => multiply(hw_multiplier, 1000 , 1);
-                WHEN 6 => multiply(hw_multiplier, 985  , 1);
+                WHEN 1 => multiply(hw_multiplier, -3, 1);
+                WHEN 2 => multiply(hw_multiplier, -5, 1);
+                WHEN 3 => multiply(hw_multiplier, -25, 1);
+                WHEN 4 => multiply(hw_multiplier, 100, 1);
+                WHEN 5 => multiply(hw_multiplier, 1000, 1);
+                WHEN 6 => multiply(hw_multiplier, 985, 1);
                 WHEN 7 => multiply(hw_multiplier, 10090, 1);
                 WHEN 8 => multiply(hw_multiplier, 33586, 1);
                 WHEN 9 =>
