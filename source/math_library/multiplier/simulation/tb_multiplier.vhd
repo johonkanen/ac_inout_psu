@@ -27,9 +27,7 @@ architecture sim of tb_multiplier is
     signal multiplier_is_ready_when_1 : std_logic;
     signal int18_multiplier_output : int18 := 0;
 
-    type list_of_multipliers is (multiplier1, multiplier2);
-    type multiplier_array is array (list_of_multipliers range list_of_multipliers'left to list_of_multipliers'right) of multiplier_record;
-    signal hw_multiplier : multiplier_array := (multiplier_init_values, multiplier_init_values);
+    signal hw_multiplier : multiplier_record := multiplier_init_values;
 
 begin
 
@@ -67,32 +65,31 @@ begin
     
         elsif rising_edge(simulator_clock) then
             clocked_reset <= '1';
+
+            create_multiplier(hw_multiplier);
+
             simulation_counter <= simulation_counter + 1;
-
-            create_multiplier(hw_multiplier(multiplier1));
-            create_multiplier(hw_multiplier(multiplier2));
-
             CASE simulation_counter is
-                WHEN 4 => multiply(hw_multiplier(multiplier1), -3, 1);
-                WHEN 5 => multiply(hw_multiplier(multiplier1), -5, 1);
-                WHEN 6 => multiply(hw_multiplier(multiplier1), -25, 1);
-                WHEN 7 => multiply(hw_multiplier(multiplier1), 100, 1);
-                WHEN 8 => multiply(hw_multiplier(multiplier1), 1000, 1);
-                WHEN 9 => multiply(hw_multiplier(multiplier1), 985, 1);
-                WHEN 10 => multiply(hw_multiplier(multiplier1), 10090, 1);
-                WHEN 11 => multiply(hw_multiplier(multiplier1), 33586, 1);
-                WHEN 12 =>
-                    simulation_counter <= 12;
-                    sequential_multiply(hw_multiplier(multiplier1), -1, -1);
-                    if multiplier_is_not_busy(hw_multiplier(multiplier1)) then
-                        simulation_counter <= 13;
+                WHEN 1 => multiply(hw_multiplier, -3   , 1);
+                WHEN 2 => multiply(hw_multiplier, -5   , 1);
+                WHEN 3 => multiply(hw_multiplier, -25  , 1);
+                WHEN 4 => multiply(hw_multiplier, 100  , 1);
+                WHEN 5 => multiply(hw_multiplier, 1000 , 1);
+                WHEN 6 => multiply(hw_multiplier, 985  , 1);
+                WHEN 7 => multiply(hw_multiplier, 10090, 1);
+                WHEN 8 => multiply(hw_multiplier, 33586, 1);
+                WHEN 9 =>
+                    simulation_counter <= 9;
+                    sequential_multiply(hw_multiplier, -1, -1);
+                    if multiplier_is_not_busy(hw_multiplier) then
+                        simulation_counter <= 10;
                     end if;
 
                 WHEN others => -- do nothing
             end CASE;
-            if multiplier_is_ready(hw_multiplier(multiplier1)) then
-                int18_multiplier_output <= get_multiplier_result(hw_multiplier(multiplier1),1);
-                report integer'image((to_integer(hw_multiplier(multiplier1).signed_data_a)))  &" * " & integer'image((to_integer(hw_multiplier(multiplier1).signed_data_b))) & " = " & integer'image((get_multiplier_result(hw_multiplier(multiplier1),0)));
+            if multiplier_is_ready(hw_multiplier) then
+                int18_multiplier_output <= get_multiplier_result(hw_multiplier,1);
+                report "multiplication result at simulation_counter value " & integer'image(simulation_counter)  &" : " & integer'image((get_multiplier_result(hw_multiplier,0)));
             end if; 
 
         end if; -- rstn
