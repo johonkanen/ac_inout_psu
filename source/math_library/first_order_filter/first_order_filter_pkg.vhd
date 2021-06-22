@@ -69,30 +69,23 @@ package body first_order_filter_pkg is
                     process_counter <= process_counter + 1;
 
                 WHEN 2 =>
-                    process_counter <= process_counter + 1;
+                    if multiplier_is_ready(multiplier) then
+                        filter_output <= filter_memory + get_multiplier_result(multiplier, 17);
+                        multiply(multiplier, filter_memory + get_multiplier_result(multiplier, 17), a1);
+                        process_counter <= process_counter + 1;
+                    end if;
 
                 WHEN 3 =>
-                    process_counter <= process_counter + 1;
-
-                WHEN 4 =>
-                    filter_output <= filter_memory + get_multiplier_result(multiplier, 17);
-                    multiply(multiplier, filter_output, a1);
-                    process_counter <= process_counter + 1;
-                    
-                WHEN 5 =>
                     filter_memory <= get_multiplier_result(multiplier, 17);
                     process_counter <= process_counter + 1;
 
-                WHEN 6 =>
-                    process_counter <= process_counter + 1;
+                WHEN 4 => 
 
-                WHEN 7 =>
-                    process_counter <= process_counter + 1;
-
-                when 8 =>
-                    filter_memory <= filter_memory + get_multiplier_result(multiplier, 17);
-                    process_counter <= process_counter + 1;
-                    filter_is_ready <= true;
+                    if multiplier_is_ready(multiplier) then
+                        filter_memory <= filter_memory + get_multiplier_result(multiplier, 17);
+                        process_counter <= process_counter + 1;
+                        filter_is_ready <= true;
+                    end if;
 
                 WHEN others => -- do nothing
                     filter_is_busy <= false;

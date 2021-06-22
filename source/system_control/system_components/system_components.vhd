@@ -58,19 +58,7 @@ architecture rtl of system_components is
         return std_logic_vector(to_unsigned(number_to_be_converted,bits_in_word)); 
     end integer_to_std;
 
-    function get_square_wave_from_counter
-    (
-        counter_value : integer
-    )
-    return int18
-    is
-    begin
-        if counter_value > 32767 then
-            return 55e3;
-        else
-            return 15e3;
-        end if;
-    end get_square_wave_from_counter;
+
 
 --------------------------------------------------
     -- multiplier instantiation
@@ -93,7 +81,7 @@ architecture rtl of system_components is
     ) is
     begin
         create_multiplier(bandpass_filter.multiplier);
-        create_first_order_filter(bandpass_filter.low_pass_filter, bandpass_filter.multiplier, 50, 3e2);
+        create_first_order_filter(bandpass_filter.low_pass_filter, bandpass_filter.multiplier, 450, 3e2);
         create_first_order_filter(bandpass_filter.high_pass_filter, bandpass_filter.multiplier, 1500, 3200);
         if filter_is_ready(bandpass_filter.low_pass_filter) then
             filter_data(bandpass_filter.high_pass_filter, bandpass_filter.low_pass_filter.filter_input - get_filter_output(bandpass_filter.low_pass_filter));
@@ -129,6 +117,22 @@ begin
 
 --------------------------------------------------
     test_with_uart : process(clock)
+
+        --------------------------------------------------
+        function get_square_wave_from_counter
+        (
+            counter_value : integer
+        )
+        return int18
+        is
+        begin
+            if counter_value > 32767 then
+                return 55e3;
+            else
+                return 15e3;
+            end if;
+        end get_square_wave_from_counter;
+        --------------------------------------------------
         
     begin
         if rising_edge(clock) then
@@ -151,7 +155,8 @@ begin
                 CASE uart_rx_data is
                     WHEN 10 => transmit_16_bit_word_with_uart(uart_data_in, get_filter_output(bandpass_filter.low_pass_filter) );
                     WHEN 11 => transmit_16_bit_word_with_uart(uart_data_in, (bandpass_filter.low_pass_filter.filter_input - get_filter_output(bandpass_filter.low_pass_filter))/2+32768);
-                    WHEN 12 => transmit_16_bit_word_with_uart(uart_data_in, get_filter_output(bandpass_filter));
+                    WHEN 12 => transmit_16_bit_word_with_uart(uart_data_in, get_filter_output(bandpass_filter)/2+32768);
+                    WHEN 13 => transmit_16_bit_word_with_uart(uart_data_in, bandpass_filter.low_pass_filter.filter_input - get_filter_output(bandpass_filter));
                     WHEN 14 => transmit_16_bit_word_with_uart(uart_data_in, get_adc_data(spi_sar_adc_data_out));
                     WHEN others =>  transmit_16_bit_word_with_uart(uart_data_in, uart_rx_data); 
                 end CASE;
