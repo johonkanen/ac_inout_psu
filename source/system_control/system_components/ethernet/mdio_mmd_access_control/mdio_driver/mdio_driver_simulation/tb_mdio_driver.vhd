@@ -89,12 +89,12 @@ begin
             simulator_counter <= simulator_counter + 1;
 
             init_mdio_driver(mdio_driver_data_in);
-            if simulator_counter = 10 then
+            if simulator_counter = 3 then
                 write_data_to_mdio(mdio_driver_data_in, x"1f", x"1f", x"acdc");
             end if;
 
             if mdio_data_write_is_ready(mdio_driver_data_out) then
-                assert mdio_receive_shift_register = "11" & x"5ffeacdc" report " not jee " severity failure;
+                assert mdio_receive_shift_register = "11" & x"5ffeacdc" report " not jee " severity error;
                 report " ";
                 report "mdio write successful!";
                 report " ";
