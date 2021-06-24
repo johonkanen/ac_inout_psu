@@ -24,8 +24,9 @@ package mdio_driver_internal_pkg is
         mdio_receive_clock              : natural range 0 to 511;
         mdio_transmit_is_ready          : boolean;
         mdio_receive_is_ready           : boolean;
+        mdio_transmit_is_pending        : boolean;
     end record; 
-    constant mdio_transmit_control_init : mdio_transmit_control_group := ((others=>'0') , (others => '0'), '0' , 0 , '0' , 0, 0, false, false);
+    constant mdio_transmit_control_init : mdio_transmit_control_group := ((others=>'0') , (others => '0'), '0' , 0 , '0' , 0, 0, false, false, false);
 
 --------------------------------------------------
     procedure generate_mdio_io_waveforms (
@@ -37,11 +38,11 @@ package mdio_driver_internal_pkg is
 --------------------------------------------------
     procedure write_data_with_mdio (
         mdio_input : in mdio_driver_data_input_group;
-        signal mdio_control : out mdio_transmit_control_group);
+        signal mdio_control : inout mdio_transmit_control_group);
 --------------------------------------------------
     procedure read_data_with_mdio (
         mdio_input : in mdio_driver_data_input_group;
-        signal mdio_control : out mdio_transmit_control_group);
+        signal mdio_control : inout mdio_transmit_control_group);
 --------------------------------------------------
 
 end package mdio_driver_internal_pkg;
@@ -96,10 +97,14 @@ package body mdio_driver_internal_pkg is
     procedure write_data_with_mdio
     (
         mdio_input : in mdio_driver_data_input_group;
-        signal mdio_control : out mdio_transmit_control_group
+        signal mdio_control : inout mdio_transmit_control_group
     ) is
     begin
         if mdio_input.mdio_data_write_is_requested then
+            mdio_control.mdio_transmit_is_pending <= true;
+        end if;
+        if (mdio_input.mdio_data_write_is_requested or mdio_control.mdio_transmit_is_pending) and mdio_control.mdio_clock_counter = 0 then
+            mdio_control.mdio_transmit_is_pending <= false;
             load_data_to_mdio_transmit_shift_register(mdio_control, 
                                 MDIO_write_command                          &
                                 mdio_input.phy_address(4 downto 0)          &
@@ -114,7 +119,7 @@ package body mdio_driver_internal_pkg is
     procedure read_data_with_mdio
     (
         mdio_input : in mdio_driver_data_input_group;
-        signal mdio_control : out mdio_transmit_control_group
+        signal mdio_control : inout mdio_transmit_control_group
     ) is
     begin
         if mdio_input.mdio_data_read_is_requested then
