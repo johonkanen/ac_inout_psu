@@ -26,8 +26,11 @@ package system_components_pkg is
         uart_FPGA_out                 : uart_FPGA_output_group;
         spi_sar_adc_FPGA_out          : spi_sar_adc_FPGA_output_group;
         test_ad_mux                  : std_logic_vector(2 downto 0);
-        mdio_driver_FPGA_out : mdio_driver_FPGA_output_group;
+        mdio_driver_FPGA_out : mdio_driver_FPGA_output_group; 
+    end record;
 
+    type system_components_FPGA_inout_record is record
+        mdio_driver_FPGA_inout : mdio_driver_FPGA_three_state_record;
     end record;
     
     type system_components_data_input_group is record
@@ -40,11 +43,12 @@ package system_components_pkg is
     
     component system_components is
         port (
-            system_components_clocks : in system_components_clock_group; 
-            system_components_FPGA_in : in system_components_FPGA_input_group;
-            system_components_FPGA_out : out system_components_FPGA_output_group; 
-            system_components_data_in : in system_components_data_input_group;
-            system_components_data_out : out system_components_data_output_group
+            system_components_clocks     : in system_components_clock_group;
+            system_components_FPGA_in    : in system_components_FPGA_input_group;
+            system_components_FPGA_out   : out system_components_FPGA_output_group;
+            system_components_FPGA_inout : inout system_components_FPGA_inout_record;
+            system_components_data_in    : in system_components_data_input_group;
+            system_components_data_out   : out system_components_data_output_group
         );
     end component system_components;
     

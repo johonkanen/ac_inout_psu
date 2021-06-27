@@ -22,7 +22,6 @@ architecture rtl of mdio_driver is
     alias core_clock is mdio_driver_clocks.clock; 
     signal mdio_transmit_control : mdio_transmit_control_group := mdio_transmit_control_init;
 
-    signal mdio_three_state_io_driver_FPGA_inout : mdio_three_state_io_driver_FPGA_inout_record;
     signal mdio_three_state_io_driver_data_in    : mdio_three_state_io_driver_data_input_group;
     signal mdio_three_state_io_driver_data_out   : mdio_three_state_io_driver_data_output_group;
 
@@ -31,10 +30,7 @@ architecture rtl of mdio_driver is
 begin
 
 ------------------------------------------------------------------------
-    mdio_driver_FPGA_out <= ( 
-                            MDIO_serial_data_out            => mdio_transmit_control.mdio_transmit_register(mdio_transmit_control.mdio_transmit_register'left) ,
-                            MDIO_io_direction_is_out_when_1 => '1'                                                                                             ,
-                            MDIO_clock                      => mdio_transmit_control.mdio_clock);
+    mdio_driver_FPGA_out <= ( MDIO_clock => mdio_transmit_control.mdio_clock);
 
     mdio_driver_data_out <= (
                                 mdio_write_is_ready => mdio_transmit_control.mdio_write_is_ready,

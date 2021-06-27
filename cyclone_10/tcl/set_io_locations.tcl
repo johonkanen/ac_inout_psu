@@ -19,3 +19,8 @@ set_location_assignment PIN_P2 -to system_control_FPGA_out.system_components_FPG
 set_location_assignment PIN_L16 -to system_control_FPGA_out.system_components_FPGA_out.test_ad_mux[0]	
 set_location_assignment PIN_L15 -to system_control_FPGA_out.system_components_FPGA_out.test_ad_mux[1]	
 set_location_assignment PIN_N15 -to system_control_FPGA_out.system_components_FPGA_out.test_ad_mux[2]	
+
+
+set_location_assignment PIN_A5 -to system_control_FPGA_inout.system_components_FPGA_inout.mdio_driver_FPGA_inout.mdio_three_state_io_driver_FPGA_inout.MDIO_inout_data
+set_location_assignment PIN_B4 -to system_control_FPGA_out.system_components_FPGA_out.mdio_driver_FPGA_out.mdio_clock
+
