@@ -54,4 +54,7 @@ begin
 
         end if; --rising_edge
     end process mdio_io_driver;	
+
+
+
 end rtl;

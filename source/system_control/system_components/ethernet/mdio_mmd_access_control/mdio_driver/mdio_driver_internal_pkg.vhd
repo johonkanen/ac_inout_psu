@@ -82,6 +82,14 @@ package body mdio_driver_internal_pkg is
             end if;
         end if;
 
+
+        if mdio_control.mdio_clock_counter = mdio_clock_divisor_counter_high/2 then
+            if mdio_control.mdio_read_clock <= 80 AND mdio_control.mdio_read_clock > 1 then
+                mdio_control.mdio_data_receive_register <= mdio_control.mdio_data_receive_register(mdio_control.mdio_data_receive_register'left-1 downto 0) & '1';
+            end if;
+        end if;
+
+
         if mdio_control.mdio_write_clock /= 0 then
             mdio_control.mdio_write_clock <= mdio_control.mdio_write_clock - 1;
         end if;
