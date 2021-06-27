@@ -16,8 +16,6 @@ package mdio_driver_pkg is
     end record;
     
     type mdio_driver_FPGA_output_group is record
-        MDIO_serial_data_out       : std_logic;
-        MDIO_io_direction_is_out_when_1 : std_logic;
         mdio_clock                 : std_logic;
     end record;
     

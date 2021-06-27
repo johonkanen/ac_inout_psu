@@ -10,7 +10,8 @@ entity top is
         enet_clk_125MHz         : in std_logic;
         pll_input_clock         : in std_logic;
         system_control_FPGA_in  : in system_control_FPGA_input_group;
-        system_control_FPGA_out : out system_control_FPGA_output_group
+        system_control_FPGA_out : out system_control_FPGA_output_group;
+        system_control_FPGA_inout : inout system_control_FPGA_inout_record
     );
 end entity ;
 
@@ -46,6 +47,7 @@ begin
     port map( system_control_clocks ,
     	  system_control_FPGA_in    ,
     	  system_control_FPGA_out   ,
+    	  system_control_FPGA_inout ,
     	  system_control_data_in    ,
     	  system_control_data_out);
 

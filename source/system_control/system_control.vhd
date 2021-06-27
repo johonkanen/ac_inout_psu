@@ -9,11 +9,12 @@ library work;
 
 entity system_control is
     port (
-        system_control_clocks   : in system_control_clock_group;
-        system_control_FPGA_in  : in system_control_FPGA_input_group;
-        system_control_FPGA_out : out system_control_FPGA_output_group;
-        system_control_data_in  : in system_control_data_input_group;
-        system_control_data_out : out system_control_data_output_group
+        system_control_clocks     : in system_control_clock_group;
+        system_control_FPGA_in    : in system_control_FPGA_input_group;
+        system_control_FPGA_out   : out system_control_FPGA_output_group;
+        system_control_FPGA_inout : inout system_control_FPGA_inout_record;
+        system_control_data_in    : in system_control_data_input_group;
+        system_control_data_out   : out system_control_data_output_group
     );
 end entity system_control;
     
@@ -70,6 +71,7 @@ begin
     port map( system_components_clocks,
     	  system_control_FPGA_in.system_components_FPGA_in,
     	  system_control_FPGA_out.system_components_FPGA_out,
+    	  system_control_FPGA_inout.system_components_FPGA_inout,
     	  system_components_data_in,
     	  system_components_data_out);
 

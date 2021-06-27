@@ -18,6 +18,7 @@ entity system_components is
         system_components_clocks   : in  system_components_clock_group;
         system_components_FPGA_in  : in  system_components_FPGA_input_group;
         system_components_FPGA_out : out system_components_FPGA_output_group;
+        system_components_FPGA_inout : inout system_components_FPGA_inout_record;
         system_components_data_in  : in  system_components_data_input_group;
         system_components_data_out : out system_components_data_output_group
     );
@@ -49,8 +50,6 @@ architecture rtl of system_components is
     signal test_counter : natural range 0 to 2**16-1;
 
     signal mdio_driver_clocks   : mdio_driver_clock_group;
-    signal mdio_driver_FPGA_in  : mdio_driver_FPGA_input_group;
-    signal mdio_driver_FPGA_out : mdio_driver_FPGA_output_group;
     signal mdio_driver_data_in  : mdio_driver_data_input_group;
     signal mdio_driver_data_out : mdio_driver_data_output_group; 
 
@@ -165,10 +164,11 @@ begin
                     WHEN 12 => transmit_16_bit_word_with_uart(uart_data_in, get_filter_output(bandpass_filter)/2+32768);
                     WHEN 13 => transmit_16_bit_word_with_uart(uart_data_in, bandpass_filter.low_pass_filter.filter_input - get_filter_output(bandpass_filter));
                     WHEN 14 => transmit_16_bit_word_with_uart(uart_data_in, get_adc_data(spi_sar_adc_data_out));
+                    WHEN 15 => transmit_16_bit_word_with_uart(uart_data_in, get_data_from_mdio(mdio_driver_data_out));
                     WHEN others =>  transmit_16_bit_word_with_uart(uart_data_in, uart_rx_data); 
                 end CASE;
 
-                write_data_to_mdio(mdio_driver_data_in, x"0f", x"0e", x"acdc");
+                read_data_from_mdio(mdio_driver_data_in, x"0f", x"0e");
 
                 filter_data(bandpass_filter, get_square_wave_from_counter(test_counter));
                 test_counter <= test_counter + 1; 
@@ -210,6 +210,7 @@ begin
     port map(
         mdio_driver_clocks   ,
         system_components_FPGA_out.mdio_driver_FPGA_out ,
+        system_components_FPGA_inout.mdio_driver_FPGA_inout ,
         mdio_driver_data_in  ,
         mdio_driver_data_out);
 

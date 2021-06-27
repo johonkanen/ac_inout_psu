@@ -1,7 +1,6 @@
 library ieee;
     use ieee.std_logic_1164.all;
-    use ieee.numeric_std.all;
-
+    use ieee.numeric_std.all; 
 
 library work;
     use work.system_components_pkg.all;
@@ -21,6 +20,10 @@ type system_control_FPGA_output_group is record
     system_components_FPGA_out : system_components_FPGA_output_group;
 end record;
 
+type system_control_FPGA_inout_record is record
+    system_components_FPGA_inout : system_components_FPGA_inout_record;
+end record;
+
 type system_control_data_input_group is record
     system_components_data_in  : system_components_data_input_group;
 end record;
@@ -31,11 +34,12 @@ end record;
 
 component system_control is
     port (
-        system_control_clocks : in system_control_clock_group; 
-        system_control_FPGA_in : in system_control_FPGA_input_group;
-        system_control_FPGA_out : out system_control_FPGA_output_group; 
-        system_control_data_in : in system_control_data_input_group;
-        system_control_data_out : out system_control_data_output_group
+        system_control_clocks     : in system_control_clock_group;
+        system_control_FPGA_in    : in system_control_FPGA_input_group;
+        system_control_FPGA_out   : out system_control_FPGA_output_group;
+        system_control_FPGA_inout : inout system_control_FPGA_inout_record;
+        system_control_data_in    : in system_control_data_input_group;
+        system_control_data_out   : out system_control_data_output_group
     );
 end component system_control;
 
