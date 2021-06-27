@@ -2,6 +2,9 @@ library ieee;
     use ieee.std_logic_1164.all;
     use ieee.numeric_std.all;
 
+library work;
+    use work.mdio_three_state_io_driver_pkg.all;
+
 package mdio_driver_pkg is
 
     type mdio_driver_clock_group is record
@@ -9,7 +12,7 @@ package mdio_driver_pkg is
     end record;
     
     type mdio_driver_FPGA_three_state_record is record
-        MDIO_serial_data_three_state : std_logic;
+        mdio_three_state_io_driver_FPGA_inout : mdio_three_state_io_driver_FPGA_inout_record;
     end record;
     
     type mdio_driver_FPGA_output_group is record

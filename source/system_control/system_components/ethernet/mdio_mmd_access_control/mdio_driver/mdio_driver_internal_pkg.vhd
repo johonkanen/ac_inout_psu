@@ -4,6 +4,7 @@ library ieee;
 
 library work;
     use work.mdio_driver_pkg.all;
+    use work.mdio_three_state_io_driver_pkg.all;
 
 package mdio_driver_internal_pkg is
 
@@ -33,7 +34,8 @@ package mdio_driver_internal_pkg is
 
 --------------------------------------------------
     procedure generate_mdio_io_waveforms (
-        signal mdio_control : inout mdio_transmit_control_group);
+        signal mdio_control : inout mdio_transmit_control_group;
+        mdio_3_state_data_output : in mdio_three_state_io_driver_data_output_group);
 --------------------------------------------------
     procedure load_data_to_mdio_transmit_shift_register (
         signal mdio_control : out mdio_transmit_control_group;
@@ -55,7 +57,8 @@ package body mdio_driver_internal_pkg is
 --------------------------------------------------
     procedure generate_mdio_io_waveforms
     (
-        signal mdio_control : inout mdio_transmit_control_group
+        signal mdio_control      : inout mdio_transmit_control_group;
+        mdio_3_state_data_output : in mdio_three_state_io_driver_data_output_group
     ) is
     begin
 
@@ -85,7 +88,7 @@ package body mdio_driver_internal_pkg is
 
         if mdio_control.mdio_clock_counter = mdio_clock_divisor_counter_high/2 then
             if mdio_control.mdio_read_clock <= 80 AND mdio_control.mdio_read_clock > 1 then
-                mdio_control.mdio_data_receive_register <= mdio_control.mdio_data_receive_register(mdio_control.mdio_data_receive_register'left-1 downto 0) & '1';
+                mdio_control.mdio_data_receive_register <= mdio_control.mdio_data_receive_register(mdio_control.mdio_data_receive_register'left-1 downto 0) & mdio_3_state_data_output.io_input_data;
             end if;
         end if;
 

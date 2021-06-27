@@ -7,6 +7,8 @@ SET project_root=%%F
 )
 SET source=%project_root%/source
 
+ghdl -a --ieee=synopsys ..\mdio_three_state_io_driver\mdio_three_state_io_driver_pkg.vhd
+ghdl -a --ieee=synopsys ..\mdio_three_state_io_driver\mdio_three_state_io_driver.vhd
 ghdl -a --ieee=synopsys ..\mdio_driver_pkg.vhd
 ghdl -a --ieee=synopsys ..\mdio_driver_internal_pkg.vhd
 ghdl -a --ieee=synopsys ..\mdio_driver.vhd
