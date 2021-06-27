@@ -8,11 +8,11 @@ library work;
 
 entity mdio_driver is
     port (
-        mdio_driver_clocks : in mdio_driver_clock_group;
-
-        mdio_driver_FPGA_out : out mdio_driver_FPGA_output_group; 
-        mdio_driver_data_in  : in mdio_driver_data_input_group;
-        mdio_driver_data_out : out mdio_driver_data_output_group
+        mdio_driver_clocks     : in mdio_driver_clock_group;
+        mdio_driver_FPGA_out   : out mdio_driver_FPGA_output_group;
+        mdio_driver_FPGA_inout : inout mdio_driver_FPGA_three_state_record;
+        mdio_driver_data_in    : in mdio_driver_data_input_group;
+        mdio_driver_data_out   : out mdio_driver_data_output_group
     );
 end mdio_driver;
 
@@ -48,7 +48,6 @@ begin
         if rising_edge(core_clock) then
 
             generate_mdio_io_waveforms(mdio_transmit_control); 
-
             write_data_with_mdio(mdio_driver_data_in, mdio_transmit_control);
             read_data_with_mdio(mdio_driver_data_in, mdio_transmit_control);
 

@@ -23,8 +23,8 @@ architecture sim of tb_mdio_driver is
     constant simtime_in_clocks : integer    := 396;
 
     signal mdio_driver_clocks   : mdio_driver_clock_group;
-    signal mdio_driver_FPGA_in  : mdio_driver_FPGA_input_group;
     signal mdio_driver_FPGA_out : mdio_driver_FPGA_output_group;
+    signal mdio_driver_FPGA_inout  : mdio_driver_FPGA_three_state_record;
     signal mdio_driver_data_in  : mdio_driver_data_input_group;
     signal mdio_driver_data_out : mdio_driver_data_output_group;
 
@@ -38,6 +38,7 @@ architecture sim of tb_mdio_driver is
     signal mdio_write_is_ready : boolean;
     signal mdio_read_is_ready : boolean;
     signal counter_to_mdio_read_trigger : natural := 0;
+
 
 begin
 
@@ -96,7 +97,7 @@ begin
             end if;
 
             if mdio_data_write_is_ready(mdio_driver_data_out) then
-                assert mdio_receive_shift_register = "11" & x"5ffeacdc" report " not jee " severity error;
+                assert mdio_receive_shift_register = "11" & x"5ffeacdc" report " write data failed " severity failure;
                 report " ";
                 report "mdio write successful!";
                 report " ";
@@ -129,6 +130,7 @@ begin
     port map(
         mdio_driver_clocks   ,
         mdio_driver_FPGA_out ,
+        mdio_driver_FPGA_inout ,
         mdio_driver_data_in  ,
         mdio_driver_data_out);
 

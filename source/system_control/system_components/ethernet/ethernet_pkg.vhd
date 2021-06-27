@@ -12,11 +12,15 @@ package ethernet_pkg is
     end record;
     
     type ethernet_FPGA_input_group is record
-        mdio_mmd_access_control_FPGA_in : mdio_mmd_access_control_FPGA_input_group;
+        data : std_logic;
     end record;
     
     type ethernet_FPGA_output_group is record
         mdio_mmd_access_control_FPGA_out : mdio_mmd_access_control_FPGA_output_group;
+    end record;
+
+    type ethernet_FPGA_inout_record is record
+        mdio_mmd_access_control_FPGA_inout : mdio_mmd_access_control_FPGA_inout_group;
     end record;
     
     type ethernet_data_input_group is record
@@ -29,11 +33,12 @@ package ethernet_pkg is
     
     component ethernet is
         port (
-            ethernet_clocks   : in ethernet_clock_group;
-            ethernet_FPGA_in  : in ethernet_FPGA_input_group;
-            ethernet_FPGA_out : out ethernet_FPGA_output_group;
-            ethernet_data_in  : in ethernet_data_input_group;
-            ethernet_data_out : out ethernet_data_output_group
+            ethernet_clocks     : in ethernet_clock_group;
+            ethernet_FPGA_in    : in ethernet_FPGA_input_group;
+            ethernet_FPGA_out   : out ethernet_FPGA_output_group;
+            ethernet_FPGA_inout : inout ethernet_FPGA_inout_record;
+            ethernet_data_in    : in ethernet_data_input_group;
+            ethernet_data_out   : out ethernet_data_output_group
         );
     end component ethernet;
     
