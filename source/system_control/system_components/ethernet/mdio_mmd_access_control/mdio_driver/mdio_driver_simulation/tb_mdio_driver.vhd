@@ -38,6 +38,7 @@ architecture sim of tb_mdio_driver is
     signal mdio_write_is_ready : boolean;
     signal mdio_read_is_ready : boolean;
     signal counter_to_mdio_read_trigger : natural := 0;
+    signal MDIO_io_direction_is_out_when_1 : std_logic;
 
 
 begin
@@ -125,6 +126,7 @@ begin
     mdio_driver_clocks <= (clock => simulator_clock);
     mdio_write_is_ready <= mdio_driver_data_out.mdio_write_is_ready;
     mdio_read_is_ready <= mdio_driver_data_out.mdio_read_is_ready;
+    MDIO_io_direction_is_out_when_1 <= mdio_driver_data_out.mdio_read_when_1;
 
     u_mdio_driver : mdio_driver
     port map(

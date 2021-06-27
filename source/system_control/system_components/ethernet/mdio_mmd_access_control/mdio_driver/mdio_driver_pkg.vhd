@@ -30,6 +30,7 @@ package mdio_driver_pkg is
     type mdio_driver_data_output_group is record
         mdio_write_is_ready : boolean;
         mdio_read_is_ready  : boolean;
+        mdio_read_when_1 : std_logic;
         data_from_mdio      : std_logic_vector(15 downto 0);
     end record;
     
@@ -73,8 +74,8 @@ package mdio_driver_pkg is
 end package mdio_driver_pkg;
 
 -- signal mdio_driver_clocks   : mdio_driver_clock_group;
--- signal mdio_driver_FPGA_inout  : mdio_driver_FPGA_three_state_record;
 -- signal mdio_driver_FPGA_out : mdio_driver_FPGA_output_group;
+-- signal mdio_driver_FPGA_inout  : mdio_driver_FPGA_three_state_record;
 -- signal mdio_driver_data_in  : mdio_driver_data_input_group;
 -- signal mdio_driver_data_out  : mdio_driver_data_output_group;
 

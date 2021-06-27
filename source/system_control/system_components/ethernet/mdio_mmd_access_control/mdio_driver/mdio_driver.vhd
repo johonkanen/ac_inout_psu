@@ -33,7 +33,8 @@ begin
     mdio_driver_data_out <= (
                                 mdio_write_is_ready => mdio_transmit_control.mdio_write_is_ready,
                                 mdio_read_is_ready  => mdio_transmit_control.mdio_read_is_ready,
-                                data_from_mdio      => mdio_transmit_control.mdio_data_receive_register
+                                data_from_mdio      => mdio_transmit_control.mdio_data_receive_register,
+                                mdio_read_when_1 => mdio_transmit_control.MDIO_io_direction_is_out_when_1
                             ); 
 
 ------------------------------------------------------------------------

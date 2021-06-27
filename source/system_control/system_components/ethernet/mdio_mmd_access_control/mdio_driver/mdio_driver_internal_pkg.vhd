@@ -15,23 +15,25 @@ package mdio_driver_internal_pkg is
     constant mdio_transmit_counter_high : integer := (mdio_clock_divisor_counter_high+1)*34;
 
     type mdio_transmit_control_group is record
-        mdio_transmit_register          : std_logic_vector(33 downto 0);
-        mdio_data_receive_register      : std_logic_vector(15 downto 0);
         mdio_clock                      : std_logic;
-        mdio_clock_counter              : natural range 0 to 15;
         MDIO_io_direction_is_out_when_1 : std_logic;
+        mdio_clock_counter              : natural range 0 to 15;
+
+        mdio_transmit_register          : std_logic_vector(33 downto 0);
         mdio_write_clock                : natural range 0 to 511;
-        mdio_read_clock                 : natural range 0 to 511;
         mdio_write_is_ready             : boolean;
-        mdio_read_is_ready              : boolean;
         mdio_data_write_is_pending      : boolean;
+
+        mdio_data_receive_register      : std_logic_vector(15 downto 0);
+        mdio_read_clock                 : natural range 0 to 511;
+        mdio_read_is_ready              : boolean;
         mdio_data_read_is_pending       : boolean;
     end record; 
-    constant mdio_transmit_control_init : mdio_transmit_control_group := ((others=>'0') , (others => '0'), '0' , 0 , '0' , 0, 0, false, false, false, false);
+    constant mdio_transmit_control_init : mdio_transmit_control_group := ('0', '0', 0, (others => '0'), 0, false, false, (others => '0'), 0, false, false);
 
 --------------------------------------------------
     procedure generate_mdio_io_waveforms (
-        signal mdio_transmit : inout mdio_transmit_control_group);
+        signal mdio_control : inout mdio_transmit_control_group);
 --------------------------------------------------
     procedure load_data_to_mdio_transmit_shift_register (
         signal mdio_control : out mdio_transmit_control_group;
@@ -53,40 +55,49 @@ package body mdio_driver_internal_pkg is
 --------------------------------------------------
     procedure generate_mdio_io_waveforms
     (
-        signal mdio_transmit : inout mdio_transmit_control_group
+        signal mdio_control : inout mdio_transmit_control_group
     ) is
     begin
 
-        mdio_transmit.mdio_clock_counter <= mdio_transmit.mdio_clock_counter + 1;
-        if mdio_transmit.mdio_clock_counter = mdio_clock_divisor_counter_high then 
-            mdio_transmit.mdio_clock_counter <= 0;
+        mdio_control.mdio_clock_counter <= mdio_control.mdio_clock_counter + 1;
+        if mdio_control.mdio_clock_counter = mdio_clock_divisor_counter_high then 
+            mdio_control.mdio_clock_counter <= 0;
         end if;
 
-        mdio_transmit.mdio_clock <= '1';
-        if mdio_transmit.mdio_clock_counter > mdio_clock_divisor_counter_high/2-1 then
-            mdio_transmit.mdio_clock <= '0'; 
+        mdio_control.mdio_clock <= '1';
+        if mdio_control.mdio_clock_counter > mdio_clock_divisor_counter_high/2-1 then
+            mdio_control.mdio_clock <= '0'; 
         end if; 
 
-        if mdio_transmit.mdio_clock_counter = mdio_clock_divisor_counter_high/2-2 then
-            mdio_transmit.mdio_transmit_register <= mdio_transmit.mdio_transmit_register(mdio_transmit.mdio_transmit_register'left-1 downto 0) & '0';
+        if mdio_control.mdio_clock_counter = mdio_clock_divisor_counter_high/2-2 then
+            mdio_control.mdio_transmit_register <= mdio_control.mdio_transmit_register(mdio_control.mdio_transmit_register'left-1 downto 0) & '0';
+
+            mdio_control.MDIO_io_direction_is_out_when_1 <= '0';
+            if mdio_control.mdio_read_clock > 90 then 
+                mdio_control.MDIO_io_direction_is_out_when_1 <= '1';
+            end if;
+
+            if mdio_control.mdio_write_clock > 1 then 
+                mdio_control.MDIO_io_direction_is_out_when_1 <= '1';
+            end if;
         end if;
 
-        if mdio_transmit.mdio_write_clock /= 0 then
-            mdio_transmit.mdio_write_clock <= mdio_transmit.mdio_write_clock - 1;
+        if mdio_control.mdio_write_clock /= 0 then
+            mdio_control.mdio_write_clock <= mdio_control.mdio_write_clock - 1;
         end if;
 
-        mdio_transmit.mdio_write_is_ready <= false;
-        if mdio_transmit.mdio_write_clock = 1 then
-            mdio_transmit.mdio_write_is_ready <= true;
+        mdio_control.mdio_write_is_ready <= false;
+        if mdio_control.mdio_write_clock = 1 then
+            mdio_control.mdio_write_is_ready <= true;
         end if;
 
-        if mdio_transmit.mdio_read_clock /= 0 then
-            mdio_transmit.mdio_read_clock <= mdio_transmit.mdio_read_clock - 1;
+        if mdio_control.mdio_read_clock /= 0 then
+            mdio_control.mdio_read_clock <= mdio_control.mdio_read_clock - 1;
         end if;
         
-        mdio_transmit.mdio_read_is_ready <= false;
-        if mdio_transmit.mdio_read_clock = 1 then
-            mdio_transmit.mdio_read_is_ready <= true;
+        mdio_control.mdio_read_is_ready <= false;
+        if mdio_control.mdio_read_clock = 1 then
+            mdio_control.mdio_read_is_ready <= true;
         end if;
     end generate_mdio_io_waveforms;
 
@@ -121,6 +132,7 @@ package body mdio_driver_internal_pkg is
                                 MDIO_write_data_delimiter                   &
                                 mdio_input.data_to_mdio(15 downto 0));
             mdio_control.mdio_write_clock <= mdio_transmit_counter_high;
+            mdio_control.MDIO_io_direction_is_out_when_1 <= '1';
         end if;
 
     end write_data_with_mdio;
@@ -142,6 +154,7 @@ package body mdio_driver_internal_pkg is
                                 mdio_input.phy_register_address(4 downto 0) &
                                 MDIO_write_data_delimiter);
             mdio_control.mdio_read_clock <= mdio_transmit_counter_high;
+            mdio_control.MDIO_io_direction_is_out_when_1 <= '1';
         end if;
         
     end read_data_with_mdio;
