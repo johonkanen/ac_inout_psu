@@ -104,11 +104,10 @@ begin
             end if;
 
             if mdio_data_read_is_ready(mdio_driver_data_out) then
-                -- assert mdio_receive_shift_register = "11" & x"5ffeacdc" report " not jee " severity error;
+                assert mdio_receive_shift_register = "11" & x"6ffe0000" report " read unsuccessful " severity failure;
                 report " ";
                 report "mdio read successful!";
                 report " ";
-                -- read_data_from_mdio(mdio_driver_data_in, x"1f", x"1f");
             end if;
 
         end if; --rising_edge

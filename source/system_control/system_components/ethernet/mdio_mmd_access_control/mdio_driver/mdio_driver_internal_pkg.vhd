@@ -79,6 +79,10 @@ package body mdio_driver_internal_pkg is
         if mdio_transmit.mdio_write_clock = 1 then
             mdio_transmit.mdio_write_is_ready <= true;
         end if;
+
+        if mdio_transmit.mdio_read_clock /= 0 then
+            mdio_transmit.mdio_read_clock <= mdio_transmit.mdio_read_clock - 1;
+        end if;
         
         mdio_transmit.mdio_read_is_ready <= false;
         if mdio_transmit.mdio_read_clock = 1 then
@@ -110,11 +114,11 @@ package body mdio_driver_internal_pkg is
         end if;
         if (mdio_input.mdio_data_write_is_requested or mdio_control.mdio_data_write_is_pending) and mdio_control.mdio_clock_counter = 0 then
             mdio_control.mdio_data_write_is_pending <= false;
-            load_data_to_mdio_transmit_shift_register(mdio_control, 
+            load_data_to_mdio_transmit_shift_register(mdio_control ,
                                 MDIO_write_command                          &
                                 mdio_input.phy_address(4 downto 0)          &
                                 mdio_input.phy_register_address(4 downto 0) &
-                                "10"                                        &
+                                MDIO_write_data_delimiter                   &
                                 mdio_input.data_to_mdio(15 downto 0));
             mdio_control.mdio_write_clock <= mdio_transmit_counter_high;
         end if;
@@ -132,13 +136,12 @@ package body mdio_driver_internal_pkg is
         end if;
         if (mdio_input.mdio_data_read_is_requested or mdio_control.mdio_data_read_is_pending) and mdio_control.mdio_clock_counter = 0 then
             mdio_control.mdio_data_read_is_pending <= false;
-            load_data_to_mdio_transmit_shift_register(mdio_control, 
+            load_data_to_mdio_transmit_shift_register(mdio_control ,
                                 MDIO_read_command                           &
                                 mdio_input.phy_address(4 downto 0)          &
                                 mdio_input.phy_register_address(4 downto 0) &
-                                "10"                                        &
-                                mdio_input.data_to_mdio(15 downto 0));
-            mdio_control.mdio_read_clock <= mdio_transmit_counter_high - 15;
+                                MDIO_write_data_delimiter);
+            mdio_control.mdio_read_clock <= mdio_transmit_counter_high;
         end if;
         
     end read_data_with_mdio;
