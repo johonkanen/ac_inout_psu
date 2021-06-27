@@ -12,8 +12,8 @@ package mdio_mmd_access_control_pkg is
         reset_n : std_logic;
     end record;
     
-    type mdio_mmd_access_control_FPGA_input_group is record
-        mdio_driver_FPGA_in : mdio_driver_FPGA_input_group;
+    type mdio_mmd_access_control_FPGA_inout_group is record
+        mdio_driver_FPGA_inout : mdio_driver_FPGA_three_state_record;
     end record;
     
     type mdio_mmd_access_control_FPGA_output_group is record
@@ -36,11 +36,11 @@ package mdio_mmd_access_control_pkg is
     
     component mdio_mmd_access_control is
         port (
-            mdio_mmd_access_control_clocks   : in mdio_mmd_access_control_clock_group;
-            mdio_mmd_access_control_FPGA_in  : in mdio_mmd_access_control_FPGA_input_group;
-            mdio_mmd_access_control_FPGA_out : out mdio_mmd_access_control_FPGA_output_group;
-            mdio_mmd_access_control_data_in  : in mdio_mmd_access_control_data_input_group;
-            mdio_mmd_access_control_data_out : out mdio_mmd_access_control_data_output_group
+            mdio_mmd_access_control_clocks     : in mdio_mmd_access_control_clock_group;
+            mdio_mmd_access_control_FPGA_out   : out mdio_mmd_access_control_FPGA_output_group;
+            mdio_mmd_access_control_FPGA_inout : inout mdio_mmd_access_control_FPGA_inout_group;
+            mdio_mmd_access_control_data_in    : in mdio_mmd_access_control_data_input_group;
+            mdio_mmd_access_control_data_out   : out mdio_mmd_access_control_data_output_group
         );
     end component mdio_mmd_access_control;
     
