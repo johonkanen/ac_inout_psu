@@ -20,7 +20,7 @@ architecture sim of tb_mdio_driver is
     signal clocked_reset       : std_logic;
     constant clock_per         : time       := 1 ns;
     constant clock_half_per    : time       := 0.5 ns;
-    constant simtime_in_clocks : integer    := 196;
+    constant simtime_in_clocks : integer    := 396;
 
     signal mdio_driver_clocks   : mdio_driver_clock_group;
     signal mdio_driver_FPGA_in  : mdio_driver_FPGA_input_group;
@@ -36,6 +36,8 @@ architecture sim of tb_mdio_driver is
     signal mdio_clock : std_logic;
     signal mdio_serial_data : std_logic;
     signal mdio_write_is_ready : boolean;
+    signal mdio_read_is_ready : boolean;
+    signal counter_to_mdio_read_trigger : natural := 0;
 
 begin
 
@@ -101,6 +103,14 @@ begin
                 read_data_from_mdio(mdio_driver_data_in, x"1f", x"1f");
             end if;
 
+            if mdio_data_read_is_ready(mdio_driver_data_out) then
+                -- assert mdio_receive_shift_register = "11" & x"5ffeacdc" report " not jee " severity error;
+                report " ";
+                report "mdio read successful!";
+                report " ";
+                -- read_data_from_mdio(mdio_driver_data_in, x"1f", x"1f");
+            end if;
+
         end if; --rising_edge
 
         if falling_edge(mdio_driver_FPGA_out.mdio_clock) then
@@ -114,6 +124,7 @@ begin
     
     mdio_driver_clocks <= (clock => simulator_clock);
     mdio_write_is_ready <= mdio_driver_data_out.mdio_write_is_ready;
+    mdio_read_is_ready <= mdio_driver_data_out.mdio_read_is_ready;
 
     u_mdio_driver : mdio_driver
     port map(

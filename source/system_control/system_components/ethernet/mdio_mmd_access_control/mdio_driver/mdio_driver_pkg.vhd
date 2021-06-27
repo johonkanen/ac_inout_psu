@@ -29,8 +29,8 @@ package mdio_driver_pkg is
     
     type mdio_driver_data_output_group is record
         mdio_write_is_ready : boolean;
-        mdio_read_is_ready : boolean;
-        data_from_mdio       : std_logic_vector(15 downto 0);
+        mdio_read_is_ready  : boolean;
+        data_from_mdio      : std_logic_vector(15 downto 0);
     end record;
     
     component mdio_driver is
@@ -53,6 +53,9 @@ package mdio_driver_pkg is
 
 ----------------------------------------------------------------
     function mdio_data_write_is_ready ( mdio_output : mdio_driver_data_output_group)
+        return boolean;
+---------------------------------------------------------------- 
+    function mdio_data_read_is_ready ( mdio_output : mdio_driver_data_output_group)
         return boolean;
 ----------------------------------------------------------------
     procedure read_data_from_mdio (
