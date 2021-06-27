@@ -27,12 +27,12 @@ begin
 ------------------------------------------------------------------------
     mdio_driver_FPGA_out <= ( 
                             MDIO_serial_data_out            => mdio_transmit_control.mdio_transmit_register(mdio_transmit_control.mdio_transmit_register'left) ,
-                            MDIO_io_direction_is_out_when_1 => '1'                                              ,
+                            MDIO_io_direction_is_out_when_1 => '1'                                                                                             ,
                             MDIO_clock                      => mdio_transmit_control.mdio_clock);
 
     mdio_driver_data_out <= (
-                                mdio_write_is_ready => mdio_transmit_control.mdio_transmit_is_ready,
-                                mdio_read_is_ready  => mdio_transmit_control.mdio_receive_is_ready,
+                                mdio_write_is_ready => mdio_transmit_control.mdio_write_is_ready,
+                                mdio_read_is_ready  => mdio_transmit_control.mdio_read_is_ready,
                                 data_from_mdio      => mdio_transmit_control.mdio_data_receive_register
                             ); 
 
