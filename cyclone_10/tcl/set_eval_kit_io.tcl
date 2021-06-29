@@ -1,0 +1,23 @@
+
+    set_location_assignment PIN_E1 -to pll_input_clock
+
+	set_location_assignment PIN_A4 -to system_control_FPGA_inout.system_components_FPGA_inout.mdio_driver_FPGA_inout.mdio_three_state_io_driver_FPGA_inout.MDIO_inout_data
+	set_location_assignment PIN_B4 -to system_control_FPGA_out.system_components_FPGA_out.mdio_driver_FPGA_out.mdio_clock
+
+    set_location_assignment PIN_P1 -to system_control_FPGA_in.system_components_FPGA_in.uart_FPGA_in.uart_transreceiver_FPGA_in.uart_rx_FPGA_in.uart_rx
+    set_location_assignment PIN_R1 -to system_control_FPGA_out.system_components_FPGA_out.uart_FPGA_out.uart_transreceiver_FPGA_out.uart_tx_FPGA_out.uart_tx
+
+    set_location_assignment PIN_j2 -to system_control_FPGA_out.system_components_FPGA_out.power_supply_control_FPGA_out.gate_drive_power_FPGA_out.gate_drive_power_pwm_output[0]
+    set_location_assignment PIN_k2 -to system_control_FPGA_out.system_components_FPGA_out.power_supply_control_FPGA_out.gate_drive_power_FPGA_out.gate_drive_power_pwm_output[1]
+    set_location_assignment PIN_k1 -to system_control_FPGA_out.system_components_FPGA_out.power_supply_control_FPGA_out.gate_drive_power_FPGA_out.gate_drive_power_pwm_output[2]
+    set_location_assignment PIN_l2 -to  system_control_FPGA_out.system_components_FPGA_out.power_supply_control_FPGA_out.gate_drive_power_FPGA_out.gate_drive_power_pwm_output[3]
+    set_location_assignment PIN_l1 -to  system_control_FPGA_out.system_components_FPGA_out.power_supply_control_FPGA_out.gate_drive_power_FPGA_out.gate_drive_power_pwm_output[4]
+    set_location_assignment PIN_k5 -to  system_control_FPGA_out.system_components_FPGA_out.power_supply_control_FPGA_out.gate_drive_power_FPGA_out.gate_drive_power_pwm_output[5]
+
+    set_location_assignment PIN_l4 -to system_control_FPGA_in.system_components_FPGA_in.spi_sar_adc_FPGA_in.spi_serial_data
+    set_location_assignment PIN_b1 -to system_control_FPGA_out.system_components_FPGA_out.spi_sar_adc_FPGA_out.chip_select
+    set_location_assignment PIN_c2 -to system_control_FPGA_out.system_components_FPGA_out.spi_sar_adc_FPGA_out.spi_clock
+
+    set_location_assignment PIN_L16 -to system_control_FPGA_out.system_components_FPGA_out.test_ad_mux[0]	
+    set_location_assignment PIN_L15 -to system_control_FPGA_out.system_components_FPGA_out.test_ad_mux[1]	
+    set_location_assignment PIN_N15 -to system_control_FPGA_out.system_components_FPGA_out.test_ad_mux[2]	
