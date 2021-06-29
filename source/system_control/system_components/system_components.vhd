@@ -116,6 +116,7 @@ architecture rtl of system_components is
     end get_filter_output;
 
     signal bandpass_filter : bandpass_filter_record;
+    signal data_from_mdio : std_logic_vector(15 downto 0);
 
 
 --------------------------------------------------
@@ -146,6 +147,7 @@ begin
             create_bandpass_filter(bandpass_filter);
 
             idle_adc(spi_sar_adc_data_in);
+            init_mdio_driver(mdio_driver_data_in);
             init_uart(uart_data_in);
             receive_data_from_uart(uart_data_out, uart_rx_data);
             system_components_FPGA_out.test_ad_mux <= integer_to_std(number_to_be_converted => uart_rx_data, bits_in_word => 3);
@@ -164,14 +166,20 @@ begin
                     WHEN 12 => transmit_16_bit_word_with_uart(uart_data_in, get_filter_output(bandpass_filter)/2+32768);
                     WHEN 13 => transmit_16_bit_word_with_uart(uart_data_in, bandpass_filter.low_pass_filter.filter_input - get_filter_output(bandpass_filter));
                     WHEN 14 => transmit_16_bit_word_with_uart(uart_data_in, get_adc_data(spi_sar_adc_data_out));
-                    WHEN 15 => transmit_16_bit_word_with_uart(uart_data_in, get_data_from_mdio(mdio_driver_data_out));
+                    WHEN 15 => transmit_16_bit_word_with_uart(uart_data_in, data_from_mdio);
                     WHEN others =>  transmit_16_bit_word_with_uart(uart_data_in, uart_rx_data); 
                 end CASE;
 
-                read_data_from_mdio(mdio_driver_data_in, x"0f", x"0e");
+                if test_counter = 20e3 then
+                    read_data_from_mdio(mdio_driver_data_in, x"00", x"00");
+                end if;
 
                 filter_data(bandpass_filter, get_square_wave_from_counter(test_counter));
                 test_counter <= test_counter + 1; 
+            end if;
+
+            if mdio_data_read_is_ready(mdio_driver_data_out) then
+                data_from_mdio <= get_data_from_mdio(mdio_driver_data_out);
             end if;
 
         end if; --rising_edge
