@@ -67,9 +67,9 @@ package body mdio_driver_internal_pkg is
             mdio_control.mdio_clock_counter <= 0;
         end if;
 
-        mdio_control.mdio_clock <= '1';
+        mdio_control.mdio_clock <= '0';
         if mdio_control.mdio_clock_counter > mdio_clock_divisor_counter_high/2-1 then
-            mdio_control.mdio_clock <= '0'; 
+            mdio_control.mdio_clock <= '1'; 
         end if; 
 
         if mdio_control.mdio_clock_counter = mdio_clock_divisor_counter_high/2-2 then
@@ -140,8 +140,8 @@ package body mdio_driver_internal_pkg is
                                 MDIO_write_command                          &
                                 mdio_input.phy_address(4 downto 0)          &
                                 mdio_input.phy_register_address(4 downto 0) &
-                                MDIO_write_data_delimiter                   &
-                                mdio_input.data_to_mdio(15 downto 0));
+                                mdio_input.data_to_mdio(15 downto 0)        &
+                                MDIO_write_data_delimiter);
             mdio_control.mdio_write_clock <= mdio_transmit_counter_high;
             mdio_control.MDIO_io_direction_is_out_when_1 <= '1';
         end if;
