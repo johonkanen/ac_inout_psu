@@ -8,11 +8,11 @@ library work;
 
 entity mdio_mmd_access_control is
     port (
-        mdio_mmd_access_control_clocks   : in mdio_mmd_access_control_clock_group;
-        mdio_mmd_access_control_FPGA_in  : in mdio_mmd_access_control_FPGA_input_group;
-        mdio_mmd_access_control_FPGA_out : out mdio_mmd_access_control_FPGA_output_group;
-        mdio_mmd_access_control_data_in  : in mdio_mmd_access_control_data_input_group;
-        mdio_mmd_access_control_data_out : out mdio_mmd_access_control_data_output_group
+        mdio_mmd_access_control_clocks     : in mdio_mmd_access_control_clock_group;
+        mdio_mmd_access_control_FPGA_out   : out mdio_mmd_access_control_FPGA_output_group;
+        mdio_mmd_access_control_FPGA_inout : inout mdio_mmd_access_control_FPGA_inout_group;
+        mdio_mmd_access_control_data_in    : in mdio_mmd_access_control_data_input_group;
+        mdio_mmd_access_control_data_out   : out mdio_mmd_access_control_data_output_group
     );
 end entity;
 
@@ -58,12 +58,12 @@ begin
     end process MMD_access_controller;	
 
 ------------------------------------------------------------------------
-    mdio_driver_clocks <= (clock => core_clock);
-
+    mdio_driver_clocks <= (clock => core_clock); 
     u_mdio_driver : mdio_driver
     port map(
         mdio_driver_clocks,
         mdio_mmd_access_control_FPGA_out.mdio_driver_FPGA_out,
+        mdio_mmd_access_control_FPGA_inout.mdio_driver_FPGA_inout,
         mdio_driver_data_in, 
         mdio_driver_data_out);
 ------------------------------------------------------------------------
