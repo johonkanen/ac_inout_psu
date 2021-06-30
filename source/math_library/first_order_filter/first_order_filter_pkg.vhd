@@ -10,14 +10,14 @@ package first_order_filter_pkg is
 ------------------------------------------------------------------------
     type first_order_filter is record
         process_counter : natural range 0 to 15;
-        filter_is_ready : boolean;
+        filterin_is_ready : boolean;
         filter_is_busy : boolean;
         filter_input : int18;
         filter_output : int18;
         filter_memory : int18; 
     end record;
 
-    constant init_filter_state : first_order_filter := (process_counter => 9, filter_is_ready => false, filter_is_busy => false, filter_input => 0, filter_output => 0, filter_memory => 0); 
+    constant init_filter_state : first_order_filter := (process_counter => 9, filterin_is_ready => false, filter_is_busy => false, filter_input => 0, filter_output => 0, filter_memory => 0); 
 
 --------------------------------------------------
     procedure create_first_order_filter (
@@ -50,7 +50,7 @@ package body first_order_filter_pkg is
         constant b1 : int18
     ) is
         constant a1 : int18 := 2**17-1-b1-b0;
-        alias filter_is_ready is filter.filter_is_ready;
+        alias filterin_is_ready is filter.filterin_is_ready;
         alias filter_is_busy  is filter.filter_is_busy;
         alias process_counter is filter.process_counter;
         alias filter_memory   is filter.filter_memory;
@@ -58,7 +58,7 @@ package body first_order_filter_pkg is
         alias filter_output   is filter.filter_output;
         variable y : int18;
     begin
-            filter_is_ready <= false;
+            filterin_is_ready <= false;
             filter_is_busy <= true;
             CASE process_counter is
                 WHEN 0 =>
@@ -86,7 +86,7 @@ package body first_order_filter_pkg is
                     if multiplier_is_ready(multiplier) then
                         filter_memory <= filter_memory + get_multiplier_result(multiplier, 17);
                         process_counter <= process_counter + 1;
-                        filter_is_ready <= true;
+                        filterin_is_ready <= true;
                     end if;
 
                 WHEN others => -- do nothing
@@ -126,7 +126,7 @@ package body first_order_filter_pkg is
     return boolean
     is
     begin
-        return filter.filter_is_ready;
+        return filter.filterin_is_ready;
     end filter_is_ready;
 ------------------------------------------------------------------------
 

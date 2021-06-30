@@ -11,6 +11,7 @@ ghdl -a --ieee=synopsys ..\mdio_three_state_io_driver\mdio_three_state_io_driver
 ghdl -a --ieee=synopsys ..\mdio_three_state_io_driver\mdio_three_state_io_driver.vhd
 ghdl -a --ieee=synopsys ..\mdio_driver_pkg.vhd
 ghdl -a --ieee=synopsys ..\mdio_driver_internal_pkg.vhd
+ghdl -a --ieee=synopsys ..\mmd_access_functions_pkg.vhd
 ghdl -a --ieee=synopsys ..\mdio_driver.vhd
 ghdl -a --ieee=synopsys tb_mdio_driver.vhd
 ghdl -e --ieee=synopsys tb_mdio_driver
