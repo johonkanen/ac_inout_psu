@@ -29,8 +29,11 @@ package mdio_driver_internal_pkg is
         mdio_read_clock                 : natural range 0 to 511;
         mdio_read_is_ready              : boolean;
         mdio_data_read_is_pending       : boolean;
+
+        mmd_read_process_counter : natural range 0 to 7;
+        mmd_write_process_counter : natural range 0 to 7;
     end record; 
-    constant mdio_transmit_control_init : mdio_transmit_control_group := ('0', '0', 0, (others => '0'), 0, false, false, (others => '0'), 0, false, false);
+    constant mdio_transmit_control_init : mdio_transmit_control_group := ('0', '0', 0, (others => '0'), 0, false, false, (others => '0'), 0, false, false, 0, 0);
 
 --------------------------------------------------
     procedure generate_mdio_io_waveforms (
@@ -86,8 +89,8 @@ package body mdio_driver_internal_pkg is
         end if;
 
 
-        if mdio_control.mdio_clock_counter = mdio_clock_divisor_counter_high/2 then
-            if mdio_control.mdio_read_clock <= 80 AND mdio_control.mdio_read_clock > 1 then
+        if mdio_control.mdio_clock_counter = 4 then
+            if mdio_control.mdio_read_clock <= 82 AND mdio_control.mdio_read_clock > 2 then
                 mdio_control.mdio_data_receive_register <= mdio_control.mdio_data_receive_register(mdio_control.mdio_data_receive_register'left-1 downto 0) & mdio_3_state_data_output.io_input_data;
             end if;
         end if;
