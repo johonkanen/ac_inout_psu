@@ -8,6 +8,7 @@ LIBRARY std  ;
 
 library work;
     use work.mdio_driver_pkg.all;
+    use work.mmd_access_functions_pkg.all;
 
 entity tb_mdio_driver is
 end;
@@ -20,7 +21,7 @@ architecture sim of tb_mdio_driver is
     signal clocked_reset       : std_logic;
     constant clock_per         : time       := 1 ns;
     constant clock_half_per    : time       := 0.5 ns;
-    constant simtime_in_clocks : integer    := 396;
+    constant simtime_in_clocks : integer    := 1000;
 
     signal mdio_driver_clocks   : mdio_driver_clock_group;
     signal mdio_driver_FPGA_out : mdio_driver_FPGA_output_group;
@@ -41,6 +42,9 @@ architecture sim of tb_mdio_driver is
     signal data_from_mdio : std_logic_vector(15 downto 0);
 
     signal mdio_three_state_io : std_logic;
+    signal data_fetched_from_mmd : std_logic_vector(15 downto 0) := (others => '0');
+    signal mmd_read_process_counter : natural range 0 to 7 := 7;
+    signal mmd_write_process_counter : natural range 0 to 7 := 7;
 
 
 begin
@@ -89,19 +93,27 @@ begin
 
 ------------------------------------------------------------------------
     test_mdio_driver : process(simulator_clock,mdio_driver_FPGA_out.mdio_clock) 
+
+
     begin
         if rising_edge(simulator_clock) then
 
             simulator_counter <= simulator_counter + 1;
 
             init_mdio_driver(mdio_driver_data_in);
+
+            read_data_from_mmd(mdio_driver_data_in, mdio_driver_data_out, x"00", x"01", data_fetched_from_mmd, mmd_read_process_counter);
+            write_data_to_mmd(mdio_driver_data_in, mdio_driver_data_out, x"00", x"01", data_fetched_from_mmd, mmd_write_process_counter);
+
             if simulator_counter = 3 then
-                write_data_to_mdio(mdio_driver_data_in, x"1f", x"1f", x"acdc");
+                mmd_read_process_counter <= 0;
             end if;
 
-            if simulator_counter = 180 then
-                read_data_from_mdio(mdio_driver_data_in, x"1f", x"1f");
-            end if;
+            -- mmd_read : 
+            -- 1. 
+            -- if simulator_counter = 180 then
+            --     read_data_from_mdio(mdio_driver_data_in, x"1f", x"1f");
+            -- end if;
 
             -- if mdio_data_write_is_ready(mdio_driver_data_out) then
             --     assert mdio_receive_shift_register = "11" & x"5ffeacdc" report " write data failed " severity failure;
