@@ -7,8 +7,17 @@ library work;
 
 package mmd_access_functions_pkg is
 
+    type mmd_access_record is record
+        mmd_read_process_counter : natural range 0 to 7;
+        mmd_write_process_counter : natural range 0 to 7;
+        mmd_write_is_ready : boolean;
+        mmd_read_is_ready : boolean;
+    end record;
+
+    constant mmd_init : mmd_access_record := (0,0,false,false);
+
     procedure read_data_from_mmd (
-        signal mdio_driver_input : inout mdio_driver_data_input_group;
+        signal mdio_driver_input : out mdio_driver_data_input_group;
         mdio_driver_output       : in mdio_driver_data_output_group;
         phy_address              : std_logic_vector(7 downto 0);
         mmd_register_address     : std_logic_vector(7 downto 0);
@@ -35,7 +44,7 @@ package body mmd_access_functions_pkg is
         ------------------------------------------------------------------------
         procedure read_data_from_mmd
         (
-            signal mdio_driver_input : inout mdio_driver_data_input_group;
+            signal mdio_driver_input : out mdio_driver_data_input_group;
             mdio_driver_output : in mdio_driver_data_output_group;
             phy_address : std_logic_vector(7 downto 0);
             mmd_register_address : std_logic_vector(7 downto 0);

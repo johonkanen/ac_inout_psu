@@ -11,7 +11,7 @@ proc get_vhdl_sources {void}\
                         /system_control/system_components/ethernet/mdio_mmd_access_control/mdio_driver/mdio_driver_pkg.vhd
                         /system_control/system_components/ethernet/mdio_mmd_access_control/mdio_driver/mdio_driver_internal_pkg.vhd
                         /system_control/system_components/ethernet/mdio_mmd_access_control/mdio_driver/mdio_driver.vhd
-                    # /system_control/system_components/ethernet/mdio_mmd_access_control/mdio_mmd_access_control_pkg.vhd 
+                    /system_control/system_components/ethernet/mdio_mmd_access_control/mmd_access_functions_pkg.vhd 
                     # /system_control/system_components/ethernet/mdio_mmd_access_control/mdio_mmd_access_control_pkg.vhd 
                 # /system_control/system_components/ethernet/ethernet_pkg.vhd
                 # /system_control/system_components/ethernet/ethernet.vhd

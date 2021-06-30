@@ -26,6 +26,10 @@ architecture rtl of mdio_driver is
     signal mdio_three_state_io_driver_data_out   : mdio_three_state_io_driver_data_output_group;
 
 
+    signal data_fetched_from_mmd : std_logic_vector(15 downto 0) := (others => '0');
+    signal mmd_read_process_counter : natural range 0 to 7 := 7;
+    signal mmd_write_process_counter : natural range 0 to 7 := 7;
+
 ------------------------------------------------------------------------
 begin
 
