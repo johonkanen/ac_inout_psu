@@ -132,6 +132,10 @@ architecture rtl of system_components is
     signal mmd_read_access_counter : natural range 0 to 7;
     signal mmd_is_busy : boolean;
 
+
+    type std_array is array (integer range 0 to 31) of std_logic_vector(15 downto 0);
+    signal mdio_registers : std_array;
+
 --------------------------------------------------
 begin
 
@@ -153,6 +157,8 @@ begin
             end if;
         end get_square_wave_from_counter;
         --------------------------------------------------
+
+        variable register_counter : natural range 0 to 31 := 0;
         
     begin
         if rising_edge(clock) then
@@ -181,44 +187,27 @@ begin
                     WHEN 13 => transmit_16_bit_word_with_uart(uart_data_in, bandpass_filter.low_pass_filter.filter_input - get_filter_output(bandpass_filter));
                     WHEN 14 => transmit_16_bit_word_with_uart(uart_data_in, get_adc_data(spi_sar_adc_data_out));
                     WHEN 15 => transmit_16_bit_word_with_uart(uart_data_in, uart_rx_data);
-                    WHEN others =>  transmit_16_bit_word_with_uart(uart_data_in, data_from_mdio); 
+                    WHEN others => -- get data from MDIO
+                        register_counter := register_counter + 1;
+                        read_data_from_mdio(mdio_driver_data_in, x"00", integer_to_std(register_counter, 8));
                 end CASE;
 
-                if test_counter = 0 and (not mmd_is_busy) then
-                    read_data_from_mdio(mdio_driver_data_in, x"00", x"02");
-                end if;
+
 
                 filter_data(bandpass_filter, get_square_wave_from_counter(test_counter));
                 test_counter <= test_counter + 1; 
-                if test_counter = 500 then
+                if test_counter = 65535 then
                     test_counter <= 0;
                 end if;
             end if;
 
-            mmd_is_busy <= true;
-            CASE mmd_read_access_counter is
-                WHEN 0=>
-                    write_data_to_mdio(mdio_driver_data_in, x"00", x"0e", x"db95");
-                    increment(mmd_read_access_counter);
+            if mdio_data_read_is_ready(mdio_driver_data_out) then
+                mdio_registers(register_counter) <=  get_data_from_mdio(mdio_driver_data_out);
 
-                WHEN 1 => 
-                    if mdio_data_write_is_ready(mdio_driver_data_out) then
-                        write_data_to_mdio(mdio_driver_data_in, x"00", x"0d", x"001f");
-                        increment(mmd_read_access_counter);
-                    end if;
-
-                WHEN 2 => 
-                    if mdio_data_write_is_ready(mdio_driver_data_out) then
-                        read_data_from_mdio(mdio_driver_data_in, x"00", x"02");
-                        increment(mmd_read_access_counter);
-                    end if;
-                WHEN others => -- hang here
-                    mmd_is_busy <= false;
-            end CASE; 
-
-                if mdio_data_read_is_ready(mdio_driver_data_out) then
-                    data_from_mdio <=  get_data_from_mdio(mdio_driver_data_out);
+                if test_counter < 32 then
+                    transmit_16_bit_word_with_uart(uart_data_in, get_data_from_mdio(mdio_driver_data_out));
                 end if;
+            end if;
 
         end if; --rising_edge
     end process test_with_uart;	
