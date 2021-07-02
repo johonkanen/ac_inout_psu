@@ -25,11 +25,6 @@ architecture rtl of mdio_driver is
     signal mdio_three_state_io_driver_data_in    : mdio_three_state_io_driver_data_input_group;
     signal mdio_three_state_io_driver_data_out   : mdio_three_state_io_driver_data_output_group;
 
-
-    signal data_fetched_from_mmd : std_logic_vector(15 downto 0) := (others => '0');
-    signal mmd_read_process_counter : natural range 0 to 7 := 7;
-    signal mmd_write_process_counter : natural range 0 to 7 := 7;
-
 ------------------------------------------------------------------------
 begin
 
@@ -40,17 +35,11 @@ begin
                                 mdio_write_is_ready => mdio_transmit_control.mdio_write_is_ready,
                                 mdio_read_is_ready  => mdio_transmit_control.mdio_read_is_ready,
                                 data_from_mdio      => mdio_transmit_control.mdio_data_receive_register,
-                                mdio_read_when_1 => mdio_transmit_control.MDIO_io_direction_is_out_when_1
+                                mdio_read_when_1    => mdio_transmit_control.MDIO_io_direction_is_out_when_1
                             ); 
 
 ------------------------------------------------------------------------
     mdio_io_driver : process(core_clock)
-
-    --------------------------------------------------
-        type list_of_mdio_states is (idle, transmit_command, transmit_address);
-        variable mdio_state : list_of_mdio_states;
-
-    --------------------------------------------------
     begin
         if rising_edge(core_clock) then
 

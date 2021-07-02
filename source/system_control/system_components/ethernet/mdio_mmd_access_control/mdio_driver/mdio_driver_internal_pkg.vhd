@@ -30,10 +30,8 @@ package mdio_driver_internal_pkg is
         mdio_read_is_ready              : boolean;
         mdio_data_read_is_pending       : boolean;
 
-        mmd_read_process_counter : natural range 0 to 7;
-        mmd_write_process_counter : natural range 0 to 7;
     end record; 
-    constant mdio_transmit_control_init : mdio_transmit_control_group := ('0', '0', 0, (others => '0'), 0, false, false, (others => '0'), 0, false, false, 0, 0);
+    constant mdio_transmit_control_init : mdio_transmit_control_group := ('0', '0', 0, (others => '0'), 0, false, false, (others => '0'), 0, false, false);
 
 --------------------------------------------------
     procedure generate_mdio_io_waveforms (
@@ -75,7 +73,7 @@ package body mdio_driver_internal_pkg is
             mdio_control.mdio_clock <= '1'; 
         end if; 
 
-        if mdio_control.mdio_clock_counter = mdio_clock_divisor_counter_high/2-2 then
+        if mdio_control.mdio_clock_counter = 0 then
             mdio_control.mdio_transmit_register <= mdio_control.mdio_transmit_register(mdio_control.mdio_transmit_register'left-1 downto 0) & '0';
 
             mdio_control.MDIO_io_direction_is_out_when_1 <= '0';
@@ -89,30 +87,11 @@ package body mdio_driver_internal_pkg is
         end if;
 
 
-        if mdio_control.mdio_clock_counter = 4 then
+        if mdio_control.mdio_clock_counter = mdio_clock_divisor_counter_high then
             if mdio_control.mdio_read_clock <= 82 AND mdio_control.mdio_read_clock > 2 then
                 mdio_control.mdio_data_receive_register <= mdio_control.mdio_data_receive_register(mdio_control.mdio_data_receive_register'left-1 downto 0) & mdio_3_state_data_output.io_input_data;
             end if;
-        end if;
-
-
-        if mdio_control.mdio_write_clock /= 0 then
-            mdio_control.mdio_write_clock <= mdio_control.mdio_write_clock - 1;
-        end if;
-
-        mdio_control.mdio_write_is_ready <= false;
-        if mdio_control.mdio_write_clock = 1 then
-            mdio_control.mdio_write_is_ready <= true;
-        end if;
-
-        if mdio_control.mdio_read_clock /= 0 then
-            mdio_control.mdio_read_clock <= mdio_control.mdio_read_clock - 1;
-        end if;
-        
-        mdio_control.mdio_read_is_ready <= false;
-        if mdio_control.mdio_read_clock = 1 then
-            mdio_control.mdio_read_is_ready <= true;
-        end if;
+        end if; 
     end generate_mdio_io_waveforms;
 
 --------------------------------------------------
@@ -134,6 +113,16 @@ package body mdio_driver_internal_pkg is
         signal mdio_control : inout mdio_transmit_control_group
     ) is
     begin
+
+        if mdio_control.mdio_write_clock /= 0 then
+            mdio_control.mdio_write_clock <= mdio_control.mdio_write_clock - 1;
+        end if;
+
+        mdio_control.mdio_write_is_ready <= false;
+        if mdio_control.mdio_write_clock = 1 then
+            mdio_control.mdio_write_is_ready <= true;
+        end if;
+
         if mdio_input.mdio_data_write_is_requested then
             mdio_control.mdio_data_write_is_pending <= true;
         end if;
@@ -157,6 +146,16 @@ package body mdio_driver_internal_pkg is
         signal mdio_control : inout mdio_transmit_control_group
     ) is
     begin
+
+        if mdio_control.mdio_read_clock /= 0 then
+            mdio_control.mdio_read_clock <= mdio_control.mdio_read_clock - 1;
+        end if;
+        
+        mdio_control.mdio_read_is_ready <= false;
+        if mdio_control.mdio_read_clock = 1 then
+            mdio_control.mdio_read_is_ready <= true;
+        end if;
+
         if mdio_input.mdio_data_read_is_requested then
             mdio_control.mdio_data_read_is_pending <= true;
         end if;
