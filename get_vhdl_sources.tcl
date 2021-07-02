@@ -12,8 +12,9 @@ proc get_vhdl_sources {void}\
                         /system_control/system_components/ethernet/mdio_driver/mdio_driver_internal_pkg.vhd
                         /system_control/system_components/ethernet/mdio_driver/mdio_driver.vhd
                     /system_control/system_components/ethernet/mdio_driver/mmd_access_functions_pkg.vhd 
-                # /system_control/system_components/ethernet/ethernet_pkg.vhd
-                # /system_control/system_components/ethernet/ethernet.vhd
+
+                /system_control/system_components/ethernet/ethernet_pkg.vhd
+                /system_control/system_components/ethernet/ethernet.vhd
 
                     /system_control/system_components/adc_interface/spi_sar_adc/spi_sar_adc_pkg.vhd 
                     /system_control/system_components/adc_interface/spi_sar_adc/ads7056_driver.vhd 

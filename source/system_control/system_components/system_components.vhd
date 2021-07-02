@@ -8,6 +8,7 @@ library work;
     use work.uart_pkg.all;
     use work.spi_sar_adc_pkg.all;
     use work.mdio_driver_pkg.all;
+    use work.ethernet_pkg.all; 
 
 library math_library;
     use math_library.multiplier_pkg.all;
@@ -49,9 +50,15 @@ architecture rtl of system_components is
 
     signal test_counter : natural range 0 to 2**16-1;
 
-    signal mdio_driver_clocks   : mdio_driver_clock_group;
-    signal mdio_driver_data_in  : mdio_driver_data_input_group;
-    signal mdio_driver_data_out : mdio_driver_data_output_group; 
+    signal ethernet_clocks     : ethernet_clock_group;
+    signal ethernet_FPGA_in    : ethernet_FPGA_input_group;
+    signal ethernet_FPGA_out   : ethernet_FPGA_output_group;
+    signal ethernet_FPGA_inout : ethernet_FPGA_inout_record;
+    signal ethernet_data_in    : ethernet_data_input_group;
+    signal ethernet_data_out   : ethernet_data_output_group;
+
+    alias mdio_driver_data_in  is ethernet_data_in.mdio_driver_data_in;
+    alias mdio_driver_data_out is ethernet_data_out.mdio_driver_data_out;
 
     function integer_to_std
     (
@@ -240,14 +247,14 @@ begin
     	  system_components_data_out.power_supply_control_data_out); 
 
 ------------------------------------------------------------------------ 
-    mdio_driver_clocks <= (clock => clock);
-    u_mdio_driver : mdio_driver
-    port map(
-        mdio_driver_clocks   ,
-        system_components_FPGA_out.mdio_driver_FPGA_out ,
-        system_components_FPGA_inout.mdio_driver_FPGA_inout ,
-        mdio_driver_data_in  ,
-        mdio_driver_data_out);
+    ethernet_clocks <= (core_clock => clock);
+    u_ethernet : ethernet
+    port map( ethernet_clocks ,
+    	  system_components_FPGA_in.ethernet_FPGA_in    ,
+    	  system_components_FPGA_out.ethernet_FPGA_out   ,
+          system_components_FPGA_inout.ethernet_FPGA_inout ,
+    	  ethernet_data_in    ,
+    	  ethernet_data_out);
 
 ------------------------------------------------------------------------ 
 end rtl;
