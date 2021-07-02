@@ -12,8 +12,7 @@ package ethernet_pkg is
     end record;
     
     type ethernet_FPGA_input_group is record
-        data : std_logic;
-
+        data : std_logic; 
     end record;
     
     type ethernet_FPGA_output_group is record
@@ -43,17 +42,19 @@ package ethernet_pkg is
         );
     end component ethernet;
     
-    -- signal ethernet_clocks   : ethernet_clock_group;
-    -- signal ethernet_FPGA_in  : ethernet_FPGA_input_group;
-    -- signal ethernet_FPGA_out : ethernet_FPGA_output_group;
-    -- signal ethernet_data_in  : ethernet_data_input_group;
-    -- signal ethernet_data_out : ethernet_data_output_group
+    -- signal ethernet_clocks     : ethernet_clock_group;
+    -- signal ethernet_FPGA_in    : ethernet_FPGA_input_group;
+    -- signal ethernet_FPGA_out   : ethernet_FPGA_output_group;
+    -- signal ethernet_FPGA_inout : ethernet_FPGA_inout_record;
+    -- signal ethernet_data_in    : ethernet_data_input_group;
+    -- signal ethernet_data_out   : ethernet_data_output_group
     
     -- u_ethernet : ethernet
-    -- port map( ethernet_clocks,
-    -- 	  ethernet_FPGA_in,
-    --	  ethernet_FPGA_out,
-    --	  ethernet_data_in,
+    -- port map( ethernet_clocks ,
+    -- 	  ethernet_FPGA_in       ,
+    --	  ethernet_FPGA_out      ,
+    --    ethernet_FPGA_inout    ,
+    --	  ethernet_data_in       ,
     --	  ethernet_data_out);
     
 
