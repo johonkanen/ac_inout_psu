@@ -3,7 +3,7 @@ library ieee;
     use ieee.numeric_std.all;
 
 library work;
-    use work.mdio_mmd_access_control_pkg.all;
+    use work.mdio_driver_pkg.all;
 
 package ethernet_pkg is
 
@@ -13,22 +13,23 @@ package ethernet_pkg is
     
     type ethernet_FPGA_input_group is record
         data : std_logic;
+
     end record;
     
     type ethernet_FPGA_output_group is record
-        mdio_mmd_access_control_FPGA_out : mdio_mmd_access_control_FPGA_output_group;
+        mdio_driver_FPGA_out : mdio_driver_FPGA_output_group; 
     end record;
 
     type ethernet_FPGA_inout_record is record
-        mdio_mmd_access_control_FPGA_inout : mdio_mmd_access_control_FPGA_inout_group;
+        mdio_driver_FPGA_inout : mdio_driver_FPGA_three_state_record;
     end record;
     
     type ethernet_data_input_group is record
-        mdio_mmd_access_control_data_in  : mdio_mmd_access_control_data_input_group;
+        mdio_driver_data_in : mdio_driver_data_input_group;
     end record;
     
     type ethernet_data_output_group is record
-        mdio_mmd_access_control_data_out : mdio_mmd_access_control_data_output_group;
+        mdio_driver_data_out : mdio_driver_data_output_group;
     end record;
     
     component ethernet is

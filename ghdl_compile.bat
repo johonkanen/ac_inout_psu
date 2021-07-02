@@ -13,12 +13,10 @@ ghdl -a --ieee=synopsys %source%/system_clocks/system_clocks_pkg.vhd
         ghdl -a --ieee=synopsys %source%/system_control/system_components/uart/uart_transreceiver/uart_transreceiver_pkg.vhd
     ghdl -a --ieee=synopsys %source%/system_control/system_components/uart/uart_pkg.vhd
 
-                ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/mdio_mmd_access_control/mdio_driver/mdio_three_state_io_driver/mdio_three_state_io_driver_pkg.vhd
-            ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/mdio_mmd_access_control/mdio_driver/mdio_driver_pkg.vhd
-            ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/mdio_mmd_access_control/mdio_driver/mdio_driver_internal_pkg.vhd
-            ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/mdio_mmd_access_control/mdio_driver/mmd_access_functions_pkg.vhd
-
-        ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/mdio_mmd_access_control/mdio_mmd_access_control_pkg.vhd
+                ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/mdio_driver/mdio_three_state_io_driver/mdio_three_state_io_driver_pkg.vhd
+            ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/mdio_driver/mdio_driver_pkg.vhd
+            ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/mdio_driver/mdio_driver_internal_pkg.vhd
+            ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/mdio_driver/mmd_access_functions_pkg.vhd
 
     ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_pkg.vhd
 
