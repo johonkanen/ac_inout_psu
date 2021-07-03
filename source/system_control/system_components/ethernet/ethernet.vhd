@@ -9,12 +9,12 @@ library work;
 
 entity ethernet is
     port (
-        ethernet_clocks   : in ethernet_clock_group;
-        ethernet_FPGA_in  : in ethernet_FPGA_input_group;
-        ethernet_FPGA_out : out ethernet_FPGA_output_group;
+        ethernet_clocks     : in ethernet_clock_group;
+        ethernet_FPGA_in    : in ethernet_FPGA_input_group;
+        ethernet_FPGA_out   : out ethernet_FPGA_output_group;
         ethernet_FPGA_inout : inout ethernet_FPGA_inout_record;
-        ethernet_data_in  : in ethernet_data_input_group;
-        ethernet_data_out : out ethernet_data_output_group
+        ethernet_data_in    : in ethernet_data_input_group;
+        ethernet_data_out   : out ethernet_data_output_group
     );
 end entity;
 
@@ -35,8 +35,7 @@ begin
         ethernet_FPGA_out.mdio_driver_FPGA_out ,
         ethernet_FPGA_inout.mdio_driver_FPGA_inout ,
         ethernet_data_in.mdio_driver_data_in  ,
-        ethernet_data_out.mdio_driver_data_out);
-
+        ethernet_data_out.mdio_driver_data_out); 
 
 ------------------------------------------------------------------------
 end rtl;

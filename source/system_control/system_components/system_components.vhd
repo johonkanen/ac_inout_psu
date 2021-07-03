@@ -146,6 +146,8 @@ architecture rtl of system_components is
 --------------------------------------------------
 begin
 
+    -- system_components_FPGA_out <= (
+
 --------------------------------------------------
     test_with_uart : process(clock)
 
@@ -197,9 +199,7 @@ begin
                     WHEN others => -- get data from MDIO
                         register_counter := register_counter + 1;
                         read_data_from_mdio(mdio_driver_data_in, x"00", integer_to_std(register_counter, 8));
-                end CASE;
-
-
+                end CASE; 
 
                 filter_data(bandpass_filter, get_square_wave_from_counter(test_counter));
                 test_counter <= test_counter + 1; 
