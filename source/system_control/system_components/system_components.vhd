@@ -9,6 +9,7 @@ library work;
     use work.spi_sar_adc_pkg.all;
     use work.mdio_driver_pkg.all;
     use work.ethernet_pkg.all; 
+    use work.ethernet_clocks_pkg.all; 
 
 library math_library;
     use math_library.multiplier_pkg.all;
@@ -247,14 +248,17 @@ begin
     	  system_components_data_out.power_supply_control_data_out); 
 
 ------------------------------------------------------------------------ 
-    ethernet_clocks <= (core_clock => clock);
+    ethernet_clocks <= (core_clock => clock, reset_n => '1', 
+                        rx_ddr_clocks => (rx_ddr_clock => clock, reset_n => '1'),
+                        tx_ddr_clocks => (tx_ddr_clock => clock, reset_n => '1')
+                       );
     u_ethernet : ethernet
-    port map( ethernet_clocks ,
-    	  system_components_FPGA_in.ethernet_FPGA_in    ,
-    	  system_components_FPGA_out.ethernet_FPGA_out   ,
-          system_components_FPGA_inout.ethernet_FPGA_inout ,
-    	  ethernet_data_in    ,
-    	  ethernet_data_out);
+    port map( ethernet_clocks                                  ,
+              system_components_FPGA_in.ethernet_FPGA_in       ,
+              system_components_FPGA_out.ethernet_FPGA_out     ,
+              system_components_FPGA_inout.ethernet_FPGA_inout ,
+              ethernet_data_in                                 ,
+              ethernet_data_out);
 
 ------------------------------------------------------------------------ 
 end rtl;

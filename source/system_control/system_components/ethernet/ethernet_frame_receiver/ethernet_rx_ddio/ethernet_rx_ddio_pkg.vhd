@@ -22,7 +22,7 @@ package ethernet_rx_ddio_pkg is
 ------------------------------------------------------------------------
     component ethernet_rx_ddio is
         port (
-            ethernet_rx_ddio_clocks   : in ethernet_clock_group;
+            ethernet_rx_ddio_clocks   : in ethernet_rx_ddr_clock_group;
             ethernet_rx_ddio_FPGA_in  : in ethernet_rx_ddio_FPGA_input_group;
             ethernet_rx_ddio_data_out : out ethernet_rx_ddio_data_output_group
         );

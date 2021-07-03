@@ -1,0 +1,9 @@
+set_global_assignment -name IP_TOOL_NAME "ALTDDIO_IN"
+set_global_assignment -name IP_TOOL_VERSION "20.1"
+set_global_assignment -name IP_GENERATED_DEVICE_FAMILY "{Cyclone 10 LP}"
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "ethddio_rx.vhd"]
+set_global_assignment -name MISC_FILE [file join $::quartus(qip_path) "ethddio_rx.bsf"]
+set_global_assignment -name MISC_FILE [file join $::quartus(qip_path) "ethddio_rx_inst.vhd"]
+set_global_assignment -name MISC_FILE [file join $::quartus(qip_path) "ethddio_rx.inc"]
+set_global_assignment -name MISC_FILE [file join $::quartus(qip_path) "ethddio_rx.cmp"]
+set_global_assignment -name MISC_FILE [file join $::quartus(qip_path) "ethddio_rx.ppf"]
