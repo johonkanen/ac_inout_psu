@@ -39,8 +39,8 @@ begin
     ddio_fpga_in(4) <= ethernet_rx_ddio_FPGA_in.rx_ctl;
     ddio_fpga_in(3 downto 0) <= ethernet_rx_ddio_FPGA_in.ethernet_rx_ddio_in;
 
-    ethernet_rx_ddio_data_out <= (rx_ctl           => dataout_h(4) & dataout_l(4),
-                                  ethernet_rx_byte => dataout_h(3 downto 0) & dataout_l(3 downto 0));
+    ethernet_rx_ddio_data_out <= (rx_ctl           => dataout_l(4) & dataout_h(4),
+                                  ethernet_rx_byte => dataout_l(3 downto 0) & dataout_h(3 downto 0));
 
 ------------------------------------------------------------------------
     u_ethddio : ethddio_rx

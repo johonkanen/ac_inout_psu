@@ -219,7 +219,7 @@ begin
 
                 if test_counter < 32 then
 
-                        transmit_16_bit_word_with_uart(uart_data_in, x"00" & ethernet_data_out.ethernet_frame_receiver_data_out.test_data);
+                        transmit_16_bit_word_with_uart(uart_data_in, ethernet_data_out.ethernet_frame_receiver_data_out.test_data(test_counter*2) & ethernet_data_out.ethernet_frame_receiver_data_out.test_data(test_counter*2+1));
                         -- transmit_16_bit_word_with_uart(uart_data_in, get_data_from_mdio(mdio_driver_data_out));
                 end if;
             end if;
