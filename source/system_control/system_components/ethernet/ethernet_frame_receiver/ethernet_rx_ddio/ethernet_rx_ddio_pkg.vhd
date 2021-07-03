@@ -56,14 +56,14 @@ package body ethernet_rx_ddio_pkg is
     return boolean
     is
     begin
-        if ethernet_rx_ddr_output.rx_ctl(1) = '1' then
+        if ethernet_rx_ddr_output.rx_ctl(0) = '1' then
             return true;
         else
             return false;
         end if;
         
-------------------------------------------------------------------------
     end ethernet_rx_active;
+------------------------------------------------------------------------
 
     function get_byte
     (
