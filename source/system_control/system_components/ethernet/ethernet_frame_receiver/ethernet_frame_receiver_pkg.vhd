@@ -17,7 +17,7 @@ package ethernet_frame_receiver_pkg is
     end record;
     
     type ethernet_frame_receiver_data_output_group is record
-        clock : std_logic;
+        test_data : std_logic_vector(7 downto 0);
     end record;
     
     component ethernet_frame_receiver is

@@ -26,15 +26,27 @@ architecture rtl of ethernet_frame_receiver is
     type bytearray is array (integer range <>) of std_logic_vector(7 downto 0); 
     signal stuff : bytearray(0 to 46);
 
-    signal rx_shift_register : std_logic_vector(15 downto 0); 
+    signal rx_shift_register : std_logic_vector(15 downto 0) := (others => '0');
+
+    signal test_data : std_logic_vector(7 downto 0) := (others => '0');
+
     
 begin
+
+    ethernet_frame_receiver_data_out <= (test_data => test_data);
 
     frame_receiver : process(rx_ddr_clock) 
     begin
         if rising_edge(rx_ddr_clock) then
 
-            rx_shift_register <= rx_shift_register(7 downto 0) & get_byte(ethernet_rx_ddio_data_out); 
+
+            if ethernet_rx_active(ethernet_rx_ddio_data_out) then
+                rx_shift_register <= rx_shift_register(7 downto 0) & get_byte(ethernet_rx_ddio_data_out); 
+                if rx_shift_register /= x"0000" then
+                    test_data <= rx_shift_register(7 downto 0);
+                end if;
+            end if;
+
 
         end if; --rising_edge
     end process frame_receiver;	
