@@ -3,14 +3,10 @@ library ieee;
     use ieee.numeric_std.all; 
 
 library work;
+    use work.system_clocks_pkg.all;
     use work.system_components_pkg.all;
 
 package system_control_pkg is
-
-type system_control_clock_group is record
-    clock : std_logic;
-    reset_n : std_logic;
-end record;
 
 type system_control_FPGA_input_group is record
     system_components_FPGA_in  : system_components_FPGA_input_group;
@@ -34,7 +30,7 @@ end record;
 
 component system_control is
     port (
-        system_control_clocks     : in system_control_clock_group;
+        system_clocks             : in system_clocks_group;
         system_control_FPGA_in    : in system_control_FPGA_input_group;
         system_control_FPGA_out   : out system_control_FPGA_output_group;
         system_control_FPGA_inout : inout system_control_FPGA_inout_record;

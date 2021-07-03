@@ -3,6 +3,7 @@ library ieee;
     use ieee.numeric_std.all;
 
 library work;
+    use work.system_clocks_pkg.all;
     use work.power_supply_control_pkg.all;
     use work.uart_pkg.all;
     use work.spi_sar_adc_pkg.all;
@@ -45,7 +46,7 @@ package system_components_pkg is
     
     component system_components is
         port (
-            system_components_clocks     : in system_components_clock_group;
+            system_clocks                : in system_clocks_group;
             system_components_FPGA_in    : in system_components_FPGA_input_group;
             system_components_FPGA_out   : out system_components_FPGA_output_group;
             system_components_FPGA_inout : inout system_components_FPGA_inout_record;

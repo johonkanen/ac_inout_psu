@@ -12,7 +12,7 @@ set_time_format -unit ns -decimal_places 3
 #**************************************************************
 
 create_clock -name {pll_input_clock} -period 31.25 -waveform { 0.000 15.625 } [get_ports {pll_input_clock}]
-#create_clock -name {ethernet_clock_125MHz} -period 8.000 -waveform { 0.000 4.000 } [get_ports {ethernet_clock_125MHz}]
+create_clock -name {enet_clk_125MHz} -period 8.000 -waveform { 0.000 4.000 } [get_ports {enet_clk_125MHz}]
 
 
 #**************************************************************

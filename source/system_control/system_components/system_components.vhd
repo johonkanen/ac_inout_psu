@@ -3,6 +3,7 @@ library ieee;
     use ieee.numeric_std.all;
 
 library work;
+    use work.system_clocks_pkg.all;
     use work.system_components_pkg.all;
     use work.power_supply_control_pkg.all;
     use work.uart_pkg.all;
@@ -17,19 +18,19 @@ library math_library;
 
 entity system_components is
     port (
-        system_components_clocks   : in  system_components_clock_group;
-        system_components_FPGA_in  : in  system_components_FPGA_input_group;
-        system_components_FPGA_out : out system_components_FPGA_output_group;
+        system_clocks                : in  system_clocks_group;
+        system_components_FPGA_in    : in  system_components_FPGA_input_group;
+        system_components_FPGA_out   : out system_components_FPGA_output_group;
         system_components_FPGA_inout : inout system_components_FPGA_inout_record;
-        system_components_data_in  : in  system_components_data_input_group;
-        system_components_data_out : out system_components_data_output_group
+        system_components_data_in    : in  system_components_data_input_group;
+        system_components_data_out   : out system_components_data_output_group
     );
 end entity system_components;
 
 architecture rtl of system_components is
 
-    alias clock is system_components_clocks.clock;
-    alias reset_n is system_components_clocks.reset_n;
+    alias clock is system_clocks.core_clock;
+    alias reset_n is system_clocks.pll_locked;
 
     signal power_supply_control_clocks   : power_supply_control_clock_group;
     signal power_supply_control_data_in  : power_supply_control_data_input_group;
@@ -221,7 +222,7 @@ begin
     end process test_with_uart;	
 
 ------------------------------------------------------------------------ 
-    spi_sar_adc_clocks <= (clock => system_components_clocks.clock, reset_n => reset_n); 
+    spi_sar_adc_clocks <= (clock => clock, reset_n => reset_n); 
     u_spi_sar_adc : spi_sar_adc
     port map( spi_sar_adc_clocks                          ,
           system_components_FPGA_in.spi_sar_adc_FPGA_in   ,
@@ -230,7 +231,7 @@ begin
     	  spi_sar_adc_data_out);
 
 ------------------------------------------------------------------------ 
-    uart_clocks <= (clock => system_components_clocks.clock);
+    uart_clocks <= (clock => clock);
     u_uart : uart
     port map( uart_clocks                          ,
     	  system_components_FPGA_in.uart_FPGA_in   ,
@@ -249,8 +250,8 @@ begin
 
 ------------------------------------------------------------------------ 
     ethernet_clocks <= (core_clock => clock, reset_n => '1', 
-                        rx_ddr_clocks => (rx_ddr_clock => clock, reset_n => '1'),
-                        tx_ddr_clocks => (tx_ddr_clock => clock, reset_n => '1')
+                        rx_ddr_clocks => (rx_ddr_clock => system_clocks.ethernet_rx_ddr_clock, reset_n => '1'),
+                        tx_ddr_clocks => (tx_ddr_clock => system_clocks.ethernet_tx_ddr_clock, reset_n => '1')
                        );
     u_ethernet : ethernet
     port map( ethernet_clocks                                  ,
