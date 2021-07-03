@@ -46,10 +46,10 @@ architecture rtl of top is
 	);
     end component ethernet_clocks_generator;
 
-    signal rx_ddr_clock        : std_logic;
-    signal tx_core_clock       : std_logic;
-    signal core_clock : std_logic;
-    signal pll_locked : std_logic;
+    signal rx_ddr_clock  : std_logic;
+    signal tx_core_clock : std_logic;
+    signal core_clock    : std_logic;
+    signal pll_locked    : std_logic;
 
 ------------------------------------------------------------------------
 begin

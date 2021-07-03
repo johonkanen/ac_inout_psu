@@ -23,10 +23,12 @@ package ethernet_pkg is
     
     type ethernet_data_input_group is record
         mdio_driver_data_in : mdio_driver_data_input_group;
+        ethernet_frame_receiver_data_in : ethernet_frame_receiver_data_input_group;
     end record;
     
     type ethernet_data_output_group is record
-        mdio_driver_data_out : mdio_driver_data_output_group;
+        mdio_driver_data_out             : mdio_driver_data_output_group;
+        ethernet_frame_receiver_data_out : ethernet_frame_receiver_data_output_group;
     end record;
     
     component ethernet is
