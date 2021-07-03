@@ -48,6 +48,8 @@ architecture rtl of top is
 
     signal rx_ddr_clock        : std_logic;
     signal tx_core_clock       : std_logic;
+    signal core_clock : std_logic;
+    signal pll_locked : std_logic;
 
 ------------------------------------------------------------------------
 begin
@@ -56,8 +58,8 @@ begin
     u_main_clocks : main_clocks
     port map( areset => '0'                         ,
               inclk0 => pll_input_clock             ,
-              c0     => system_clocks.core_clock ,
-              locked => system_clocks.pll_locked);
+              c0     => core_clock ,
+              locked => pll_locked);
 
 ------------------------------------------------------------------------
     u_ethernet_clocks : ethernet_clocks_generator
@@ -71,6 +73,12 @@ begin
 	);
 
 ------------------------------------------------------------------------
+    system_clocks <= (core_clock           => core_clock   ,
+                     pll_locked            => pll_locked   ,
+                     ethernet_rx_ddr_clock => rx_ddr_clock ,
+                     ethernet_tx_ddr_clock => tx_core_clock
+                     );
+
     u_system_control : system_control
     port map( system_clocks             ,
               system_control_FPGA_in    ,
