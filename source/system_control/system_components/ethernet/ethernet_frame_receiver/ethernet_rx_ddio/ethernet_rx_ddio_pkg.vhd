@@ -15,7 +15,7 @@ package ethernet_rx_ddio_pkg is
     
 ------------------------------------------------------------------------
     type ethernet_rx_ddio_data_output_group is record
-        rx_ctl : std_logic;
+        rx_ctl : std_logic_vector(1 downto 0);
         ethernet_rx_byte : std_logic_vector(7 downto 0);
     end record;
     
@@ -56,7 +56,7 @@ package body ethernet_rx_ddio_pkg is
     return boolean
     is
     begin
-        if ethernet_rx_ddr_output.rx_ctl = '1' then
+        if ethernet_rx_ddr_output.rx_ctl(1) = '1' then
             return true;
         else
             return false;

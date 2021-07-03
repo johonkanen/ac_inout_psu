@@ -33,6 +33,18 @@ architecture rtl of top is
     END component main_clocks;
 
 ------------------------------------------------------------------------
+    component ethernet_clocks_generator IS
+	PORT
+	(
+		inclk0 : IN STD_LOGIC := '0' ;
+		c0     : OUT STD_LOGIC       ;
+		c1     : OUT STD_LOGIC       ;
+		c2     : OUT STD_LOGIC       ;
+		locked : OUT STD_LOGIC
+	);
+    end component ethernet_clocks_generator;
+
+------------------------------------------------------------------------
 begin
 
 ------------------------------------------------------------------------

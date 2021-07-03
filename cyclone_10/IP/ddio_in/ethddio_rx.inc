@@ -16,11 +16,11 @@
 
 FUNCTION ethddio_rx 
 (
-	datain[3..0],
+	datain[4..0],
 	inclock
 )
 
 RETURNS (
-	dataout_h[3..0],
-	dataout_l[3..0]
+	dataout_h[4..0],
+	dataout_l[4..0]
 );

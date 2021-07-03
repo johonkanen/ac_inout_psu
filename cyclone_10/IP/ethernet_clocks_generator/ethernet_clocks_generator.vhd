@@ -43,11 +43,11 @@ USE altera_mf.all;
 ENTITY ethernet_clocks_generator IS
 	PORT
 	(
-		inclk0		: IN STD_LOGIC  := '0';
-		c0		: OUT STD_LOGIC ;
-		c1		: OUT STD_LOGIC ;
-		c2		: OUT STD_LOGIC ;
-		locked		: OUT STD_LOGIC 
+		inclk0 : IN STD_LOGIC    := '0';
+		c0     : OUT STD_LOGIC ;
+		c1     : OUT STD_LOGIC ;
+		c2     : OUT STD_LOGIC ;
+		locked : OUT STD_LOGIC
 	);
 END ethernet_clocks_generator;
 
