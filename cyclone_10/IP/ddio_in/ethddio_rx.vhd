@@ -63,7 +63,7 @@ BEGIN
 	ALTDDIO_IN_component : ALTDDIO_IN
 	GENERIC MAP (
 		intended_device_family => "Cyclone 10 LP",
-		invert_input_clocks => "OFF",
+		invert_input_clocks => "ON",
 		lpm_hint => "UNUSED",
 		lpm_type => "altddio_in",
 		power_up_high => "OFF",
@@ -86,7 +86,7 @@ END SYN;
 -- Retrieval info: LIBRARY: altera_mf altera_mf.altera_mf_components.all
 -- Retrieval info: PRIVATE: INTENDED_DEVICE_FAMILY STRING "Cyclone 10 LP"
 -- Retrieval info: CONSTANT: INTENDED_DEVICE_FAMILY STRING "Cyclone 10 LP"
--- Retrieval info: CONSTANT: INVERT_INPUT_CLOCKS STRING "OFF"
+-- Retrieval info: CONSTANT: INVERT_INPUT_CLOCKS STRING "ON"
 -- Retrieval info: CONSTANT: LPM_HINT STRING "UNUSED"
 -- Retrieval info: CONSTANT: LPM_TYPE STRING "altddio_in"
 -- Retrieval info: CONSTANT: POWER_UP_HIGH STRING "OFF"
