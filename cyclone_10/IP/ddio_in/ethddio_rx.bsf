@@ -27,8 +27,8 @@ https://fpgasoftware.intel.com/eula.
 	(port
 		(pt 0 48)
 		(input)
-		(text "datain[3..0]" (rect 0 0 62 14)(font "Arial" (font_size 8)))
-		(text "datain[3..0]" (rect 4 34 55 47)(font "Arial" (font_size 8)))
+		(text "datain[4..0]" (rect 0 0 62 14)(font "Arial" (font_size 8)))
+		(text "datain[4..0]" (rect 4 34 55 47)(font "Arial" (font_size 8)))
 		(line (pt 0 48)(pt 64 48)(line_width 3))
 	)
 	(port
@@ -41,15 +41,15 @@ https://fpgasoftware.intel.com/eula.
 	(port
 		(pt 208 48)
 		(output)
-		(text "dataout_l[3..0]" (rect 0 0 80 14)(font "Arial" (font_size 8)))
-		(text "dataout_l[3..0]" (rect 137 34 203 47)(font "Arial" (font_size 8)))
+		(text "dataout_l[4..0]" (rect 0 0 80 14)(font "Arial" (font_size 8)))
+		(text "dataout_l[4..0]" (rect 137 34 203 47)(font "Arial" (font_size 8)))
 		(line (pt 208 48)(pt 128 48)(line_width 3))
 	)
 	(port
 		(pt 208 64)
 		(output)
-		(text "dataout_h[3..0]" (rect 0 0 84 14)(font "Arial" (font_size 8)))
-		(text "dataout_h[3..0]" (rect 133 50 203 63)(font "Arial" (font_size 8)))
+		(text "dataout_h[4..0]" (rect 0 0 84 14)(font "Arial" (font_size 8)))
+		(text "dataout_h[4..0]" (rect 133 50 203 63)(font "Arial" (font_size 8)))
 		(line (pt 208 64)(pt 128 64)(line_width 3))
 	)
 	(drawing
