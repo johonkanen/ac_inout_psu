@@ -4,11 +4,12 @@ library ieee;
 
 library work;
     use work.ethernet_clocks_pkg.all;
+    use work.ethernet_rx_ddio_pkg.all;
 
 package ethernet_frame_receiver_pkg is
 
     type ethernet_frame_receiver_FPGA_input_group is record
-        clock : std_logic;
+        ethernet_rx_ddio_FPGA_in : ethernet_rx_ddio_FPGA_input_group;
     end record;
     
     type ethernet_frame_receiver_data_input_group is record

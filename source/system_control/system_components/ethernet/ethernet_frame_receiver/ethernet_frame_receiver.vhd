@@ -10,20 +10,18 @@ library work;
 
 entity ethernet_frame_receiver is
     port (
-        ethernet_frame_receiver_clocks   : in ethernet_clock_group;
-        ethernet_frame_receiver_FPGA_in  : in ethernet_frame_receiver_FPGA_input_group;
-        ethernet_frame_receiver_data_in  : in ethernet_frame_receiver_data_input_group;
+        ethernet_frame_receiver_clocks  : in ethernet_rx_ddr_clock_group;
+        ethernet_frame_receiver_FPGA_in : in ethernet_frame_receiver_FPGA_input_group;
+        ethernet_frame_receiver_data_in : in ethernet_frame_receiver_data_input_group;
         ethernet_frame_receiver_data_out : out ethernet_frame_receiver_data_output_group
     );
 end entity ethernet_frame_receiver;
 
 architecture rtl of ethernet_frame_receiver is
 
-    signal ethernet_rx_ddio_clocks   : ethernet_clock_group;
-    signal ethernet_rx_ddio_FPGA_in : ethernet_rx_ddio_FPGA_input_group;
     signal ethernet_rx_ddio_data_out  : ethernet_rx_ddio_data_output_group;
 
-    alias rx_ddr_clock is ethernet_rx_ddio_clocks.rx_ddr_clocks.rx_ddr_clock;
+    alias rx_ddr_clock is ethernet_frame_receiver_clocks.rx_ddr_clock;
 
     type bytearray is array (integer range <>) of std_logic_vector(7 downto 0); 
     signal stuff : bytearray(0 to 46);
@@ -41,9 +39,9 @@ begin
         end if; --rising_edge
     end process frame_receiver;	
 
-    u_ethernet_rx_ddio_pkg : ethernet_rx_ddio
-    port map( ethernet_rx_ddio_clocks  ,
-              ethernet_rx_ddio_FPGA_in ,
+    u_ethernet_rx_ddio : ethernet_rx_ddio
+    port map( ethernet_frame_receiver_clocks                           ,
+              ethernet_frame_receiver_FPGA_in.ethernet_rx_ddio_FPGA_in ,
               ethernet_rx_ddio_data_out);
 
 end rtl;

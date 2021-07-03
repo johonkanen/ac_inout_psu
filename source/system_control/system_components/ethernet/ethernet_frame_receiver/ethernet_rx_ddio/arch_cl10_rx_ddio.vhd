@@ -15,7 +15,7 @@ library work;
 
 architecture cl10_rx_ddio of ethernet_rx_ddio is
 
-    alias ddio_rx_clock is ethernet_rx_ddio_clocks.rx_ddr_clocks.rx_ddr_clock;
+    alias ddio_rx_clock is ethernet_rx_ddio_clocks.rx_ddr_clock;
     alias ddio_fpga_in is ethernet_rx_ddio_fpga_in.ethernet_rx_ddio_in;
     alias ethernet_byte_to_fpga is ethernet_rx_ddio_data_out.ethernet_rx_byte;
 

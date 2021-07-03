@@ -27,18 +27,15 @@ architecture rtl of ethernet is
     signal ethernet_frame_receiver_data_in : ethernet_frame_receiver_data_input_group;
     signal ethernet_frame_receiver_data_out : ethernet_frame_receiver_data_output_group;
 
-begin
-
-    
-
-    u_ethernet_frame_receiver : ethernet_frame_receiver
-    port map( ethernet_clocks.rx_ddr_clocks,
-              ethernet_FPGA_in.ethernet_frame_receiver_FPGA_in ,
-              ethernet_frame_receiver_data_in                  ,
-              ethernet_frame_receiver_data_out);
-
+begin 
 
 ------------------------------------------------------------------------
+    u_ethernet_frame_receiver : ethernet_frame_receiver
+    port map( ethernet_clocks.rx_ddr_clocks                    ,
+              ethernet_FPGA_in.ethernet_frame_receiver_FPGA_in ,
+              ethernet_frame_receiver_data_in                  ,
+              ethernet_frame_receiver_data_out); 
+
 ------------------------------------------------------------------------ 
     mdio_driver_clocks <= (clock => ethernet_clocks.core_clock);
     u_mdio_driver : mdio_driver
