@@ -5,8 +5,7 @@ library ieee;
 library work;
     use work.ethernet_clocks_pkg.all;
     use work.ethernet_frame_receiver_pkg.all;
-    use work.ethernet_rx_ddio_pkg.all;
-
+    use work.ethernet_rx_ddio_pkg.all; 
 
 entity ethernet_frame_receiver is
     port (
@@ -37,23 +36,23 @@ begin
 
     frame_receiver : process(rx_ddr_clock) 
     begin
-        if rising_edge(rx_ddr_clock) then
-
+        if rising_edge(rx_ddr_clock) then 
 
             if ethernet_rx_active(ethernet_rx_ddio_data_out) then
                 rx_shift_register <= rx_shift_register(7 downto 0) & get_byte(ethernet_rx_ddio_data_out); 
                 if rx_shift_register /= x"0000" then
                     test_data <= rx_shift_register(7 downto 0);
                 end if;
-            end if;
-
+            end if; 
 
         end if; --rising_edge
     end process frame_receiver;	
 
+------------------------------------------------------------------------
     u_ethernet_rx_ddio : ethernet_rx_ddio
     port map( ethernet_frame_receiver_clocks                           ,
               ethernet_frame_receiver_FPGA_in.ethernet_rx_ddio_FPGA_in ,
               ethernet_rx_ddio_data_out);
 
+------------------------------------------------------------------------
 end rtl;

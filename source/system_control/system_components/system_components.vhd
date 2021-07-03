@@ -200,7 +200,11 @@ begin
                     WHEN 15 => transmit_16_bit_word_with_uart(uart_data_in, uart_rx_data);
                     WHEN others => -- get data from MDIO
                         register_counter := register_counter + 1;
-                        read_data_from_mdio(mdio_driver_data_in, x"00", integer_to_std(register_counter, 8));
+                        if test_counter = 100 then
+                            write_data_to_mdio(mdio_driver_data_in, x"00", x"00", x"0450");
+                        else
+                            read_data_from_mdio(mdio_driver_data_in, x"00", integer_to_std(register_counter, 8));
+                        end if;
                 end CASE; 
 
                 filter_data(bandpass_filter, get_square_wave_from_counter(test_counter));
@@ -214,7 +218,9 @@ begin
                 mdio_registers(register_counter) <=  get_data_from_mdio(mdio_driver_data_out);
 
                 if test_counter < 32 then
-                    transmit_16_bit_word_with_uart(uart_data_in, x"00" & ethernet_data_out.ethernet_frame_receiver_data_out.test_data);
+
+                        transmit_16_bit_word_with_uart(uart_data_in, x"00" & ethernet_data_out.ethernet_frame_receiver_data_out.test_data);
+                        -- transmit_16_bit_word_with_uart(uart_data_in, get_data_from_mdio(mdio_driver_data_out));
                 end if;
             end if;
 
