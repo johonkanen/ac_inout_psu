@@ -8,16 +8,19 @@ library work;
 
 package ethernet_frame_receiver_pkg is
 
+    type bytearray is array (integer range <>) of std_logic_vector(7 downto 0); 
+
     type ethernet_frame_receiver_FPGA_input_group is record
         ethernet_rx_ddio_FPGA_in : ethernet_rx_ddio_FPGA_input_group;
     end record;
     
     type ethernet_frame_receiver_data_input_group is record
-        clock : std_logic;
+        data_is_read_when_1 : std_logic;
     end record;
     
     type ethernet_frame_receiver_data_output_group is record
-        test_data : std_logic_vector(7 downto 0);
+        test_data : bytearray(0 to 63);
+        data_has_been_written_when_1 : std_logic;
     end record;
     
     component ethernet_frame_receiver is
