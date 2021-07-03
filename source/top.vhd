@@ -3,21 +3,23 @@ library ieee;
     use ieee.numeric_std.all;
 
 library work;
+    use work.system_clocks_pkg.all;
     use work.system_control_pkg.all;
 
 entity top is
     port (
-        enet_clk_125MHz         : in std_logic;
-        pll_input_clock         : in std_logic;
-        system_control_FPGA_in  : in system_control_FPGA_input_group;
-        system_control_FPGA_out : out system_control_FPGA_output_group;
+        enet_clk_125MHz           : in std_logic;
+        ethernet_tx_ddr_clock     : out std_logic;
+        pll_input_clock           : in std_logic;
+        system_control_FPGA_in    : in system_control_FPGA_input_group;
+        system_control_FPGA_out   : out system_control_FPGA_output_group;
         system_control_FPGA_inout : inout system_control_FPGA_inout_record
     );
 end entity ;
 
 architecture rtl of top is
 
-    signal system_control_clocks   : system_control_clock_group;
+    signal system_clocks           : system_clocks_group;
     signal system_control_data_in  : system_control_data_input_group;
     signal system_control_data_out : system_control_data_output_group;
 
@@ -44,6 +46,9 @@ architecture rtl of top is
 	);
     end component ethernet_clocks_generator;
 
+    signal rx_ddr_clock        : std_logic;
+    signal tx_core_clock       : std_logic;
+
 ------------------------------------------------------------------------
 begin
 
@@ -51,16 +56,27 @@ begin
     u_main_clocks : main_clocks
     port map( areset => '0'                         ,
               inclk0 => pll_input_clock             ,
-              c0     => system_control_clocks.clock ,
-              locked => system_control_clocks.reset_n);
+              c0     => system_clocks.core_clock ,
+              locked => system_clocks.pll_locked);
+
+------------------------------------------------------------------------
+    u_ethernet_clocks : ethernet_clocks_generator
+	port map
+	(
+		inclk0  => enet_clk_125MHz       ,
+		c0      => rx_ddr_clock          ,
+		c1      => ethernet_tx_ddr_clock ,
+		c2      => tx_core_clock         ,
+		locked  => open
+	);
 
 ------------------------------------------------------------------------
     u_system_control : system_control
-    port map( system_control_clocks ,
-    	  system_control_FPGA_in    ,
-    	  system_control_FPGA_out   ,
-    	  system_control_FPGA_inout ,
-    	  system_control_data_in    ,
-    	  system_control_data_out);
+    port map( system_clocks             ,
+              system_control_FPGA_in    ,
+              system_control_FPGA_out   ,
+              system_control_FPGA_inout ,
+              system_control_data_in    ,
+              system_control_data_out);
 
 end rtl;

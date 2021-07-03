@@ -1,6 +1,0 @@
-
-
-set_location_assignment PIN_M2 pll_input_clock
-
-set_location_assignment PIN_T6 system_control_FPGA_in.system_components_FPGA_in.uart_FPGA_in.uart_rx 
-set_location_assignment PIN_R6 system_control_FPGA_out.system_components_FPGA_out.uart_FPGA_out.uart_tx

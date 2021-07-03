@@ -24,6 +24,11 @@ set_location_assignment PIN_A5 -to system_control_FPGA_inout.system_components_F
 set_location_assignment PIN_B4 -to system_control_FPGA_out.system_components_FPGA_out.ethernet_FPGA_out.mdio_driver_FPGA_out.mdio_clock
 
 
+set_location_assignment PIN_B14 -to ethernet_tx_ddr_clock
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to ethernet_tx_ddr_clock
+   
+set_location_assignment PIN_B8 -to enet_clk_125MHz
+
 set_location_assignment PIN_B5 -to system_control_FPGA_in.system_components_FPGA_in.ethernet_FPGA_in.ethernet_frame_receiver_FPGA_in.ethernet_rx_ddio_FPGA_in.rx_ctl
 
 set_location_assignment PIN_A6 -to system_control_FPGA_in.system_components_FPGA_in.ethernet_FPGA_in.ethernet_frame_receiver_FPGA_in.ethernet_rx_ddio_FPGA_in.ethernet_rx_ddio_in[3]

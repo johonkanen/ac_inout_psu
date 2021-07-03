@@ -5,7 +5,7 @@ ghdl -a --ieee=synopsys --work=math_library %source%/math_library/multiplier/mul
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/first_order_filter/first_order_filter_pkg.vhd
 
 ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_clocks_pkg.vhd 
-ghdl -a --ieee=synopsys %source%/system_clocks/system_clocks_pkg.vhd
+ghdl -a --ieee=synopsys %source%/system_clocks_pkg.vhd
 
         ghdl -a --ieee=synopsys %source%/system_control/system_components/adc_interface/spi_sar_adc/spi_sar_adc_pkg.vhd 
 

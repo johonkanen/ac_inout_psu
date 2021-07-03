@@ -5,7 +5,7 @@ proc get_vhdl_sources {void}\
         /math_library/multiplier/multiplier_pkg.vhd
         /math_library/first_order_filter/first_order_filter_pkg.vhd
 
-        system_control/system_components/ethernet/ethernet_clocks_pkg.vhd
+        /system_clocks_pkg.vhd
 
                             /system_control/system_components/ethernet/mdio_driver/mdio_three_state_io_driver/mdio_three_state_io_driver_pkg.vhd
                             /system_control/system_components/ethernet/mdio_driver/mdio_three_state_io_driver/mdio_three_state_io_driver.vhd
@@ -14,6 +14,7 @@ proc get_vhdl_sources {void}\
                         /system_control/system_components/ethernet/mdio_driver/mdio_driver.vhd
                     /system_control/system_components/ethernet/mdio_driver/mmd_access_functions_pkg.vhd 
 
+                system_control/system_components/ethernet/ethernet_clocks_pkg.vhd 
                         /system_control/system_components/ethernet/ethernet_frame_receiver/ethernet_rx_ddio/ethernet_rx_ddio_pkg.vhd
                         /system_control/system_components/ethernet/ethernet_frame_receiver/ethernet_rx_ddio/ethernet_rx_ddio.vhd
                         /system_control/system_components/ethernet/ethernet_frame_receiver/ethernet_rx_ddio/arch_cl10_rx_ddio.vhd
