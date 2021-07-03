@@ -48,6 +48,9 @@ end package ethernet_rx_ddio_pkg;
 
 package body ethernet_rx_ddio_pkg is
 
+    constant transmit_enabled : std_logic_vector(1 downto 0) := "11";
+    constant transmit_error : std_logic_vector(1 downto 0) := "10";
+
 ------------------------------------------------------------------------
     function ethernet_rx_active
     (
@@ -56,7 +59,7 @@ package body ethernet_rx_ddio_pkg is
     return boolean
     is
     begin
-        if ethernet_rx_ddr_output.rx_ctl(0) = '1' then
+        if ethernet_rx_ddr_output.rx_ctl = transmit_enabled then
             return true;
         else
             return false;
