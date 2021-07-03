@@ -4,8 +4,10 @@ library ieee;
     use ieee.numeric_std.all;
 
 library work;
+    use work.ethernet_clocks_pkg.all;
     use work.ethernet_pkg.all;
     use work.mdio_driver_pkg.all;
+    use work.ethernet_frame_receiver_pkg.all;
 
 entity ethernet is
     port (
@@ -22,8 +24,18 @@ architecture rtl of ethernet is
 
 --------------------------------------------------
     signal mdio_driver_clocks : mdio_driver_clock_group;
+    signal ethernet_frame_receiver_data_in : ethernet_frame_receiver_data_input_group;
+    signal ethernet_frame_receiver_data_out : ethernet_frame_receiver_data_output_group;
 
 begin
+
+    
+
+    u_ethernet_frame_receiver : ethernet_frame_receiver
+    port map( ethernet_clocks.rx_ddr_clocks,
+              ethernet_FPGA_in.ethernet_frame_receiver_FPGA_in ,
+              ethernet_frame_receiver_data_in                  ,
+              ethernet_frame_receiver_data_out);
 
 
 ------------------------------------------------------------------------

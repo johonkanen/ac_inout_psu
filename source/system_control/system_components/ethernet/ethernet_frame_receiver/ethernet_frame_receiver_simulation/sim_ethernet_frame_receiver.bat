@@ -7,6 +7,10 @@ SET project_root=%%F
 )
 SET source=%project_root%/source
 
+ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_clocks_pkg.vhd 
+ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_frame_receiver/ethernet_rx_ddio/ethernet_rx_ddio_pkg.vhd
+ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_frame_receiver/ethernet_rx_ddio/ethernet_rx_ddio.vhd
+ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_frame_receiver/ethernet_rx_ddio/arch_ethernet_rx_ddio_simulation.vhd
 ghdl -a --ieee=synopsys ..\ethernet_frame_receiver_pkg.vhd
 ghdl -a --ieee=synopsys ..\ethernet_frame_receiver.vhd
 ghdl -a --ieee=synopsys tb_ethernet_frame_receiver.vhd

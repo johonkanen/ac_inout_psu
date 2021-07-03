@@ -4,15 +4,13 @@ library ieee;
 
 library work;
     use work.mdio_driver_pkg.all;
+    use work.ethernet_frame_receiver_pkg.all;
+    use work.ethernet_clocks_pkg.all;
 
 package ethernet_pkg is
 
-    type ethernet_clock_group is record
-        core_clock : std_logic;
-    end record;
-    
     type ethernet_FPGA_input_group is record
-        data : std_logic; 
+        ethernet_frame_receiver_FPGA_in : ethernet_frame_receiver_FPGA_input_group;
     end record;
     
     type ethernet_FPGA_output_group is record
