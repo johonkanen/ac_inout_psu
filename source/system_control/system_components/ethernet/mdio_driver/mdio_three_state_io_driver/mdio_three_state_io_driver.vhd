@@ -19,7 +19,7 @@ architecture rtl of mdio_three_state_io_driver is
 
 begin
     --------------------------------------------------
-    mdio_bidirectional_io_selection : process(mdio_three_state_io_driver_data_in)
+    mdio_bidirectional_io_selection : process(mdio_three_state_io_driver_data_in, mdio_three_state_io_driver_FPGA_inout)
     begin
         if mdio_three_state_io_driver_data_in.direction_is_out_when_1 = '0' then
             mdio_three_state_io_driver_FPGA_inout.MDIO_inout_data <= 'Z';
