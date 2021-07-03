@@ -35,6 +35,7 @@ architecture sim of tb_ethernet_frame_receiver is
     
     signal shift_register : std_logic_vector(11 downto 0) := (others => '0');
     signal test_data : std_logic_vector(3 downto 0);
+    signal toggled : boolean;
 
 
 
@@ -75,7 +76,7 @@ begin
         elsif rising_edge(simulator_clock) then
             clocked_reset <= '1';
 
-            if simulation_counter < test_array'high then
+            if simulation_counter < 11 then
                 simulation_counter <= simulation_counter + 1;
             else
                 simulation_counter <= 0;
@@ -83,36 +84,16 @@ begin
             data := test_array(simulation_counter);
             shift_register <= shift_register(7 downto 0) & data;
 
-            CASE simulation_counter is
-                WHEN 1 =>
-                    test_data <= data;
-                WHEN 2 =>
+            if simulation_counter > 0 then
+                toggled <= not toggled;
+                if toggled then
                     test_data <= shift_register(7 downto 4);
-                WHEN 3 => 
+                else
                     test_data <= data;
-                WHEN 4 =>
-                    test_data <= shift_register(7 downto 4);
-                WHEN 5 => 
-                    test_data <= data;
-                WHEN 6 =>
-                    test_data <= shift_register(7 downto 4);
-                WHEN 7 => 
-                    test_data <= data;
-                WHEN 8 =>
-                    test_data <= shift_register(7 downto 4);
-                WHEN 9 => 
-                    test_data <= data;
-                WHEN 10 =>
-                    test_data <= shift_register(7 downto 4);
-                WHEN 11 => 
-                    test_data <= data;
-                WHEN 12 =>
-                    test_data <= shift_register(7 downto 4);
-                when others =>
-                    -- do nothing
-            end CASE;
-
-
+                end if;
+            else
+                toggled <= false;
+            end if;
     
         end if; -- rstn
     end process clocked_reset_generator;	
