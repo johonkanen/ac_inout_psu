@@ -4,6 +4,7 @@ set source=source/
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/multiplier/multiplier_pkg.vhd
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/first_order_filter/first_order_filter_pkg.vhd
 
+ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_clocks_pkg.vhd 
 ghdl -a --ieee=synopsys %source%/system_clocks/system_clocks_pkg.vhd
 
         ghdl -a --ieee=synopsys %source%/system_control/system_components/adc_interface/spi_sar_adc/spi_sar_adc_pkg.vhd 
@@ -18,7 +19,9 @@ ghdl -a --ieee=synopsys %source%/system_clocks/system_clocks_pkg.vhd
             ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/mdio_driver/mdio_driver_internal_pkg.vhd
             ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/mdio_driver/mmd_access_functions_pkg.vhd
 
-    ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_frame_receiver/ethernet_frame_receiver_pkg.vhd
+            ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_frame_receiver/ethernet_rx_ddio/ethernet_rx_ddio_pkg.vhd
+            ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_frame_receiver/ethernet_rx_ddio/ethernet_rx_ddio.vhd
+        ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_frame_receiver/ethernet_frame_receiver_pkg.vhd
     ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_pkg.vhd
 
             ghdl -a --ieee=synopsys %source%/system_control/system_components/power_supply_control/gate_drive_power/gate_drive_power_pkg.vhd

@@ -7,6 +7,7 @@ LIBRARY std  ;
     USE std.textio.all  ; 
 
 library work;
+    use work.ethernet_clocks_pkg.all;
     use work.ethernet_frame_receiver_pkg.all;
 
 entity tb_ethernet_frame_receiver is
@@ -22,7 +23,7 @@ architecture sim of tb_ethernet_frame_receiver is
     constant clock_half_per : time := 0.5 ns;
     constant simtime_in_clocks : integer := 50;
 
-    signal ethernet_frame_receiver_clocks   : ethernet_frame_receiver_clock_group;
+    signal ethernet_frame_receiver_clocks   : ethernet_rx_ddr_clock_group;
     signal ethernet_frame_receiver_FPGA_in  : ethernet_frame_receiver_FPGA_input_group;
     signal ethernet_frame_receiver_data_in  : ethernet_frame_receiver_data_input_group;
     signal ethernet_frame_receiver_data_out : ethernet_frame_receiver_data_output_group;

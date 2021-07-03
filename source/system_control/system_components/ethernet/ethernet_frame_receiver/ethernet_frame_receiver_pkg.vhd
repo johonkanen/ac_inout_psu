@@ -2,12 +2,11 @@ library ieee;
     use ieee.std_logic_1164.all;
     use ieee.numeric_std.all;
 
+library work;
+    use work.ethernet_clocks_pkg.all;
+
 package ethernet_frame_receiver_pkg is
 
-    type ethernet_frame_receiver_clock_group is record
-        clock : std_logic;
-    end record;
-    
     type ethernet_frame_receiver_FPGA_input_group is record
         clock : std_logic;
     end record;
@@ -22,7 +21,7 @@ package ethernet_frame_receiver_pkg is
     
     component ethernet_frame_receiver is
         port (
-            ethernet_frame_receiver_clocks : in ethernet_frame_receiver_clock_group; 
+            ethernet_frame_receiver_clocks : in ethernet_rx_ddr_clock_group; 
             ethernet_frame_receiver_FPGA_in : in ethernet_frame_receiver_FPGA_input_group;
             ethernet_frame_receiver_data_in : in ethernet_frame_receiver_data_input_group;
             ethernet_frame_receiver_data_out : out ethernet_frame_receiver_data_output_group
