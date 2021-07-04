@@ -46,23 +46,22 @@ begin
             rx_shift_register <= rx_shift_register(7 downto 0) & get_byte(ethernet_rx_ddio_data_out); 
 
             if ethernet_rx_is_active(ethernet_rx_ddio_data_out) then
-                -- CASE frame_receiver_state is
-                    -- WHEN wait_for_start_of_frame =>
-                    --     if rx_shift_register = x"AAAB" then
-                    --         frame_receiver_state := receive_frame;
-                    --     end if;
-                    --
-                    -- WHEN receive_frame =>
-                    --     data_is_read_from_buffer <= not data_is_read_from_buffer;
+                CASE frame_receiver_state is
+                    WHEN wait_for_start_of_frame =>
+                        if rx_shift_register = x"AAAB" then
+                            frame_receiver_state := receive_frame;
+                        end if;
+
+                    WHEN receive_frame =>
+                        data_is_read_from_buffer <= not data_is_read_from_buffer;
 
                         if bytearray_index_counter < bytearray'high then
                             bytearray_index_counter <= bytearray_index_counter + 1;
 
-                            test_data(bytearray_index_counter) <= get_byte(ethernet_rx_ddio_data_out); 
-                            -- test_data(bytearray_index_counter) <= get_ethernet_octet(rx_shift_register, ethernet_rx_ddio_data_out, data_is_read_from_buffer);
+                            test_data(bytearray_index_counter) <= get_ethernet_octet(rx_shift_register, ethernet_rx_ddio_data_out, data_is_read_from_buffer);
                         end if;
 
-                -- end CASE;
+                end CASE;
             else
                 if bytearray_index_counter > 0 and bytearray_index_counter /= bytearray'high then
                     bytearray_index_counter <= bytearray_index_counter + 1;

@@ -142,6 +142,12 @@ architecture rtl of system_components is
     signal mmd_is_busy : boolean;
 
 
+    constant activate_loopback_at_10MHz : std_logic_vector(15 downto 0) := x"4000";
+    constant activate_loopback_at_100MHz : std_logic_vector(15 downto 0) := x"6000";
+    constant activate_loopback_at_1000MHz : std_logic_vector(15 downto 0) := x"4040";
+
+    constant force_1000MHz_connection : std_logic_vector(15 downto 0) := x"0140";
+
 
 --------------------------------------------------
 begin
@@ -199,7 +205,7 @@ begin
                     WHEN others => -- get data from MDIO
                         register_counter := register_counter + 1;
                         if test_counter = 100 then
-                            write_data_to_mdio(mdio_driver_data_in, x"00", x"00", x"6100");
+                            -- write_data_to_mdio(mdio_driver_data_in, x"00", x"00", force_1000MHz_connection);
                         else
                             read_data_from_mdio(mdio_driver_data_in, x"00", integer_to_std(register_counter, 8));
                         end if;
