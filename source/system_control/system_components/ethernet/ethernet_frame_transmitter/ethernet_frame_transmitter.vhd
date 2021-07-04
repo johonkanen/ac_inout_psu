@@ -30,6 +30,7 @@ architecture rtl of ethernet_frame_transmitter is
     signal counter_for_333ms : natural range 0 to 2**16-1 := counter_value_at_333ms;
 
     signal transmit_byte_counter : natural range 0 to 255;
+    signal byte_counter_offset : natural range 0 to 255 := 0;
 
 
 begin
@@ -50,12 +51,13 @@ begin
                 else
                     counter_for_333ms <= counter_value_at_333ms;
                     transmit_byte_counter <= 101;
+                    byte_counter_offset <= byte_counter_offset + 1;
                 end if;
             end if; 
 
             if transmit_byte_counter > 0 then
                 transmit_byte_counter <= transmit_byte_counter - 1;
-                transmit_8_bits_of_data(ethernet_tx_ddio_data_in, transmit_byte_counter);
+                transmit_8_bits_of_data(ethernet_tx_ddio_data_in, byte_counter_offset+ transmit_byte_counter);
             end if; 
 
         end if; --rising_edge
