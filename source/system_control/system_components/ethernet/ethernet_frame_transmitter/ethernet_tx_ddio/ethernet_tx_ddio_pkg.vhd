@@ -20,9 +20,12 @@ package ethernet_tx_ddio_pkg is
     end record;
     
 ------------------------------------------------------------------------
+    procedure init_ethernet_tx_ddio (
+        signal ethernet_tx_ddio_input : out ethernet_tx_ddio_data_input_group);
+------------------------------------------------------------------------
     component ethernet_tx_ddio is
         port (
-            ethernet_tx_ddio_clocks : in ethernet_clock_group; 
+            ethernet_tx_ddio_clocks : in ethernet_tx_ddr_clock_group; 
             ethernet_tx_ddio_FPGA_out : out ethernet_tx_ddio_FPGA_output_group; 
             ethernet_tx_ddio_data_in : in ethernet_tx_ddio_data_input_group
         );
@@ -36,7 +39,7 @@ package ethernet_tx_ddio_pkg is
 ------------------------------------------------------------------------
 end package ethernet_tx_ddio_pkg;
 
-    -- signal ethernet_tx_ddio_clocks   : ethernet_tx_ddio_clock_group;
+    -- signal ethernet_tx_ddio_clocks   : ethernet_tx_ddr_clock_group;
     -- signal ethernet_tx_ddio_FPGA_out : ethernet_tx_ddio_FPGA_output_group;
     -- signal ethernet_tx_ddio_data_in  : ethernet_tx_ddio_data_input_group;
     
