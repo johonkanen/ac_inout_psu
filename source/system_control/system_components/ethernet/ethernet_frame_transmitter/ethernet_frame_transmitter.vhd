@@ -23,6 +23,14 @@ architecture rtl of ethernet_frame_transmitter is
     signal ethernet_tx_ddio_FPGA_out : ethernet_tx_ddio_FPGA_output_group;
     signal ethernet_tx_ddio_data_in  : ethernet_tx_ddio_data_input_group;
     
+    constant counter_value_at_100kHz : natural := 1250;
+    signal counter_for_100kHz : natural range 0 to 2**16-1 := counter_value_at_100kHz;
+
+    constant counter_value_at_333ms : natural := 33e3;
+    signal counter_for_333ms : natural range 0 to 2**16-1 := counter_value_at_333ms;
+
+    signal transmit_byte_counter : natural range 0 to 255;
+
 
 begin
 
@@ -31,6 +39,24 @@ begin
     begin
         if rising_edge(tx_ddr_clocks.tx_ddr_clock) then
             init_ethernet_tx_ddio(ethernet_tx_ddio_data_in);
+
+            if counter_for_100kHz > 0 then
+                counter_for_100kHz <= counter_for_100kHz - 1;
+            else
+                counter_for_100kHz <= counter_value_at_100kHz;
+
+                if counter_for_333ms > 0 then
+                    counter_for_333ms <= counter_for_333ms - 1;
+                else
+                    counter_for_333ms <= counter_value_at_333ms;
+                    transmit_byte_counter <= 35;
+                end if;
+            end if; 
+
+            if transmit_byte_counter > 0 then
+                transmit_byte_counter <= transmit_byte_counter - 1;
+                transmit_8_bits_of_data(ethernet_tx_ddio_data_in, transmit_byte_counter);
+            end if; 
 
         end if; --rising_edge
     end process frame_transmitter;	
