@@ -32,6 +32,8 @@ architecture cl10_tx_ddio of ethernet_tx_ddio is
 
 ------------------------------------------------------------------------
 begin
+    ethernet_tx_ddio_FPGA_out <= ( tx_ctl => dataout(4),
+                                 rgmii_tx => dataout(3 downto 0));
 
     ddio_data_out_h <= ethernet_tx_ddio_data_in.tx_ctl(1) & ethernet_tx_ddio_data_in.tx_byte(7 downto 4);
     ddio_data_out_l <= ethernet_tx_ddio_data_in.tx_ctl(0) & ethernet_tx_ddio_data_in.tx_byte(3 downto 0);

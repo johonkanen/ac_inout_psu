@@ -5,6 +5,7 @@ library ieee;
 library work;
     use work.mdio_driver_pkg.all;
     use work.ethernet_frame_receiver_pkg.all;
+    use work.ethernet_frame_transmitter_pkg.all;
     use work.ethernet_clocks_pkg.all;
 
 package ethernet_pkg is
@@ -14,7 +15,8 @@ package ethernet_pkg is
     end record;
     
     type ethernet_FPGA_output_group is record
-        mdio_driver_FPGA_out : mdio_driver_FPGA_output_group; 
+        ethernet_frame_transmitter_FPGA_out : ethernet_frame_transmitter_FPGA_output_group;
+        mdio_driver_FPGA_out                : mdio_driver_FPGA_output_group;
     end record;
 
     type ethernet_FPGA_inout_record is record

@@ -20,9 +20,6 @@ package ethernet_tx_ddio_pkg is
     end record;
     
 ------------------------------------------------------------------------
-    procedure init_ethernet_tx_ddio (
-        signal ethernet_tx_ddio_input : out ethernet_tx_ddio_data_input_group);
-------------------------------------------------------------------------
     component ethernet_tx_ddio is
         port (
             ethernet_tx_ddio_clocks : in ethernet_tx_ddr_clock_group; 
@@ -30,6 +27,14 @@ package ethernet_tx_ddio_pkg is
             ethernet_tx_ddio_data_in : in ethernet_tx_ddio_data_input_group
         );
     end component ethernet_tx_ddio;
+
+------------------------------------------------------------------------
+    procedure init_ethernet_tx_ddio (
+        signal ethernet_tx_ddio_input : out ethernet_tx_ddio_data_input_group);
+------------------------------------------------------------------------
+    procedure transmit_8_bits_of_data (
+        signal ethernet_tx_ddio_input : out ethernet_tx_ddio_data_input_group;
+        data_to_output : in integer);
 
 ------------------------------------------------------------------------
     procedure transmit_8_bits_of_data (
@@ -70,6 +75,17 @@ package body ethernet_tx_ddio_pkg is
         ethernet_tx_ddio_input.tx_ctl  <= "11";
         ethernet_tx_ddio_input.tx_byte <= data_to_output;
     end transmit_8_bits_of_data;
+
+------------------------------------------------------------------------
+    procedure transmit_8_bits_of_data
+    (
+        signal ethernet_tx_ddio_input : out ethernet_tx_ddio_data_input_group;
+        data_to_output : in integer
+    ) is
+    begin
+        transmit_8_bits_of_data(ethernet_tx_ddio_input, std_logic_vector(to_unsigned(data_to_output,8)));
+    end transmit_8_bits_of_data;
+
 
 ------------------------------------------------------------------------
 end package body ethernet_tx_ddio_pkg;
