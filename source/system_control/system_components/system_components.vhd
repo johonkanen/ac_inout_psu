@@ -217,7 +217,7 @@ begin
             if mdio_data_read_is_ready(mdio_driver_data_out) then
                 mdio_registers(register_counter) <=  get_data_from_mdio(mdio_driver_data_out);
 
-                if test_counter < 32 then
+                if test_counter < 64 then
 
                         transmit_16_bit_word_with_uart(uart_data_in, ethernet_data_out.ethernet_frame_receiver_data_out.test_data(test_counter*2+1) & ethernet_data_out.ethernet_frame_receiver_data_out.test_data(test_counter*2));
                         -- transmit_16_bit_word_with_uart(uart_data_in, get_data_from_mdio(mdio_driver_data_out));
