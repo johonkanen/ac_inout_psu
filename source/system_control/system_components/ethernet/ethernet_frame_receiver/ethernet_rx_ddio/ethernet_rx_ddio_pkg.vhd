@@ -36,7 +36,7 @@ package ethernet_rx_ddio_pkg is
         ethernet_rx_output : ethernet_rx_ddio_data_output_group)
         return std_logic_vector;
 ------------------------------------------------------------------------
-    function ethernet_rx_active ( ethernet_rx_ddr_output : ethernet_rx_ddio_data_output_group)
+    function ethernet_rx_is_active ( ethernet_rx_ddr_output : ethernet_rx_ddio_data_output_group)
         return boolean;
 ------------------------------------------------------------------------
 end package ethernet_rx_ddio_pkg;
@@ -78,7 +78,7 @@ package body ethernet_rx_ddio_pkg is
     end get_reversed_byte;
 
 ------------------------------------------------------------------------
-    function ethernet_rx_active
+    function ethernet_rx_is_active
     (
         ethernet_rx_ddr_output : ethernet_rx_ddio_data_output_group
     )
@@ -91,7 +91,7 @@ package body ethernet_rx_ddio_pkg is
             return false;
         end if;
         
-    end ethernet_rx_active;
+    end ethernet_rx_is_active;
 ------------------------------------------------------------------------
 
     function get_byte
