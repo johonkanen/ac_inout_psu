@@ -10,9 +10,9 @@ library work;
 
 entity ethernet_frame_receiver is
     port (
-        ethernet_frame_receiver_clocks  : in ethernet_rx_ddr_clock_group;
-        ethernet_frame_receiver_FPGA_in : in ethernet_frame_receiver_FPGA_input_group;
-        ethernet_frame_receiver_data_in : in ethernet_frame_receiver_data_input_group;
+        ethernet_frame_receiver_clocks   : in ethernet_rx_ddr_clock_group;
+        ethernet_frame_receiver_FPGA_in  : in ethernet_frame_receiver_FPGA_input_group;
+        ethernet_frame_receiver_data_in  : in ethernet_frame_receiver_data_input_group;
         ethernet_frame_receiver_data_out : out ethernet_frame_receiver_data_output_group
     );
 end entity ethernet_frame_receiver;
@@ -25,9 +25,9 @@ architecture rtl of ethernet_frame_receiver is
 
 
     signal rx_shift_register : std_logic_vector(15 downto 0) := (others => '0'); 
-    signal test_data : bytearray(0 to 63);
+    signal test_data : bytearray;
     signal data_has_been_written_when_1 : std_logic := '0';
-    signal bytearray_index_counter : natural range 0 to 127;
+    signal bytearray_index_counter : natural range 0 to bytearray'high;
     signal data_is_read_from_buffer : boolean;
 
     
@@ -55,7 +55,7 @@ begin
                     WHEN receive_frame =>
                         data_is_read_from_buffer <= not data_is_read_from_buffer;
 
-                        if bytearray_index_counter < 64 then
+                        if bytearray_index_counter < bytearray'high then
                             bytearray_index_counter <= bytearray_index_counter + 1;
 
                             test_data(bytearray_index_counter) <= get_ethernet_octet(rx_shift_register, ethernet_rx_ddio_data_out, data_is_read_from_buffer);
@@ -63,7 +63,13 @@ begin
 
                 end CASE;
             else
-                bytearray_index_counter <= 0;
+                if bytearray_index_counter > 0 and bytearray_index_counter /= bytearray'high then
+                    bytearray_index_counter <= bytearray_index_counter + 1;
+
+                    test_data(bytearray_index_counter) <= x"DD";
+                else
+                    bytearray_index_counter <= 0;
+                end if;
                 frame_receiver_state := wait_for_start_of_frame;
                 data_is_read_from_buffer <= false;
 

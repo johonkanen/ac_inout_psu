@@ -9,7 +9,7 @@ library work;
 entity top is
     port (
         enet_clk_125MHz           : in std_logic;
-        ethernet_tx_ddr_clock     : out std_logic;
+        ethernet_tx_ddr_io_clock  : out std_logic;
         pll_input_clock           : in std_logic;
         system_control_FPGA_in    : in system_control_FPGA_input_group;
         system_control_FPGA_out   : out system_control_FPGA_output_group;
@@ -65,10 +65,10 @@ begin
     u_ethernet_clocks : ethernet_clocks_generator
 	port map
 	(
-		inclk0  => enet_clk_125MHz       ,
-		c0      => rx_ddr_clock          ,
-		c1      => ethernet_tx_ddr_clock ,
-		c2      => tx_core_clock         ,
+		inclk0  => enet_clk_125MHz          ,
+		c0      => rx_ddr_clock             ,
+		c1      => ethernet_tx_ddr_io_clock ,
+		c2      => tx_core_clock            ,
 		locked  => open
 	);
 

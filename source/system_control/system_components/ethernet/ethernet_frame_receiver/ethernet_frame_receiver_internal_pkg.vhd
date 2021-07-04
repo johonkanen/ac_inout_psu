@@ -8,9 +8,6 @@ library work;
 
 package ethernet_frame_receiver_internal_pkg is
 
-    function get_reversed_byte ( ethernet_shift_register : std_logic_vector)
-        return std_logic_vector;
-
     function get_ethernet_octet (
             shift_register : std_logic_vector;
             ethernet_ddio : ethernet_rx_ddio_data_output_group;

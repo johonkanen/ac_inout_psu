@@ -39,7 +39,7 @@ begin
     ddio_fpga_in(4) <= ethernet_rx_ddio_FPGA_in.rx_ctl;
     ddio_fpga_in(3 downto 0) <= ethernet_rx_ddio_FPGA_in.ethernet_rx_ddio_in;
 
-    ethernet_rx_ddio_data_out <= (rx_ctl           => dataout_l(4) & dataout_h(4),
+    ethernet_rx_ddio_data_out <= (rx_ctl           => dataout_l(4)          & dataout_h(4),
                                   ethernet_rx_byte => dataout_l(3 downto 0) & dataout_h(3 downto 0));
 
 ------------------------------------------------------------------------
@@ -47,8 +47,8 @@ begin
         PORT map(
             ddio_fpga_in  ,
             ddio_rx_clock ,
-            dataout_h     , -- ethernet_byte_to_fpga(7 downto 4) ,
-            dataout_l       -- ethernet_byte_to_fpga(3 downto 0)
+            dataout_h     ,
+            dataout_l
         );
 
 ------------------------------------------------------------------------
