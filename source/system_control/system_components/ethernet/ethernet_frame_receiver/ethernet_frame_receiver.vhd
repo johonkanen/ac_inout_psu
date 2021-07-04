@@ -28,6 +28,31 @@ architecture rtl of ethernet_frame_receiver is
     signal data_has_been_written_when_1 : std_logic := '0';
     signal bytearray_index_counter : natural range 0 to 127;
     signal data_is_read_from_buffer : boolean;
+
+    function get_reversed_byte
+    (
+        ethernet_shift_register : std_logic_vector
+    )
+    return std_logic_vector 
+    is
+        variable byte_reversed : std_logic_vector(7 downto 0);
+        variable buffered_byte : std_logic_vector(7 downto 0);
+    begin
+        buffered_byte := ethernet_shift_register(15 downto 8);
+
+        byte_reversed := buffered_byte(0) &
+                         buffered_byte(1) &
+                         buffered_byte(2) &
+                         buffered_byte(3) &
+                         buffered_byte(4) &
+                         buffered_byte(5) &
+                         buffered_byte(6) &
+                         buffered_byte(7);
+
+        return byte_reversed; 
+
+        
+    end get_reversed_byte;
     
 begin
 
@@ -42,26 +67,26 @@ begin
             rx_shift_register <= rx_shift_register(7 downto 0) & get_byte(ethernet_rx_ddio_data_out); 
 
             if ethernet_rx_active(ethernet_rx_ddio_data_out) then
-                -- CASE frame_receiver_state is
-                --     WHEN wait_for_start_of_frame =>
-                --         if rx_shift_register = x"AAAB" then
-                --             frame_receiver_state := receive_frame;
-                --         end if;
-                --
-                --     WHEN receive_frame =>
+                CASE frame_receiver_state is
+                    WHEN wait_for_start_of_frame =>
+                        if rx_shift_register = x"AAAB" then
+                            frame_receiver_state := receive_frame;
+                        end if;
+
+                    WHEN receive_frame =>
                         data_is_read_from_buffer <= not data_is_read_from_buffer;
 
                         if bytearray_index_counter < 64 then
                             bytearray_index_counter <= bytearray_index_counter + 1;
 
-                            -- if data_is_read_from_buffer then
-                            --     test_data(bytearray_index_counter) <= rx_shift_register(15 downto 8);
-                            -- else
-                                test_data(bytearray_index_counter) <= get_byte(ethernet_rx_ddio_data_out);
-                            -- end if;
+                            if data_is_read_from_buffer then
+                                test_data(bytearray_index_counter) <= get_reversed_byte(rx_shift_register);
+                            else
+                                test_data(bytearray_index_counter) <= get_reversed_byte(ethernet_rx_ddio_data_out);
+                            end if;
                         end if;
 
-                -- end CASE;
+                end CASE;
             else
                 bytearray_index_counter <= 0;
                 frame_receiver_state := wait_for_start_of_frame;
