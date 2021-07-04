@@ -142,8 +142,6 @@ architecture rtl of system_components is
     signal mmd_is_busy : boolean;
 
 
-    type std_array is array (integer range 0 to 31) of std_logic_vector(15 downto 0);
-    signal mdio_registers : std_array;
 
 --------------------------------------------------
 begin
@@ -201,7 +199,7 @@ begin
                     WHEN others => -- get data from MDIO
                         register_counter := register_counter + 1;
                         if test_counter = 100 then
-                            write_data_to_mdio(mdio_driver_data_in, x"00", x"00", x"4140");
+                            write_data_to_mdio(mdio_driver_data_in, x"00", x"00", x"6100");
                         else
                             read_data_from_mdio(mdio_driver_data_in, x"00", integer_to_std(register_counter, 8));
                         end if;
@@ -215,13 +213,15 @@ begin
             end if;
 
             if mdio_data_read_is_ready(mdio_driver_data_out) then
-                mdio_registers(register_counter) <=  get_data_from_mdio(mdio_driver_data_out);
+                if test_counter < 64+32 then 
+                        transmit_16_bit_word_with_uart(uart_data_in, get_data_from_mdio(mdio_driver_data_out));
+                end if;
 
                 if test_counter < 64 then
 
                         transmit_16_bit_word_with_uart(uart_data_in, ethernet_data_out.ethernet_frame_receiver_data_out.test_data(test_counter*2+1) & ethernet_data_out.ethernet_frame_receiver_data_out.test_data(test_counter*2));
-                        -- transmit_16_bit_word_with_uart(uart_data_in, get_data_from_mdio(mdio_driver_data_out));
                 end if;
+
             end if;
 
         end if; --rising_edge
