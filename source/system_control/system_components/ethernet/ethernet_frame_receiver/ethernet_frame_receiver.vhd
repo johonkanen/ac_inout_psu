@@ -61,12 +61,37 @@ begin
     frame_receiver : process(rx_ddr_clock) 
         type list_of_frame_receiver_states is (wait_for_start_of_frame, receive_frame);
         variable frame_receiver_state : list_of_frame_receiver_states := wait_for_start_of_frame;
+
+        --------------------------------------------------
+        impure function get_ethernet_octet
+        (
+            shift_register : std_logic_vector;
+            ethernet_ddio : ethernet_rx_ddio_data_output_group
+        )
+        return std_logic_vector 
+        is
+            variable reordered_ethernet_byte : std_logic_vector(7 downto 0);
+        begin
+            data_is_read_from_buffer <= not data_is_read_from_buffer;
+
+            if data_is_read_from_buffer then
+                reordered_ethernet_byte := get_reversed_byte(rx_shift_register);
+            else
+                reordered_ethernet_byte := get_reversed_byte(ethernet_rx_ddio_data_out);
+            end if;
+
+            return reordered_ethernet_byte;
+            
+        end get_ethernet_octet;
+        --------------------------------------------------
+
+
     begin
         if rising_edge(rx_ddr_clock) then 
 
             rx_shift_register <= rx_shift_register(7 downto 0) & get_byte(ethernet_rx_ddio_data_out); 
 
-            if ethernet_rx_active(ethernet_rx_ddio_data_out) then
+            if ethernet_rx_is_active(ethernet_rx_ddio_data_out) then
                 CASE frame_receiver_state is
                     WHEN wait_for_start_of_frame =>
                         if rx_shift_register = x"AAAB" then
@@ -74,16 +99,11 @@ begin
                         end if;
 
                     WHEN receive_frame =>
-                        data_is_read_from_buffer <= not data_is_read_from_buffer;
 
                         if bytearray_index_counter < 64 then
                             bytearray_index_counter <= bytearray_index_counter + 1;
 
-                            if data_is_read_from_buffer then
-                                test_data(bytearray_index_counter) <= get_reversed_byte(rx_shift_register);
-                            else
-                                test_data(bytearray_index_counter) <= get_reversed_byte(ethernet_rx_ddio_data_out);
-                            end if;
+                            test_data(bytearray_index_counter) <= get_ethernet_octet(rx_shift_register, ethernet_rx_ddio_data_out);
                         end if;
 
                 end CASE;
