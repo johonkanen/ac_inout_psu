@@ -201,7 +201,7 @@ begin
                     WHEN others => -- get data from MDIO
                         register_counter := register_counter + 1;
                         if test_counter = 100 then
-                            write_data_to_mdio(mdio_driver_data_in, x"00", x"00", x"4500");
+                            write_data_to_mdio(mdio_driver_data_in, x"00", x"00", x"4140");
                         else
                             read_data_from_mdio(mdio_driver_data_in, x"00", integer_to_std(register_counter, 8));
                         end if;
