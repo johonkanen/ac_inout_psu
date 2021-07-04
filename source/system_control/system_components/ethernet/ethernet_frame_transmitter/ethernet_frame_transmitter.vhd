@@ -49,7 +49,7 @@ begin
                     counter_for_333ms <= counter_for_333ms - 1;
                 else
                     counter_for_333ms <= counter_value_at_333ms;
-                    transmit_byte_counter <= 35;
+                    transmit_byte_counter <= 101;
                 end if;
             end if; 
 
