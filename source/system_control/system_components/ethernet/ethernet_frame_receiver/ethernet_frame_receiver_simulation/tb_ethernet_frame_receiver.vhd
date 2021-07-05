@@ -75,6 +75,21 @@ architecture sim of tb_ethernet_frame_receiver is
     signal fcs_shift_register : std_logic_vector(31 downto 0) := (others => '1');
     signal checksum : std_logic_vector(31 downto 0) := (others => '0');
 
+    function invert_bit_order
+    (
+        std_vector : std_logic_vector(31 downto 0)
+    )
+    return std_logic_vector 
+    is
+        variable reordered_vector : std_logic_vector(31 downto 0);
+    begin
+        for i in reordered_vector'range loop
+            reordered_vector(i) := std_vector(std_vector'left - i);
+        end loop;
+        return reordered_vector;
+    end invert_bit_order;
+
+
 
 begin
 
@@ -134,7 +149,7 @@ begin
 
             ethernet_test_frame_in_big_endian <= ethernet_test_frame_in_big_endian(ethernet_test_frame_in_big_endian'left-8 downto 0) & x"00";
             fcs_shift_register <= nextCRC32_D8(reverse_bit_order(ethernet_test_frame_in_big_endian(ethernet_test_frame_in_big_endian'left downto ethernet_test_frame_in_big_endian'left-7)), fcs_shift_register);
-            checksum <= (not (nextCRC32_D8(reverse_bit_order(ethernet_test_frame_in_big_endian(ethernet_test_frame_in_big_endian'left downto ethernet_test_frame_in_big_endian'left-7)), fcs_shift_register)));
+            checksum <= invert_bit_order(not (nextCRC32_D8(reverse_bit_order(ethernet_test_frame_in_big_endian(ethernet_test_frame_in_big_endian'left downto ethernet_test_frame_in_big_endian'left-7)), fcs_shift_register)));
     
         end if; -- rstn
     end process clocked_reset_generator;	
