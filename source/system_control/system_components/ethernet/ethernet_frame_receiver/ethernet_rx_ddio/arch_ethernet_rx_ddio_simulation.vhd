@@ -17,7 +17,7 @@ library work;
 
 architecture simulation of ethernet_rx_ddio is
 
-    alias ddio_rx_clock is ethernet_rx_ddio_clocks.rx_ddr_clocks.rx_ddr_clock;
+    alias ddio_rx_clock is ethernet_rx_ddio_clocks.rx_ddr_clock;
     alias ddio_fpga_in is ethernet_rx_ddio_fpga_in.ethernet_rx_ddio_in;
     alias received_ethernet_byte is ethernet_rx_ddio_data_out.ethernet_rx_byte;
 
