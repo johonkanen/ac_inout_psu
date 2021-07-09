@@ -225,7 +225,7 @@ begin
 
                 if test_counter < 64 then
 
-                        transmit_16_bit_word_with_uart(uart_data_in, ethernet_data_out.ethernet_frame_receiver_data_out.test_data(test_counter*2+1) & ethernet_data_out.ethernet_frame_receiver_data_out.test_data(test_counter*2));
+                        transmit_16_bit_word_with_uart(uart_data_in, to_integer(unsigned(ethernet_data_out.ethernet_frame_receiver_data_out.test_data(test_counter*2+1) & ethernet_data_out.ethernet_frame_receiver_data_out.test_data(test_counter*2))));
                 end if;
 
             end if;
