@@ -68,7 +68,21 @@ architecture rtl of ethernet_frame_receiver is
     signal checksum_test2 : std_logic_vector(31 downto 0) := (others => '0');
     signal checksum_test3 : std_logic_vector(31 downto 0) := (others => '0');
     signal checksum_test4 : std_logic_vector(31 downto 0) := (others => '0');
-    signal counter : natural range 0 to 7;
+    signal counter : natural range 0 to 15;
+    
+    signal crc_is_ok : boolean := false;
+
+    function get_low_bytes
+    (
+        data_in : std_logic_vector(31 downto 0)
+    )
+    return std_logic_vector
+    is
+    begin
+
+        return data_in(15 downto 0);
+        
+    end get_low_bytes;
     
 begin
 
@@ -83,6 +97,10 @@ begin
         if rising_edge(rx_ddr_clock) then 
 
             rx_shift_register <= rx_shift_register(7 downto 0) & get_byte(ethernet_rx_ddio_data_out); 
+
+            if fcs_shift_register = x"38fb2284" then
+                crc_is_ok <= true; 
+            end if;
 
 
             ethernet_rx_is_activated <= ethernet_rx_is_active(ethernet_rx_ddio_data_out);
@@ -101,13 +119,9 @@ begin
                         if bytearray_index_counter < bytearray'high then
                             bytearray_index_counter <= bytearray_index_counter + 1;
 
-                            test_data(bytearray_index_counter) <= get_ethernet_octet(rx_shift_register, ethernet_rx_ddio_data_out, data_is_read_from_buffer);
-                            fcs_shift_register <= nextCRC32_D8(get_ethernet_octet(rx_shift_register, ethernet_rx_ddio_data_out, data_is_read_from_buffer), fcs_shift_register);
-                            checksum <= invert_bit_order(not (nextCRC32_D8(get_ethernet_octet(rx_shift_register, ethernet_rx_ddio_data_out, data_is_read_from_buffer), fcs_shift_register)));
-                            checksum_test1 <= checksum;
-                            checksum_test2 <= checksum_test1;
-                            checksum_test3 <= checksum_test2;
-                            checksum_test4 <= checksum_test3;
+                            test_data(bytearray_index_counter) <= get_low_bytes(nextCRC32_D8(get_reversed_ethernet_octet(rx_shift_register, ethernet_rx_ddio_data_out, data_is_read_from_buffer), fcs_shift_register));  --get_ethernet_octet(rx_shift_register, ethernet_rx_ddio_data_out, data_is_read_from_buffer);
+                            fcs_shift_register                 <= nextCRC32_D8(get_reversed_ethernet_octet(rx_shift_register, ethernet_rx_ddio_data_out, data_is_read_from_buffer), fcs_shift_register);
+                            checksum                           <= (nextCRC32_D8((get_ethernet_octet(rx_shift_register, ethernet_rx_ddio_data_out, data_is_read_from_buffer)), checksum));
                         end if;
 
                 end CASE;
@@ -116,19 +130,22 @@ begin
                     bytearray_index_counter <= bytearray_index_counter + 1;
 
                     test_data(bytearray_index_counter) <= x"DD";
-                    if counter < 4 then
+                    if counter < 8 then
                         counter <= counter + 1;
                         CASE counter is
-                            WHEN 0 => test_data(bytearray_index_counter) <= checksum_test2(31 downto 24);
-                            WHEN 1 => test_data(bytearray_index_counter) <= checksum_test2(23 downto 16);
-                            WHEN 2 => test_data(bytearray_index_counter) <= checksum_test2(15 downto 8);
-                            WHEN 3 => test_data(bytearray_index_counter) <= checksum_test2(7 downto 0);
+                            WHEN 0 => test_data(bytearray_index_counter) <= fcs_shift_register(7  downto 0);
+                            WHEN 1 => test_data(bytearray_index_counter) <= fcs_shift_register(15 downto 8);
+                            WHEN 2 => test_data(bytearray_index_counter) <= fcs_shift_register(23 downto 16);
+                            WHEN 3 => test_data(bytearray_index_counter) <= fcs_shift_register(31 downto 24);
                             WHEN others => -- do notihing
                         end CASE;
                     end if;
                 else
                     bytearray_index_counter <= 0;
                     fcs_shift_register <= (others => '1');
+                    checksum <= (others => '1');
+                    crc_is_ok <= false; 
+
 
                     frame_receiver_state := wait_for_start_of_frame;
                 end if;

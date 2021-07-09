@@ -14,6 +14,12 @@ package ethernet_frame_receiver_internal_pkg is
             read_data_from_buffer : boolean)
         return std_logic_vector;
 
+    function get_reversed_ethernet_octet (
+            shift_register : std_logic_vector;
+            ethernet_ddio : ethernet_rx_ddio_data_output_group;
+            read_data_from_buffer : boolean)
+        return std_logic_vector ;
+
 end package ethernet_frame_receiver_internal_pkg;
 
 
@@ -65,6 +71,28 @@ package body ethernet_frame_receiver_internal_pkg is
         return reordered_ethernet_byte;
         
     end get_ethernet_octet;
+    ------------------------------------------------------------------------ 
+    function get_reversed_ethernet_octet
+    (
+        shift_register : std_logic_vector;
+        ethernet_ddio : ethernet_rx_ddio_data_output_group;
+        read_data_from_buffer : boolean
+    )
+    return std_logic_vector 
+    is
+        variable reordered_ethernet_byte : std_logic_vector(7 downto 0);
+    begin
+
+        if read_data_from_buffer then
+            reordered_ethernet_byte := (shift_register(15 downto 8));
+        else
+            reordered_ethernet_byte := get_byte(ethernet_ddio);
+        end if;
+
+        return reordered_ethernet_byte;
+        
+    end get_reversed_ethernet_octet;
+
     ------------------------------------------------------------------------ 
 
 end package body ethernet_frame_receiver_internal_pkg;
