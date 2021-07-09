@@ -67,14 +67,6 @@ architecture sim of tb_ethernet_frame_receiver is
         return reordered_vector;
     end reverse_bit_order;
 
-    constant ethernet_test_frame_in_order : std_logic_vector := x"ffffffffffffc46516ae5e4f08004500004e3ca700008011574aa9fe52b1a9feffff00890089003a567b91c9011000010000000000002045454542454f454745504644464443414341434143414341434143414341424d000020000155c9b04d";
-    signal ethernet_test_frame_in_big_endian : std_logic_vector(ethernet_test_frame_in_order'high downto 0) := reverse_bits(ethernet_test_frame_in_order);
-
-    signal test_framee_length : natural := ethernet_test_frame_in_big_endian'high;
-
-    signal fcs_shift_register : std_logic_vector(31 downto 0) := (others => '1');
-    signal checksum : std_logic_vector(31 downto 0) := (others => '0');
-
     function invert_bit_order
     (
         std_vector : std_logic_vector(31 downto 0)
@@ -89,6 +81,23 @@ architecture sim of tb_ethernet_frame_receiver is
         return reordered_vector;
     end invert_bit_order;
 
+
+    constant magic_check_1 : std_logic_vector(31 downto 0) := x"2144df1c";
+
+    constant ethernet_test_frame_in_order : std_logic_vector := x"ffffffffffffc46516ae5e4f08004500004e3ca700008011574aa9fe52b1a9feffff00890089003a567b91c9011000010000000000002045454542454f454745504644464443414341434143414341434143414341424d00002000014db0c955";
+    signal ethernet_test_frame_in_big_endian : std_logic_vector(ethernet_test_frame_in_order'high downto 0) := reverse_bits(ethernet_test_frame_in_order);
+
+    signal test_framee_length : natural := ethernet_test_frame_in_big_endian'high;
+
+    signal fcs_shift_register_ref : std_logic_vector(31 downto 0) := x"ffffffff";
+    signal fcs_shift_register : std_logic_vector(31 downto 0) := (others => '1');
+    signal checksum : std_logic_vector(31 downto 0) := (others => '0');
+    signal checksum_test1 : std_logic_vector(31 downto 0) := (others => '0');
+    signal checksum_test2 : std_logic_vector(31 downto 0) := (others => '0');
+    signal checksum_test3 : std_logic_vector(31 downto 0) := (others => '0');
+    signal checksum_test4 : std_logic_vector(31 downto 0) := (others => '0');
+
+    signal data_shift_register : std_logic_vector(31 downto 0);
 
 
 begin
@@ -120,6 +129,7 @@ begin
 
     clocked_reset_generator : process(simulator_clock, rstn)
         variable data : std_logic_vector(3 downto 0);
+
     begin
         if rstn = '0' then
         -- reset state
@@ -148,8 +158,16 @@ begin
             end if;
 
             ethernet_test_frame_in_big_endian <= ethernet_test_frame_in_big_endian(ethernet_test_frame_in_big_endian'left-8 downto 0) & x"00";
-            fcs_shift_register <= nextCRC32_D8(reverse_bit_order(ethernet_test_frame_in_big_endian(ethernet_test_frame_in_big_endian'left downto ethernet_test_frame_in_big_endian'left-7)), fcs_shift_register);
-            checksum <= invert_bit_order(not (nextCRC32_D8(reverse_bit_order(ethernet_test_frame_in_big_endian(ethernet_test_frame_in_big_endian'left downto ethernet_test_frame_in_big_endian'left-7)), fcs_shift_register)));
+            fcs_shift_register_ref <= nextCRC32_D8( reverse_bit_order(ethernet_test_frame_in_big_endian(ethernet_test_frame_in_big_endian'left downto ethernet_test_frame_in_big_endian'left-7)), fcs_shift_register_ref);
+            fcs_shift_register <= nextCRC32_D8( reverse_bit_order(ethernet_test_frame_in_big_endian(ethernet_test_frame_in_big_endian'left downto ethernet_test_frame_in_big_endian'left-7)), fcs_shift_register);
+
+            data_shift_register <=  data_shift_register(31-8 downto 0) & (ethernet_test_frame_in_big_endian(ethernet_test_frame_in_big_endian'left downto ethernet_test_frame_in_big_endian'left-7));
+
+            checksum <= not  invert_bit_order((nextCRC32_D8(reverse_bit_order(ethernet_test_frame_in_big_endian(ethernet_test_frame_in_big_endian'left downto ethernet_test_frame_in_big_endian'left-7)), fcs_shift_register)));
+            checksum_test1 <= checksum;
+            checksum_test2 <= checksum_test1;
+            checksum_test3 <= checksum_test2;
+            checksum_test4 <= checksum_test3;
     
         end if; -- rstn
     end process clocked_reset_generator;	

@@ -22,6 +22,8 @@ proc get_vhdl_sources {void}\
                     /system_control/system_components/ethernet/ethernet_frame_receiver/ethernet_frame_receiver_internal_pkg.vhd
                     /system_control/system_components/ethernet/ethernet_frame_receiver/ethernet_frame_receiver.vhd
 
+
+                /system_control/system_components/ethernet/ethernet_common/PCK_CRC_32_D8.vhd
                         /system_control/system_components/ethernet/ethernet_frame_transmitter/ethernet_tx_ddio/ethernet_tx_ddio_pkg.vhd
                         /system_control/system_components/ethernet/ethernet_frame_transmitter/ethernet_tx_ddio/ethernet_tx_ddio.vhd
                         /system_control/system_components/ethernet/ethernet_frame_transmitter/ethernet_tx_ddio/arch_cl10_tx_ddio.vhd
