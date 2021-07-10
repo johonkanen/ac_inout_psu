@@ -9,20 +9,25 @@ library work;
 
 package ethernet_frame_receiver_internal_pkg is
 
+    constant ethernet_fcs_checksum    : std_logic_vector(31 downto 0) := x"c704dd7b";
+    constant ethernet_frame_delimiter : std_logic_vector(7 downto 0)  := x"AB";
+    constant ethernet_frame_preamble  : std_logic_vector(15 downto 0) := x"AAAA";
+
     type list_of_frame_receiver_states is (wait_for_start_of_frame, receive_frame);
 
     type ethernet_receiver is record
         frame_receiver_state         : list_of_frame_receiver_states;
         rx_shift_register            : std_logic_vector(15 downto 0);
-        test_data                    : bytearray;
         data_has_been_written_when_1 : std_logic;
-        bytearray_index_counter      : natural range 0 to bytearray'high;
         fcs_shift_register           : std_logic_vector(31 downto 0);
         counter                      : natural range 0 to 15;
         crc_is_ok                    : boolean; 
+
+        test_data                    : bytearray;
+        bytearray_index_counter      : natural range 0 to bytearray'high;
     end record;
 
-    procedure receiver_ethernet_frame (
+    procedure capture_ethernet_frame (
         signal ethernet_rx : inout ethernet_receiver;
         ethernet_ddio_out : ethernet_rx_ddio_data_output_group);
 
@@ -34,7 +39,8 @@ end package ethernet_frame_receiver_internal_pkg;
 
 package body ethernet_frame_receiver_internal_pkg is
 
-    procedure receiver_ethernet_frame
+------------------------------------------------------------------------
+    procedure capture_ethernet_frame
     (
         signal ethernet_rx : inout ethernet_receiver;
         ethernet_ddio_out : ethernet_rx_ddio_data_output_group
@@ -49,9 +55,10 @@ package body ethernet_frame_receiver_internal_pkg is
         alias crc_is_ok                    is ethernet_rx.crc_is_ok                   ;
 
     begin
+
         CASE frame_receiver_state is
             WHEN wait_for_start_of_frame =>
-                if rx_shift_register = x"AAAA" and get_byte(ethernet_ddio_out) = x"ab"  then
+                if rx_shift_register = ethernet_frame_preamble and get_byte(ethernet_ddio_out) = ethernet_frame_delimiter  then
                     frame_receiver_state <= receive_frame;
                 end if;
 
@@ -64,12 +71,12 @@ package body ethernet_frame_receiver_internal_pkg is
                     test_data(bytearray_index_counter) <= get_reversed_byte(ethernet_ddio_out);
                 end if;
 
-                if fcs_shift_register /= x"c704dd7b" then
+                if fcs_shift_register /= ethernet_fcs_checksum then
                     fcs_shift_register <= nextCRC32_D8(get_byte(ethernet_ddio_out), fcs_shift_register);
                 end if;
 
         end CASE;
-    end receiver_ethernet_frame;
+    end capture_ethernet_frame;
 
 ------------------------------------------------------------------------
     procedure idle_ethernet_rx

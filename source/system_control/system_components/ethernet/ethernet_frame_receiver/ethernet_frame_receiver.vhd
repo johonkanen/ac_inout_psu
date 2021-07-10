@@ -17,12 +17,11 @@ entity ethernet_frame_receiver is
     );
 end entity ethernet_frame_receiver;
 
-architecture rtl of ethernet_frame_receiver is
-
-    signal ethernet_rx_ddio_data_out  : ethernet_rx_ddio_data_output_group;
+architecture rtl of ethernet_frame_receiver is 
 
     alias rx_ddr_clock is ethernet_frame_receiver_clocks.rx_ddr_clock; 
 
+    signal ethernet_rx_ddio_data_out  : ethernet_rx_ddio_data_output_group;
     signal ethernet_rx : ethernet_receiver;
 
 ------------------------------------------------------------------------
@@ -33,8 +32,9 @@ begin
                                             data_has_been_written_when_1 => ethernet_rx.data_has_been_written_when_1
                                         );
 
+------------------------------------------------------------------------
     frame_receiver : process(rx_ddr_clock) 
-    --------------------------------------------------
+
     begin
         if rising_edge(rx_ddr_clock) then 
 
@@ -45,7 +45,7 @@ begin
             end if; 
 
             if ethernet_rx_is_active(ethernet_rx_ddio_data_out) then
-                receiver_ethernet_frame(ethernet_rx, ethernet_rx_ddio_data_out); 
+                capture_ethernet_frame(ethernet_rx, ethernet_rx_ddio_data_out); 
 
             else
                 idle_ethernet_rx(ethernet_rx);
