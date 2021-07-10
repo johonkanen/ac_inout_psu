@@ -94,7 +94,7 @@ architecture sim of tb_ethernet_frame_receiver is
     constant ethernet_test_frame_in_order_3 : std_logic_vector := x"ffffffffffffc46516ae5e4f08004500004e8bc600008011082ba9fe52b1a9feffff00890089003a0417e42d011000010000000000002045454542454f454745504644464443414341434143414341434143414341424d0000200001d8b29720"; 
     -- ff ff ff ff ff ff c4 65 16 ae 5e 4f 08 00 45 00 00 4e 8b c6 00 00 80 11 08 2b a9 fe 52 b1 a9 fe ff ff 00 89 00 89 00 3a 04 17 e4 2d 01 10 00 01 00 00 00 00 00 00 20 45 45 45 42 45 4f 45 47 45 50 46 44 46 44 43 41 43 41 43 41 43 41 43 41 43 41 43 41 43 41 42 4d 00 00 20 00 01 d8 b2 97 20
 
-    signal ethernet_test_frame_in_big_endian : std_logic_vector(ethernet_test_frame_in_order'high downto 0) := reverse_bits(ethernet_test_frame_in_order);
+    signal ethernet_test_frame_in_big_endian : std_logic_vector(ethernet_test_frame_in_order_2'high downto 0) := reverse_bits(ethernet_test_frame_in_order_2);
     -- signal ethernet_test_frame_as_received : std_logic_vector(ethernet_test_frame_in_order'high+32 downto 0) := reverse_bits(ethernet_test_frame_in_order) & x"4db0c955";
 
     signal fcs_shift_register     : std_logic_vector(31 downto 0) := (others => '1');

@@ -37,14 +37,14 @@ package body ethernet_frame_receiver_internal_pkg is
     begin
         buffered_byte := ethernet_shift_register(15 downto 8);
 
-        byte_reversed := buffered_byte(0) &
-                         buffered_byte(1) &
-                         buffered_byte(2) &
-                         buffered_byte(3) &
-                         buffered_byte(4) &
+        byte_reversed := buffered_byte(4) &
                          buffered_byte(5) &
                          buffered_byte(6) &
-                         buffered_byte(7);
+                         buffered_byte(7) &
+                         buffered_byte(0) &
+                         buffered_byte(1) &
+                         buffered_byte(2) &
+                         buffered_byte(3);
 
         return byte_reversed; 
 
