@@ -21,28 +21,12 @@ architecture rtl of ethernet_frame_receiver is
 
     signal ethernet_rx_ddio_data_out  : ethernet_rx_ddio_data_output_group;
 
-    alias rx_ddr_clock is ethernet_frame_receiver_clocks.rx_ddr_clock;
-
+    alias rx_ddr_clock is ethernet_frame_receiver_clocks.rx_ddr_clock; 
 
     signal rx_shift_register : std_logic_vector(15 downto 0) := (others => '0'); 
     signal test_data : bytearray;
     signal data_has_been_written_when_1 : std_logic := '0';
     signal bytearray_index_counter : natural range 0 to bytearray'high;
-    signal ethernet_rx_is_activated : boolean;
-
-    function reverse_bit_order
-    (
-        std_vector : std_logic_vector 
-    )
-    return std_logic_vector 
-    is
-        variable reordered_vector : std_logic_vector(7 downto 0);
-    begin
-        for i in reordered_vector'range loop
-            reordered_vector(i) := std_vector(std_vector'left - i);
-        end loop;
-        return reordered_vector;
-    end reverse_bit_order;
 
     signal fcs_shift_register : std_logic_vector(31 downto 0) := (others => '1');
 
@@ -50,13 +34,14 @@ architecture rtl of ethernet_frame_receiver is
     
     signal crc_is_ok : boolean := false;
 
+    type list_of_frame_receiver_states is (wait_for_start_of_frame, receive_frame);
+    signal frame_receiver_state : list_of_frame_receiver_states := wait_for_start_of_frame; 
+
 begin
 
-    ethernet_frame_receiver_data_out <= (test_data => test_data, data_has_been_written_when_1 => data_has_been_written_when_1);
+    ethernet_frame_receiver_data_out <= (test_data => test_data, data_has_been_written_when_1 => data_has_been_written_when_1); 
 
     frame_receiver : process(rx_ddr_clock) 
-        type list_of_frame_receiver_states is (wait_for_start_of_frame, receive_frame);
-        variable frame_receiver_state : list_of_frame_receiver_states := wait_for_start_of_frame; 
 
     --------------------------------------------------
     begin
@@ -73,7 +58,7 @@ begin
                 CASE frame_receiver_state is
                     WHEN wait_for_start_of_frame =>
                         if rx_shift_register = x"AAAA" and get_byte(ethernet_rx_ddio_data_out) = x"ab"  then
-                            frame_receiver_state := receive_frame;
+                            frame_receiver_state <= receive_frame;
                         end if;
 
                     WHEN receive_frame =>
@@ -114,8 +99,7 @@ begin
                     fcs_shift_register <= (others => '1');
                     crc_is_ok <= false; 
 
-
-                    frame_receiver_state := wait_for_start_of_frame;
+                    frame_receiver_state <= wait_for_start_of_frame;
                 end if;
 
             end if; 
