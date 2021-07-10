@@ -20,7 +20,6 @@ package ethernet_frame_receiver_internal_pkg is
         rx_shift_register            : std_logic_vector(15 downto 0);
         data_has_been_written_when_1 : std_logic;
         fcs_shift_register           : std_logic_vector(31 downto 0);
-        crc_is_ok                    : boolean; 
 
         test_data                    : bytearray;
         bytearray_index_counter      : natural range 0 to bytearray'high;
@@ -56,7 +55,6 @@ package body ethernet_frame_receiver_internal_pkg is
         alias data_has_been_written_when_1 is ethernet_rx.data_has_been_written_when_1;
         alias bytearray_index_counter      is ethernet_rx.bytearray_index_counter     ;
         alias fcs_shift_register           is ethernet_rx.fcs_shift_register          ;
-        alias crc_is_ok                    is ethernet_rx.crc_is_ok                   ;
 
     begin
 
@@ -105,7 +103,6 @@ package body ethernet_frame_receiver_internal_pkg is
         alias data_has_been_written_when_1 is ethernet_rx.data_has_been_written_when_1;
         alias bytearray_index_counter      is ethernet_rx.bytearray_index_counter     ;
         alias fcs_shift_register           is ethernet_rx.fcs_shift_register          ;
-        alias crc_is_ok                    is ethernet_rx.crc_is_ok                   ;
     begin
         if bytearray_index_counter > 0 and bytearray_index_counter /= bytearray'high then
             bytearray_index_counter <= bytearray_index_counter + 1;
@@ -118,7 +115,6 @@ package body ethernet_frame_receiver_internal_pkg is
         else
             bytearray_index_counter <= 0;
             fcs_shift_register <= (others => '1');
-            crc_is_ok <= false; 
 
             frame_receiver_state <= wait_for_start_of_frame;
         end if;
