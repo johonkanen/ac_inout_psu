@@ -29,7 +29,6 @@ architecture rtl of ethernet_frame_receiver is
     signal test_data : bytearray;
     signal data_has_been_written_when_1 : std_logic := '0';
     signal bytearray_index_counter : natural range 0 to bytearray'high;
-    signal data_is_read_from_buffer : boolean;
     signal ethernet_rx_is_activated : boolean;
 
     function invert_bit_order
@@ -83,7 +82,7 @@ architecture rtl of ethernet_frame_receiver is
         return data_in(15 downto 0);
         
     end get_low_bytes;
-    
+
 begin
 
     ethernet_frame_receiver_data_out <= (test_data => test_data, data_has_been_written_when_1 => data_has_been_written_when_1);
@@ -98,30 +97,29 @@ begin
 
             rx_shift_register <= rx_shift_register(7 downto 0) & get_byte(ethernet_rx_ddio_data_out); 
 
-            if fcs_shift_register = x"38fb2284" then
+            if fcs_shift_register = x"c704dd7b" then
                 crc_is_ok <= true; 
             end if;
 
 
-            ethernet_rx_is_activated <= ethernet_rx_is_active(ethernet_rx_ddio_data_out);
-            if ethernet_rx_is_active(ethernet_rx_ddio_data_out) or ethernet_rx_is_activated then
+            if ethernet_rx_is_active(ethernet_rx_ddio_data_out) then
                 CASE frame_receiver_state is
                     WHEN wait_for_start_of_frame =>
-                        if rx_shift_register = x"AAAB" then
+                        if rx_shift_register = x"AAAA" and get_byte(ethernet_rx_ddio_data_out) = x"ab"  then
                             frame_receiver_state := receive_frame;
                         end if;
 
                     WHEN receive_frame =>
-                        data_is_read_from_buffer <= not data_is_read_from_buffer;
-                        counter <= 0;
 
-
+                        counter <= 0; 
                         if bytearray_index_counter < bytearray'high then
                             bytearray_index_counter <= bytearray_index_counter + 1;
 
-                            test_data(bytearray_index_counter) <= get_low_bytes(nextCRC32_D8(get_reversed_ethernet_octet(rx_shift_register, ethernet_rx_ddio_data_out, data_is_read_from_buffer), fcs_shift_register));  --get_ethernet_octet(rx_shift_register, ethernet_rx_ddio_data_out, data_is_read_from_buffer);
-                            fcs_shift_register                 <= nextCRC32_D8(get_reversed_ethernet_octet(rx_shift_register, ethernet_rx_ddio_data_out, data_is_read_from_buffer), fcs_shift_register);
-                            checksum                           <= (nextCRC32_D8((get_ethernet_octet(rx_shift_register, ethernet_rx_ddio_data_out, data_is_read_from_buffer)), checksum));
+                            test_data(bytearray_index_counter) <= get_reversed_byte(ethernet_rx_ddio_data_out);
+                        end if;
+
+                        if fcs_shift_register /= x"c704dd7b" then
+                            fcs_shift_register <= nextCRC32_D8(get_byte(ethernet_rx_ddio_data_out), fcs_shift_register);
                         end if;
 
                 end CASE;
@@ -129,8 +127,12 @@ begin
                 if bytearray_index_counter > 0 and bytearray_index_counter /= bytearray'high then
                     bytearray_index_counter <= bytearray_index_counter + 1;
 
-                    test_data(bytearray_index_counter) <= x"DD";
-                    if counter < 8 then
+                    if crc_is_ok then
+                        test_data(bytearray_index_counter) <= x"EE";
+                    else
+                        test_data(bytearray_index_counter) <= x"dd";
+                    end if;
+                    if counter < 4 then
                         counter <= counter + 1;
                         CASE counter is
                             WHEN 0 => test_data(bytearray_index_counter) <= fcs_shift_register(7  downto 0);
@@ -149,8 +151,6 @@ begin
 
                     frame_receiver_state := wait_for_start_of_frame;
                 end if;
-
-                data_is_read_from_buffer <= false;
 
             end if; 
 
