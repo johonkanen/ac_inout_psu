@@ -27,12 +27,18 @@ package ethernet_frame_receiver_internal_pkg is
         bytearray_index_counter      : natural range 0 to bytearray'high;
     end record;
 
+------------------------------------------------------------------------
     procedure capture_ethernet_frame (
         signal ethernet_rx : inout ethernet_receiver;
         ethernet_ddio_out : ethernet_rx_ddio_data_output_group);
 
+------------------------------------------------------------------------
     procedure idle_ethernet_rx (
         signal ethernet_rx : inout ethernet_receiver);
+------------------------------------------------------------------------
+    procedure calculate_fcs (
+        signal ethernet_rx : inout ethernet_receiver;
+        ethernet_ddio_out : ethernet_rx_ddio_data_output_group);
 
 end package ethernet_frame_receiver_internal_pkg;
 
@@ -69,14 +75,26 @@ package body ethernet_frame_receiver_internal_pkg is
                     bytearray_index_counter <= bytearray_index_counter + 1;
 
                     test_data(bytearray_index_counter) <= get_reversed_byte(ethernet_ddio_out);
-                end if;
+                end if; 
 
-                if fcs_shift_register /= ethernet_fcs_checksum then
-                    fcs_shift_register <= nextCRC32_D8(get_byte(ethernet_ddio_out), fcs_shift_register);
-                end if;
+                calculate_fcs(ethernet_rx, ethernet_ddio_out); 
 
         end CASE;
     end capture_ethernet_frame;
+
+------------------------------------------------------------------------
+    procedure calculate_fcs
+    (
+        signal ethernet_rx : inout ethernet_receiver;
+        ethernet_ddio_out : ethernet_rx_ddio_data_output_group
+    ) is
+        alias fcs_shift_register is ethernet_rx.fcs_shift_register;
+    begin
+        if fcs_shift_register /= ethernet_fcs_checksum then
+            fcs_shift_register <= nextCRC32_D8(get_byte(ethernet_ddio_out), fcs_shift_register);
+        end if;
+        
+    end calculate_fcs;
 
 ------------------------------------------------------------------------
     procedure idle_ethernet_rx
