@@ -5,7 +5,6 @@ library ieee;
 library work;
     use work.ethernet_clocks_pkg.all;
     use work.ethernet_frame_receiver_pkg.all;
-    use work.ethernet_frame_receiver_internal_pkg.all;
     use work.ethernet_rx_ddio_pkg.all; 
     use work.PCK_CRC32_D8.all;
 
@@ -31,20 +30,6 @@ architecture rtl of ethernet_frame_receiver is
     signal bytearray_index_counter : natural range 0 to bytearray'high;
     signal ethernet_rx_is_activated : boolean;
 
-    function invert_bit_order
-    (
-        std_vector : std_logic_vector(31 downto 0)
-    )
-    return std_logic_vector 
-    is
-        variable reordered_vector : std_logic_vector(31 downto 0);
-    begin
-        for i in reordered_vector'range loop
-            reordered_vector(i) := std_vector(std_vector'left - i);
-        end loop;
-        return reordered_vector;
-    end invert_bit_order;
-
     function reverse_bit_order
     (
         std_vector : std_logic_vector 
@@ -60,28 +45,10 @@ architecture rtl of ethernet_frame_receiver is
     end reverse_bit_order;
 
     signal fcs_shift_register : std_logic_vector(31 downto 0) := (others => '1');
-    signal checksum : std_logic_vector(31 downto 0) := (others => '0');
-    signal databuffer : std_logic_vector(31 downto 0);
 
-    signal checksum_test1 : std_logic_vector(31 downto 0) := (others => '0');
-    signal checksum_test2 : std_logic_vector(31 downto 0) := (others => '0');
-    signal checksum_test3 : std_logic_vector(31 downto 0) := (others => '0');
-    signal checksum_test4 : std_logic_vector(31 downto 0) := (others => '0');
     signal counter : natural range 0 to 15;
     
     signal crc_is_ok : boolean := false;
-
-    function get_low_bytes
-    (
-        data_in : std_logic_vector(31 downto 0)
-    )
-    return std_logic_vector
-    is
-    begin
-
-        return data_in(15 downto 0);
-        
-    end get_low_bytes;
 
 begin
 
@@ -145,7 +112,6 @@ begin
                 else
                     bytearray_index_counter <= 0;
                     fcs_shift_register <= (others => '1');
-                    checksum <= (others => '1');
                     crc_is_ok <= false; 
 
 
