@@ -20,7 +20,6 @@ package ethernet_frame_receiver_internal_pkg is
         rx_shift_register            : std_logic_vector(15 downto 0);
         data_has_been_written_when_1 : std_logic;
         fcs_shift_register           : std_logic_vector(31 downto 0);
-        counter                      : natural range 0 to 15;
         crc_is_ok                    : boolean; 
 
         test_data                    : bytearray;
@@ -57,7 +56,6 @@ package body ethernet_frame_receiver_internal_pkg is
         alias data_has_been_written_when_1 is ethernet_rx.data_has_been_written_when_1;
         alias bytearray_index_counter      is ethernet_rx.bytearray_index_counter     ;
         alias fcs_shift_register           is ethernet_rx.fcs_shift_register          ;
-        alias counter                      is ethernet_rx.counter                     ;
         alias crc_is_ok                    is ethernet_rx.crc_is_ok                   ;
 
     begin
@@ -70,7 +68,6 @@ package body ethernet_frame_receiver_internal_pkg is
 
             WHEN receive_frame =>
 
-                counter <= 0; 
                 if bytearray_index_counter < bytearray'high then
                     bytearray_index_counter <= bytearray_index_counter + 1;
 
@@ -108,26 +105,15 @@ package body ethernet_frame_receiver_internal_pkg is
         alias data_has_been_written_when_1 is ethernet_rx.data_has_been_written_when_1;
         alias bytearray_index_counter      is ethernet_rx.bytearray_index_counter     ;
         alias fcs_shift_register           is ethernet_rx.fcs_shift_register          ;
-        alias counter                      is ethernet_rx.counter                     ;
         alias crc_is_ok                    is ethernet_rx.crc_is_ok                   ;
     begin
         if bytearray_index_counter > 0 and bytearray_index_counter /= bytearray'high then
             bytearray_index_counter <= bytearray_index_counter + 1;
 
-            if crc_is_ok then
+            if ethernet_rx.fcs_shift_register = ethernet_fcs_checksum then
                 test_data(bytearray_index_counter) <= x"EE";
             else
                 test_data(bytearray_index_counter) <= x"dd";
-            end if;
-            if counter < 4 then
-                counter <= counter + 1;
-                CASE counter is
-                    WHEN 0 => test_data(bytearray_index_counter) <= fcs_shift_register(7  downto 0);
-                    WHEN 1 => test_data(bytearray_index_counter) <= fcs_shift_register(15 downto 8);
-                    WHEN 2 => test_data(bytearray_index_counter) <= fcs_shift_register(23 downto 16);
-                    WHEN 3 => test_data(bytearray_index_counter) <= fcs_shift_register(31 downto 24);
-                    WHEN others => -- do notihing
-                end CASE;
             end if;
         else
             bytearray_index_counter <= 0;
