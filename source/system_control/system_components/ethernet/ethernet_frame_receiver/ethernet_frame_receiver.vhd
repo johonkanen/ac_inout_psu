@@ -40,10 +40,6 @@ begin
 
             ethernet_rx.rx_shift_register <= ethernet_rx.rx_shift_register(7 downto 0) & get_byte(ethernet_rx_ddio_data_out); 
 
-            if ethernet_rx.fcs_shift_register = x"c704dd7b" then
-                ethernet_rx.crc_is_ok <= true; 
-            end if; 
-
             if ethernet_rx_is_active(ethernet_rx_ddio_data_out) then
                 capture_ethernet_frame(ethernet_rx, ethernet_rx_ddio_data_out); 
 
