@@ -1,5 +1,6 @@
 # ac input/output power supply
-A vhdl implementation for a 3kW single phase input/output power supply. Quick hack test code currently developed in system_component layer
+A vhdl implementation for a 3kW single phase input/output power supply control and communications. Power supply has gigabit ethernet and uart communications.
+Hardware test code currently developed in source/system_control/system_components/system_components.vhd
 
 A companion website with some descriptions on the project can be found at
 https://hardwaredescriptions.com
@@ -22,6 +23,6 @@ Currently compiled with quartus software and for cyclone 10lp025. Build can be s
         system_components -- interconnect for top level module interfaces
             ad_interface,
             uart,
-            (ethernet),
+            ethernet,
             (lcd),
             (power_supply_control)
