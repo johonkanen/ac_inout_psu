@@ -28,6 +28,10 @@ package ethernet_frame_ram_read_pkg is
 ------------------------------------------------------------------------
     function get_ram_data ( ram_read_port_data_out : ram_read_output_group)
         return std_logic_vector;
+------------------------------------------------------------------------
+    function ram_data_is_ready ( ram_read_port_data_out : ram_read_output_group)
+        return boolean;
+------------------------------------------------------------------------
 
 end package ethernet_frame_ram_read_pkg;
 
@@ -77,6 +81,16 @@ package body ethernet_frame_ram_read_pkg is
         return ram_read_port_data_out.byte_from_ram;
     end get_ram_data;
 ------------------------------------------------------------------------
+    function ram_data_is_ready
+    (
+        ram_read_port_data_out : ram_read_output_group
+    )
+    return boolean
+    is
+    begin
+        return ram_read_port_data_out.data_is_ready;
+        
+    end ram_data_is_ready;
 
 end package body ethernet_frame_ram_read_pkg;
 
