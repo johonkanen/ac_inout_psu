@@ -6,6 +6,7 @@ library work;
     use work.ethernet_frame_receiver_pkg.all;
     use work.ethernet_rx_ddio_pkg.all; 
     use work.PCK_CRC32_D8.all;
+    use work.ethernet_frame_ram_pkg.ram_write_control_group;
 
 package ethernet_frame_receiver_internal_pkg is
 
@@ -21,8 +22,8 @@ package ethernet_frame_receiver_internal_pkg is
         data_has_been_written_when_1 : std_logic;
         fcs_shift_register           : std_logic_vector(31 downto 0);
 
-        test_data                    : bytearray;
-        bytearray_index_counter      : natural range 0 to bytearray'high;
+        ram_write_control_port : ram_write_control_group;
+        ram_write_counter      : natural range 0 to 2047;
     end record;
 
 ------------------------------------------------------------------------
@@ -51,7 +52,7 @@ package body ethernet_frame_receiver_internal_pkg is
     ) is 
         alias frame_receiver_state         is ethernet_rx.frame_receiver_state        ;
         alias rx_shift_register            is ethernet_rx.rx_shift_register           ;
-        alias test_data                    is ethernet_rx.test_data                   ;
+        alias ram_write_control_port                    is ethernet_rx.ram_write_control_port                   ;
         alias data_has_been_written_when_1 is ethernet_rx.data_has_been_written_when_1;
         alias bytearray_index_counter      is ethernet_rx.bytearray_index_counter     ;
         alias fcs_shift_register           is ethernet_rx.fcs_shift_register          ;
@@ -99,7 +100,7 @@ package body ethernet_frame_receiver_internal_pkg is
     ) is
         alias frame_receiver_state         is ethernet_rx.frame_receiver_state        ;
         alias rx_shift_register            is ethernet_rx.rx_shift_register           ;
-        alias test_data                    is ethernet_rx.test_data                   ;
+        alias ram_write_control_port                    is ethernet_rx.ram_write_control_port                   ;
         alias data_has_been_written_when_1 is ethernet_rx.data_has_been_written_when_1;
         alias bytearray_index_counter      is ethernet_rx.bytearray_index_counter     ;
         alias fcs_shift_register           is ethernet_rx.fcs_shift_register          ;
