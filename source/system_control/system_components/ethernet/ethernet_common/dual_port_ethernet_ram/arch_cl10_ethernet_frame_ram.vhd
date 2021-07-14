@@ -45,8 +45,9 @@ architecture cyclone_10_lp of ethernet_frame_ram is
 
 begin
 
-    ethernet_frame_ram_data_out <= (data_is_ready => data_is_ready_to_be_read,
-                                   byte_from_ram  => q);
+    ethernet_frame_ram_data_out <= (ram_read_port_data_out =>(data_is_ready => data_is_ready_to_be_read,
+                                                              byte_from_ram => q)
+                                  );
 
     data_is_ready_pipeline : process(ethernet_frame_ram_clocks.read_clock)
         
