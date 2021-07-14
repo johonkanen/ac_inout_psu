@@ -13,20 +13,15 @@ package ethernet_frame_receiver_pkg is
         ethernet_rx_ddio_FPGA_in : ethernet_rx_ddio_FPGA_input_group;
     end record;
     
-    type ethernet_frame_receiver_data_input_group is record
-        data_is_read_when_1 : std_logic;
-    end record;
-    
     type ethernet_frame_receiver_data_output_group is record
         ram_write_control_port       : ram_write_control_group;
-        data_has_been_written_when_1 : std_logic;
+        toggle_data_has_been_written : std_logic;
     end record;
     
     component ethernet_frame_receiver is
         port (
             ethernet_frame_receiver_clocks : in ethernet_rx_ddr_clock_group; 
             ethernet_frame_receiver_FPGA_in : in ethernet_frame_receiver_FPGA_input_group;
-            ethernet_frame_receiver_data_in : in ethernet_frame_receiver_data_input_group;
             ethernet_frame_receiver_data_out : out ethernet_frame_receiver_data_output_group
         );
     end component ethernet_frame_receiver;

@@ -10,6 +10,8 @@ library work;
 
 package ethernet_frame_receiver_internal_pkg is
 
+    constant ram_max_index : integer := 2047;
+
     constant ethernet_fcs_checksum    : std_logic_vector(31 downto 0) := x"c704dd7b";
     constant ethernet_frame_delimiter : std_logic_vector(7 downto 0)  := x"AB";
     constant ethernet_frame_preamble  : std_logic_vector(15 downto 0) := x"AAAA";
@@ -19,11 +21,11 @@ package ethernet_frame_receiver_internal_pkg is
     type ethernet_receiver is record
         frame_receiver_state         : list_of_frame_receiver_states;
         rx_shift_register            : std_logic_vector(15 downto 0);
-        data_has_been_written_when_1 : std_logic;
+        toggle_data_has_been_written : std_logic;
         fcs_shift_register           : std_logic_vector(31 downto 0);
 
         ram_write_control_port : ram_write_control_group;
-        ram_write_counter      : natural range 0 to 2047;
+        ram_write_counter      : natural range 0 to ram_max_index;
     end record;
 
 ------------------------------------------------------------------------
@@ -49,13 +51,13 @@ package body ethernet_frame_receiver_internal_pkg is
     (
         signal ethernet_rx : inout ethernet_receiver;
         ethernet_ddio_out : ethernet_rx_ddio_data_output_group
-    ) is 
-        alias frame_receiver_state         is ethernet_rx.frame_receiver_state        ;
-        alias rx_shift_register            is ethernet_rx.rx_shift_register           ;
-        alias ram_write_control_port                    is ethernet_rx.ram_write_control_port                   ;
-        alias data_has_been_written_when_1 is ethernet_rx.data_has_been_written_when_1;
-        alias bytearray_index_counter      is ethernet_rx.bytearray_index_counter     ;
-        alias fcs_shift_register           is ethernet_rx.fcs_shift_register          ;
+    ) is
+        alias frame_receiver_state         is  ethernet_rx.frame_receiver_state         ;
+        alias rx_shift_register            is  ethernet_rx.rx_shift_register            ;
+        alias ram_write_control_port       is  ethernet_rx.ram_write_control_port       ;
+        alias toggle_data_has_been_written is  ethernet_rx.toggle_data_has_been_written ;
+        alias ram_write_counter            is  ethernet_rx.ram_write_counter            ;
+        alias fcs_shift_register           is  ethernet_rx.fcs_shift_register           ;
 
     begin
 
@@ -67,12 +69,8 @@ package body ethernet_frame_receiver_internal_pkg is
 
             WHEN receive_frame =>
 
-                if bytearray_index_counter < bytearray'high then
-                    bytearray_index_counter <= bytearray_index_counter + 1;
-
-                    write_data_to_ram(ram_write_control_port, ram_write_counter,  get_reversed_byte(ethernet_ddio_out));
-                end if; 
-
+                ram_write_counter <= ram_write_counter + 1; 
+                write_data_to_ram(ram_write_control_port, ram_write_counter,  get_reversed_byte(ethernet_ddio_out)); 
                 calculate_fcs(ethernet_rx, ethernet_ddio_out); 
 
         end CASE;
@@ -98,15 +96,15 @@ package body ethernet_frame_receiver_internal_pkg is
         signal ethernet_rx : inout ethernet_receiver
         
     ) is
-        alias frame_receiver_state         is ethernet_rx.frame_receiver_state        ;
-        alias rx_shift_register            is ethernet_rx.rx_shift_register           ;
-        alias ram_write_control_port                    is ethernet_rx.ram_write_control_port                   ;
-        alias data_has_been_written_when_1 is ethernet_rx.data_has_been_written_when_1;
-        alias bytearray_index_counter      is ethernet_rx.bytearray_index_counter     ;
-        alias fcs_shift_register           is ethernet_rx.fcs_shift_register          ;
+        alias frame_receiver_state         is ethernet_rx.frame_receiver_state         ;
+        alias rx_shift_register            is ethernet_rx.rx_shift_register            ;
+        alias ram_write_control_port       is ethernet_rx.ram_write_control_port       ;
+        alias toggle_data_has_been_written is ethernet_rx.toggle_data_has_been_written ;
+        alias ram_write_counter            is ethernet_rx.ram_write_counter            ;
+        alias fcs_shift_register           is ethernet_rx.fcs_shift_register           ;
     begin
-        if bytearray_index_counter > 0 and bytearray_index_counter /= bytearray'high then
-            bytearray_index_counter <= bytearray_index_counter + 1;
+        if ram_write_counter > 0 and ram_write_counter /= 127 then
+            ram_write_counter <= ram_write_counter + 1;
 
             if ethernet_rx.fcs_shift_register = ethernet_fcs_checksum then
                 write_data_to_ram(ram_write_control_port, ram_write_counter,  x"EE");
@@ -114,14 +112,17 @@ package body ethernet_frame_receiver_internal_pkg is
                 write_data_to_ram(ram_write_control_port, ram_write_counter,  x"dd");
             end if;
         else
-            bytearray_index_counter <= 0;
+            ram_write_counter <= 0;
             fcs_shift_register <= (others => '1');
 
             frame_receiver_state <= wait_for_start_of_frame;
-        end if;
+            if toggle_data_has_been_written = '1' then
+                toggle_data_has_been_written <= '0';
+            else
+                toggle_data_has_been_written <= '1';
+            end if;
 
-        
-    end idle_ethernet_rx;
-
+        end if; 
+    end idle_ethernet_rx; 
 
 end package body ethernet_frame_receiver_internal_pkg;
