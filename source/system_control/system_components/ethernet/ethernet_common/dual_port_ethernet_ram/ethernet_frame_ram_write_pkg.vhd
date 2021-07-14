@@ -15,9 +15,8 @@ package ethernet_frame_ram_write_pkg is
     procedure init_ram_write (
         signal ram_write_port : out ram_write_control_group);
 ------------------------------------------------------------------------
-    procedure write_data_from_ram (
+    procedure write_data_to_ram (
         signal ram_write_port : out ram_write_control_group;
-        offset : natural;
         address : natural;
         byte_to_write : std_logic_vector(7 downto 0));
 ------------------------------------------------------------------------ 
@@ -26,6 +25,7 @@ end package ethernet_frame_ram_write_pkg;
 
 package body ethernet_frame_ram_write_pkg is
 
+------------------------------------------------------------------------ 
     procedure init_ram_write
     (
         signal ram_write_port : out ram_write_control_group
@@ -35,10 +35,10 @@ package body ethernet_frame_ram_write_pkg is
     end init_ram_write;
 
 
-    procedure write_data_from_ram
+------------------------------------------------------------------------ 
+    procedure write_data_to_ram
     (
         signal ram_write_port : out ram_write_control_group;
-        offset : natural;
         address : natural;
         byte_to_write : std_logic_vector(7 downto 0)
     ) is
@@ -46,8 +46,9 @@ package body ethernet_frame_ram_write_pkg is
 
         ram_write_port.write_enabled_when_1 <= '1';
         ram_write_port.byte_to_write <= byte_to_write;
+        ram_write_port.address <= std_logic_vector(to_unsigned(address, 11));
         
-    end write_data_from_ram;
+    end write_data_to_ram;
 
-end package body ethernet_frame_ram_write_pkg;
-
+------------------------------------------------------------------------ 
+end package body ethernet_frame_ram_write_pkg; 
