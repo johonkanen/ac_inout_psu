@@ -20,6 +20,8 @@ ghdl -a --ieee=synopsys %source%/system_clocks_pkg.vhd
             ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/mdio_driver/mmd_access_functions_pkg.vhd
 
             ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_common/PCK_CRC_32_D8.vhd 
+            ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_common/dual_port_ethernet_ram/ethernet_frame_ram_read_pkg.vhd 
+            ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_common/dual_port_ethernet_ram/ethernet_frame_ram_write_pkg.vhd 
             ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_common/dual_port_ethernet_ram/ethernet_frame_ram_pkg.vhd 
             ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_common/dual_port_ethernet_ram/ethernet_frame_ram.vhd 
 

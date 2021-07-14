@@ -9,6 +9,7 @@ library work;
     use work.mdio_driver_pkg.all;
     use work.ethernet_frame_receiver_pkg.all;
     use work.ethernet_frame_transmitter_pkg.all;
+    use work.ethernet_frame_ram_pkg.all;
 
 entity ethernet is
     port (
@@ -33,6 +34,10 @@ architecture rtl of ethernet is
     signal ethernet_frame_transmitter_data_in : ethernet_frame_transmitter_data_input_group;
     signal ethernet_frame_transmitter_data_out : ethernet_frame_transmitter_data_output_group;
 
+    signal ethernet_frame_ram_clocks   : ethernet_frame_ram_clock_group;
+    signal ethernet_frame_ram_data_in  : ethernet_frame_ram_data_input_group;
+    signal ethernet_frame_ram_data_out : ethernet_frame_ram_data_output_group;
+
 begin 
 
     ethernet_data_out <= (mdio_driver_data_out => mdio_driver_data_out,
@@ -40,6 +45,18 @@ begin
                          );
 
 ------------------------------------------------------------------------
+    ethernet_frame_ram_clocks <= (read_clock => ethernet_clocks.core_clock, 
+                                 write_clock => ethernet_clocks.rx_ddr_clocks.rx_ddr_clock);
+
+    ethernet_frame_ram_data_in <= (ram_write_control_port => ethernet_frame_receiver_data_out.ram_write_control_port,
+                                  ram_read_control_port   => ethernet_frame_ram_data_in.ram_read_control_port);
+
+
+    u_ethernet_frame_ram : ethernet_frame_ram
+    port map( ethernet_frame_ram_clocks  ,
+              ethernet_frame_ram_data_in ,
+              ethernet_frame_ram_data_out);
+
     u_ethernet_frame_receiver : ethernet_frame_receiver
     port map( ethernet_clocks.rx_ddr_clocks                    ,
               ethernet_FPGA_in.ethernet_frame_receiver_FPGA_in ,

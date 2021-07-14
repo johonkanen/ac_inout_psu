@@ -5,10 +5,9 @@ library ieee;
 library work;
     use work.ethernet_clocks_pkg.all;
     use work.ethernet_rx_ddio_pkg.all;
+    use work.ethernet_frame_ram_pkg.ram_write_control_group;
 
 package ethernet_frame_receiver_pkg is
-
-    type bytearray is array (integer range 0 to 127) of std_logic_vector(7 downto 0); 
 
     type ethernet_frame_receiver_FPGA_input_group is record
         ethernet_rx_ddio_FPGA_in : ethernet_rx_ddio_FPGA_input_group;
@@ -19,7 +18,7 @@ package ethernet_frame_receiver_pkg is
     end record;
     
     type ethernet_frame_receiver_data_output_group is record
-        test_data : bytearray;
+        ram_write_control_port       : ram_write_control_group;
         data_has_been_written_when_1 : std_logic;
     end record;
     
