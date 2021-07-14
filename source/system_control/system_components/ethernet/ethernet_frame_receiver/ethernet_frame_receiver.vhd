@@ -12,7 +12,6 @@ entity ethernet_frame_receiver is
     port (
         ethernet_frame_receiver_clocks   : in ethernet_rx_ddr_clock_group;
         ethernet_frame_receiver_FPGA_in  : in ethernet_frame_receiver_FPGA_input_group;
-        ethernet_frame_receiver_data_in  : in ethernet_frame_receiver_data_input_group;
         ethernet_frame_receiver_data_out : out ethernet_frame_receiver_data_output_group
     );
 end entity ethernet_frame_receiver;
@@ -28,8 +27,8 @@ architecture rtl of ethernet_frame_receiver is
 begin
 
     ethernet_frame_receiver_data_out <= (
-                                            test_data                    => ethernet_rx.test_data,
-                                            data_has_been_written_when_1 => ethernet_rx.data_has_been_written_when_1
+                                            ram_write_control_port       => ethernet_rx.ram_write_control_port,
+                                            toggle_data_has_been_written => ethernet_rx.toggle_data_has_been_written
                                         );
 
 ------------------------------------------------------------------------
