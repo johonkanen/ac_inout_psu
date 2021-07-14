@@ -103,7 +103,7 @@ package body ethernet_frame_receiver_internal_pkg is
         alias ram_write_counter            is ethernet_rx.ram_write_counter            ;
         alias fcs_shift_register           is ethernet_rx.fcs_shift_register           ;
     begin
-        if ram_write_counter > 0 and ram_write_counter /= 127 then
+        if ram_write_counter > 0 and ram_write_counter /= 256 then
             ram_write_counter <= ram_write_counter + 1;
 
             if ethernet_rx.fcs_shift_register = ethernet_fcs_checksum then

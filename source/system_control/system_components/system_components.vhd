@@ -42,7 +42,7 @@ architecture rtl of system_components is
     signal uart_data_out : uart_data_output_group;
 
     signal uart_transmit_counter : natural range 0 to 2**16-1 := 0;
-    constant counter_at_100khz   : natural                    := 120e6/100e3;
+    constant counter_at_100khz   : natural                    := 120e6/80e3;
 
     signal uart_rx_data : natural range 0 to 2**16-1;
 
@@ -209,7 +209,7 @@ begin
                     WHEN 15 => transmit_16_bit_word_with_uart(uart_data_in, uart_rx_data);
                     WHEN others => -- get data from MDIO
                         register_counter := register_counter + 1;
-                        if test_counter = 100 then
+                        if test_counter = 150 then
                             -- write_data_to_mdio(mdio_driver_data_in, x"00", x"00", force_1000MHz_connection);
                         else
                             read_data_from_mdio(mdio_driver_data_in, x"00", integer_to_std(register_counter, 8));
@@ -225,8 +225,8 @@ begin
 
             if mdio_data_read_is_ready(mdio_driver_data_out) then
 
-                if test_counter < 64+32 then 
-                    if test_counter < 64 then
+                if test_counter < 129+32 then 
+                    if test_counter < 129 then
                         ram_read_process_counter <= 0;
                     else
                         transmit_16_bit_word_with_uart(uart_data_in, get_data_from_mdio(mdio_driver_data_out));
@@ -252,8 +252,6 @@ begin
                     shift_register <= get_ram_data(ethernet_data_out.ethernet_frame_ram_out) & shift_register(15 downto 8); 
                     ram_read_process_counter <= ram_read_process_counter +1;
                 WHEN 4 =>
-                    ram_read_process_counter <= ram_read_process_counter +1;
-                WHEN 5 =>
                     transmit_16_bit_word_with_uart(uart_data_in, shift_register); 
                     ram_read_process_counter <= ram_read_process_counter +1;
                 WHEN others => -- do nothing

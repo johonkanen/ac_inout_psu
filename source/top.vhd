@@ -41,7 +41,6 @@ architecture rtl of top is
 		inclk0 : IN STD_LOGIC := '0' ;
 		c0     : OUT STD_LOGIC       ;
 		c1     : OUT STD_LOGIC       ;
-		c2     : OUT STD_LOGIC       ;
 		locked : OUT STD_LOGIC
 	);
     end component ethernet_clocks_generator;
@@ -68,7 +67,6 @@ begin
 		inclk0  => enet_clk_125MHz          ,
 		c0      => rx_ddr_clock             ,
 		c1      => ethernet_tx_ddr_io_clock ,
-		c2      => tx_core_clock            ,
 		locked  => open
 	);
 
@@ -76,7 +74,7 @@ begin
     system_clocks <= (core_clock           => core_clock   ,
                      pll_locked            => pll_locked   ,
                      ethernet_rx_ddr_clock => rx_ddr_clock ,
-                     ethernet_tx_ddr_clock => tx_core_clock
+                     ethernet_tx_ddr_clock => rx_ddr_clock
                      );
 
     u_system_control : system_control
