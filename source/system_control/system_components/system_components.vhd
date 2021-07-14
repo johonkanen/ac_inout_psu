@@ -74,6 +74,7 @@ architecture rtl of system_components is
         return std_logic_vector(to_unsigned(number_to_be_converted,bits_in_word)); 
     end integer_to_std;
 
+    signal ram_read_process_counter : natural range 0 to 7 := 0;
 
 
 --------------------------------------------------
@@ -150,6 +151,7 @@ architecture rtl of system_components is
     constant force_1000MHz_connection : std_logic_vector(15 downto 0) := x"0140";
 
     signal shift_register : std_logic_vector(15 downto 0);
+    signal transmit_counter : natural range 0 to 7;
 
 
 --------------------------------------------------
@@ -223,7 +225,7 @@ begin
 
             if mdio_data_read_is_ready(mdio_driver_data_out) then
                 if test_counter < 64 then
-
+                    ram_read_process_counter <= 0;
                 end if;
 
                 if test_counter < 64+32 then 
@@ -232,11 +234,26 @@ begin
 
             end if;
             
-            shift_register <= shift_register(7 downto 0) & get_ram_data(ethernet_data_out.ethernet_frame_ram_out);
+            init_ram_read(ethernet_data_in.ram_read_control_port);
+            CASE ram_read_process_counter is
+                WHEN 0 => 
+                    read_data_from_ram(ethernet_data_in.ram_read_control_port, test_counter*2);
+                    ram_read_process_counter <= ram_read_process_counter +1;
+                WHEN 1 => 
+                    read_data_from_ram(ethernet_data_in.ram_read_control_port, test_counter*2+1);
+                    ram_read_process_counter <= ram_read_process_counter +1;
+                WHEN others => -- do nothing
+            end CASE;
 
-            -- transmit_16_bit_word_with_uart(uart_data_in, 
-            --                                ethernet_data_out.ethernet_frame_receiver_data_out.test_data(test_counter*2+1) & 
-            --                                ethernet_data_out.ethernet_frame_receiver_data_out.test_data(test_counter*2));
+            if ram_data_is_ready(ethernet_data_out.ethernet_frame_ram_out) then
+                shift_register <= shift_register(7 downto 0) & get_ram_data(ethernet_data_out.ethernet_frame_ram_out); 
+                transmit_counter <= transmit_counter + 1;
+            end if;
+            if transmit_counter = 2 then
+                transmit_16_bit_word_with_uart(uart_data_in, shift_register); 
+                transmit_counter <= 0;
+            end if;
+                                     
 
 
         end if; --rising_edge
