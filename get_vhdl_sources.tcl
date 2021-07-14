@@ -24,6 +24,12 @@ proc get_vhdl_sources {void}\
 
 
                 /system_control/system_components/ethernet/ethernet_common/PCK_CRC_32_D8.vhd
+                /system_control/system_components/ethernet/ethernet_common/dual_port_ethernet_ram/ethernet_frame_ram_read_pkg.vhd 
+                /system_control/system_components/ethernet/ethernet_common/dual_port_ethernet_ram/ethernet_frame_ram_write_pkg.vhd 
+                /system_control/system_components/ethernet/ethernet_common/dual_port_ethernet_ram/ethernet_frame_ram_pkg.vhd 
+                /system_control/system_components/ethernet/ethernet_common/dual_port_ethernet_ram/ethernet_frame_ram.vhd 
+                /system_control/system_components/ethernet/ethernet_common/dual_port_ethernet_ram/arch_cl10_ethernet_frame_ram.vhd 
+
                         /system_control/system_components/ethernet/ethernet_frame_transmitter/ethernet_tx_ddio/ethernet_tx_ddio_pkg.vhd
                         /system_control/system_components/ethernet/ethernet_frame_transmitter/ethernet_tx_ddio/ethernet_tx_ddio.vhd
                         /system_control/system_components/ethernet/ethernet_frame_transmitter/ethernet_tx_ddio/arch_cl10_tx_ddio.vhd
