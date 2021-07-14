@@ -11,6 +11,7 @@ library work;
     use work.mdio_driver_pkg.all;
     use work.ethernet_pkg.all; 
     use work.ethernet_clocks_pkg.all; 
+    use work.ethernet_frame_ram_read_pkg.all;
 
 library math_library;
     use math_library.multiplier_pkg.all;
@@ -148,6 +149,8 @@ architecture rtl of system_components is
 
     constant force_1000MHz_connection : std_logic_vector(15 downto 0) := x"0140";
 
+    signal shift_register : std_logic_vector(15 downto 0);
+
 
 --------------------------------------------------
 begin
@@ -219,18 +222,22 @@ begin
             end if;
 
             if mdio_data_read_is_ready(mdio_driver_data_out) then
-                if test_counter < 64+32 then 
-                        transmit_16_bit_word_with_uart(uart_data_in, get_data_from_mdio(mdio_driver_data_out));
-                end if;
-
                 if test_counter < 64 then
 
-                        transmit_16_bit_word_with_uart(uart_data_in, 
-                                                       ethernet_data_out.ethernet_frame_receiver_data_out.test_data(test_counter*2+1) & 
-                                                       ethernet_data_out.ethernet_frame_receiver_data_out.test_data(test_counter*2));
                 end if;
 
+                if test_counter < 64+32 then 
+                        transmit_16_bit_word_with_uart(uart_data_in, get_data_from_mdio(mdio_driver_data_out));
+                end if; 
+
             end if;
+            
+            shift_register <= shift_register(7 downto 0) & get_ram_data(ethernet_data_out.ethernet_frame_ram_out);
+
+            -- transmit_16_bit_word_with_uart(uart_data_in, 
+            --                                ethernet_data_out.ethernet_frame_receiver_data_out.test_data(test_counter*2+1) & 
+            --                                ethernet_data_out.ethernet_frame_receiver_data_out.test_data(test_counter*2));
+
 
         end if; --rising_edge
     end process test_with_uart;	

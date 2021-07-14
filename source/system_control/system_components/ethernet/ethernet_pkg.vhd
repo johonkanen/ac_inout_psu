@@ -7,6 +7,7 @@ library work;
     use work.ethernet_frame_receiver_pkg.all;
     use work.ethernet_frame_transmitter_pkg.all;
     use work.ethernet_clocks_pkg.all;
+    use work.ethernet_frame_ram_read_pkg.all;
 
 package ethernet_pkg is
 
@@ -25,11 +26,12 @@ package ethernet_pkg is
     
     type ethernet_data_input_group is record
         mdio_driver_data_in : mdio_driver_data_input_group;
+        ram_read_control_port : ram_read_control_group;
     end record;
     
     type ethernet_data_output_group is record
-        mdio_driver_data_out             : mdio_driver_data_output_group;
-        ethernet_frame_receiver_data_out : ethernet_frame_receiver_data_output_group;
+        mdio_driver_data_out   : mdio_driver_data_output_group;
+        ethernet_frame_ram_out : ram_read_output_group;
     end record;
     
     component ethernet is
