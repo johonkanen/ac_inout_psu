@@ -39,22 +39,23 @@ architecture rtl of ethernet is
 
 begin 
 
-    ethernet_data_out <= (mdio_driver_data_out => mdio_driver_data_out,
-                         ethernet_frame_receiver_data_out => ethernet_frame_receiver_data_out 
-                         );
+------------------------------------------------------------------------
+    ethernet_data_out <= (mdio_driver_data_out  => mdio_driver_data_out,
+                         ethernet_frame_ram_out => ethernet_frame_ram_data_out.ram_read_port_data_out);
 
 ------------------------------------------------------------------------
-    ethernet_frame_ram_clocks <= (read_clock => ethernet_clocks.core_clock, 
-                                 write_clock => ethernet_clocks.rx_ddr_clocks.rx_ddr_clock);
 
     ethernet_frame_ram_data_in <= (ram_write_control_port => ethernet_frame_receiver_data_out.ram_write_control_port,
-                                  ram_read_control_port   => ethernet_frame_ram_data_in.ram_read_control_port);
+                                  ram_read_control_port   => ethernet_data_in.ram_read_control_port); 
 
+    ethernet_frame_ram_clocks <= (read_clock => ethernet_clocks.core_clock, 
+                                 write_clock => ethernet_clocks.rx_ddr_clocks.rx_ddr_clock);
 
     u_ethernet_frame_ram : ethernet_frame_ram
     port map( ethernet_frame_ram_clocks  ,
               ethernet_frame_ram_data_in ,
               ethernet_frame_ram_data_out);
+------------------------------------------------------------------------ 
 
     u_ethernet_frame_receiver : ethernet_frame_receiver
     port map( ethernet_clocks.rx_ddr_clocks                    ,

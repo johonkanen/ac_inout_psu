@@ -26,7 +26,8 @@ package ethernet_frame_ram_read_pkg is
         signal ram_read_port : out ram_read_control_group;
         address : natural);
 ------------------------------------------------------------------------
-------------------------------------------------------------------------
+    function get_ram_data ( ram_read_port_data_out : ram_read_output_group)
+        return std_logic_vector;
 
 end package ethernet_frame_ram_read_pkg;
 
@@ -65,6 +66,16 @@ package body ethernet_frame_ram_read_pkg is
 
     end read_data_from_ram;
 
+------------------------------------------------------------------------
+    function get_ram_data
+    (
+        ram_read_port_data_out : ram_read_output_group
+    )
+    return std_logic_vector 
+    is
+    begin
+        return ram_read_port_data_out.byte_from_ram;
+    end get_ram_data;
 ------------------------------------------------------------------------
 
 end package body ethernet_frame_ram_read_pkg;

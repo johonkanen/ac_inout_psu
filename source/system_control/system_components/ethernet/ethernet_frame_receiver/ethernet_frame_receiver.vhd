@@ -7,6 +7,7 @@ library work;
     use work.ethernet_frame_receiver_pkg.all;
     use work.ethernet_frame_receiver_internal_pkg.all;
     use work.ethernet_rx_ddio_pkg.all; 
+    use work.ethernet_frame_ram_write_pkg.all;
 
 entity ethernet_frame_receiver is
     port (
@@ -38,6 +39,7 @@ begin
         if rising_edge(rx_ddr_clock) then 
 
             ethernet_rx.rx_shift_register <= ethernet_rx.rx_shift_register(7 downto 0) & get_byte(ethernet_rx_ddio_data_out); 
+            init_ram_write(ethernet_frame_receiver_data_out.ram_write_control_port);
 
             if ethernet_rx_is_active(ethernet_rx_ddio_data_out) then
                 capture_ethernet_frame(ethernet_rx, ethernet_rx_ddio_data_out); 
