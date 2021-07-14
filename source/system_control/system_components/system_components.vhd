@@ -224,13 +224,13 @@ begin
             end if;
 
             if mdio_data_read_is_ready(mdio_driver_data_out) then
-                if test_counter < 64 then
-                    ram_read_process_counter <= 0;
-                    transmit_counter <= 0;
-                end if;
 
                 if test_counter < 64+32 then 
+                    if test_counter < 64 then
+                        ram_read_process_counter <= 0;
+                    else
                         transmit_16_bit_word_with_uart(uart_data_in, get_data_from_mdio(mdio_driver_data_out));
+                    end if;
                 end if; 
 
             end if;
@@ -245,7 +245,6 @@ begin
                     ram_read_process_counter <= ram_read_process_counter +1;
                 WHEN 2 => 
                     ram_read_process_counter <= ram_read_process_counter +1;
-                    shift_register <= get_ram_data(ethernet_data_out.ethernet_frame_ram_out) & shift_register(15 downto 8); 
                 WHEN 3 => 
                     shift_register <= get_ram_data(ethernet_data_out.ethernet_frame_ram_out) & shift_register(15 downto 8); 
                     ram_read_process_counter <= ram_read_process_counter +1;
