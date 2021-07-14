@@ -226,6 +226,7 @@ begin
             if mdio_data_read_is_ready(mdio_driver_data_out) then
                 if test_counter < 64 then
                     ram_read_process_counter <= 0;
+                    transmit_counter <= 0;
                 end if;
 
                 if test_counter < 64+32 then 
@@ -242,19 +243,20 @@ begin
                 WHEN 1 => 
                     read_data_from_ram(ethernet_data_in.ram_read_control_port, test_counter*2+1);
                     ram_read_process_counter <= ram_read_process_counter +1;
+                WHEN 2 => 
+                    ram_read_process_counter <= ram_read_process_counter +1;
+                    shift_register <= get_ram_data(ethernet_data_out.ethernet_frame_ram_out) & shift_register(15 downto 8); 
+                WHEN 3 => 
+                    shift_register <= get_ram_data(ethernet_data_out.ethernet_frame_ram_out) & shift_register(15 downto 8); 
+                    ram_read_process_counter <= ram_read_process_counter +1;
+                WHEN 4 =>
+                    shift_register <= get_ram_data(ethernet_data_out.ethernet_frame_ram_out) & shift_register(15 downto 8); 
+                    ram_read_process_counter <= ram_read_process_counter +1;
+                WHEN 5 =>
+                    transmit_16_bit_word_with_uart(uart_data_in, shift_register); 
+                    ram_read_process_counter <= ram_read_process_counter +1;
                 WHEN others => -- do nothing
             end CASE;
-
-            if ram_data_is_ready(ethernet_data_out.ethernet_frame_ram_out) then
-                shift_register <= shift_register(7 downto 0) & get_ram_data(ethernet_data_out.ethernet_frame_ram_out); 
-                transmit_counter <= transmit_counter + 1;
-            end if;
-            if transmit_counter = 2 then
-                transmit_16_bit_word_with_uart(uart_data_in, shift_register); 
-                transmit_counter <= 0;
-            end if;
-                                     
-
 
         end if; --rising_edge
     end process test_with_uart;	
