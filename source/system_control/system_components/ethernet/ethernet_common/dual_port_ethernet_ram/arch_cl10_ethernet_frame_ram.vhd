@@ -42,10 +42,11 @@ architecture cyclone_10_lp of ethernet_frame_ram is
     signal q         : STD_LOGIC_VECTOR (7 DOWNTO 0)          ;
 
     signal data_is_ready_to_be_read : boolean := false;
+    signal data_is_ready_to_be_read_buffer : boolean := false;
 
 begin
 
-    ethernet_frame_ram_data_out <= (ram_read_port_data_out =>(data_is_ready => data_is_ready_to_be_read,
+    ethernet_frame_ram_data_out <= (ram_read_port_data_out =>(data_is_ready => data_is_ready_to_be_read_buffer,
                                                               byte_from_ram => q)
                                   );
 
@@ -54,10 +55,11 @@ begin
     begin
         if rising_edge(ethernet_frame_ram_clocks.read_clock) then
 
-            data_is_ready_to_be_read <= true;
+            data_is_ready_to_be_read <= false;
             if ram_read_control_port.read_is_enabled_when_1 = '1' then
                 data_is_ready_to_be_read <= true;
             end if;
+            data_is_ready_to_be_read_buffer <= data_is_ready_to_be_read;
 
         end if; --rising_edge
     end process data_is_ready_pipeline;	
