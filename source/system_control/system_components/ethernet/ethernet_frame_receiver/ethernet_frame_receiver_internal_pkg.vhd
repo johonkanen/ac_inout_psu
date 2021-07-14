@@ -6,7 +6,7 @@ library work;
     use work.ethernet_frame_receiver_pkg.all;
     use work.ethernet_rx_ddio_pkg.all; 
     use work.PCK_CRC32_D8.all;
-    use work.ethernet_frame_ram_pkg.ram_write_control_group;
+    use work.ethernet_frame_ram_write_pkg.all;
 
 package ethernet_frame_receiver_internal_pkg is
 
@@ -70,7 +70,7 @@ package body ethernet_frame_receiver_internal_pkg is
                 if bytearray_index_counter < bytearray'high then
                     bytearray_index_counter <= bytearray_index_counter + 1;
 
-                    test_data(bytearray_index_counter) <= get_reversed_byte(ethernet_ddio_out);
+                    write_data_to_ram(ram_write_control_port, ram_write_counter,  get_reversed_byte(ethernet_ddio_out));
                 end if; 
 
                 calculate_fcs(ethernet_rx, ethernet_ddio_out); 
@@ -109,9 +109,9 @@ package body ethernet_frame_receiver_internal_pkg is
             bytearray_index_counter <= bytearray_index_counter + 1;
 
             if ethernet_rx.fcs_shift_register = ethernet_fcs_checksum then
-                test_data(bytearray_index_counter) <= x"EE";
+                write_data_to_ram(ram_write_control_port, ram_write_counter,  x"EE");
             else
-                test_data(bytearray_index_counter) <= x"dd";
+                write_data_to_ram(ram_write_control_port, ram_write_counter,  x"dd");
             end if;
         else
             bytearray_index_counter <= 0;

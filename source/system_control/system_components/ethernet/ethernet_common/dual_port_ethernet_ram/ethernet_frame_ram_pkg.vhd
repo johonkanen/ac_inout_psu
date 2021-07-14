@@ -8,6 +8,7 @@ library work;
 
 package ethernet_frame_ram_pkg is
 
+------------------------------------------------------------------------
     type ethernet_frame_ram_clock_group is record
         write_clock : std_logic;
         read_clock : std_logic;
@@ -18,10 +19,12 @@ package ethernet_frame_ram_pkg is
         ram_write_control_port : ram_write_control_group;
         ram_read_control_port  : ram_read_control_group;
     end record;
-    
+
+------------------------------------------------------------------------
     type ethernet_frame_ram_data_output_group is record
         ram_read_port_data_out : ram_read_output_group;
     end record;
+------------------------------------------------------------------------
     
     component ethernet_frame_ram is
         port (
@@ -41,59 +44,4 @@ package ethernet_frame_ram_pkg is
     --	  ethernet_frame_ram_data_in,
     --	  ethernet_frame_ram_data_out);
 
-------------------------------------------------------------------------
-    procedure init_ram_read (
-        signal ram_read_port : out ram_read_control_group);
-------------------------------------------------------------------------
-    procedure read_data_from_ram (
-        signal ram_read_port : out ram_read_control_group;
-        offset : natural;
-        address : natural);
-------------------------------------------------------------------------
-    procedure read_data_from_ram (
-        signal ram_read_port : out ram_read_control_group;
-        address : natural);
-------------------------------------------------------------------------
-------------------------------------------------------------------------
-    
-
 end package ethernet_frame_ram_pkg;
-
-
-package body ethernet_frame_ram_pkg is
-
-------------------------------------------------------------------------
-    procedure init_ram_read
-    (
-        signal ram_read_port : out ram_read_control_group
-    ) is
-    begin
-        ram_read_port.read_is_enabled_when_1 <= '0'; 
-    end init_ram_read;
-
-------------------------------------------------------------------------
-    procedure read_data_from_ram
-    (
-        signal ram_read_port : out ram_read_control_group;
-        address : natural
-    ) is
-    begin
-        ram_read_port.read_is_enabled_when_1 <= '1';
-        ram_read_port.address <= std_logic_vector(to_unsigned(address, 11));
-
-    end read_data_from_ram;
-------------------------------------------------------------------------
-    procedure read_data_from_ram
-    (
-        signal ram_read_port : out ram_read_control_group;
-        offset : natural;
-        address : natural
-    ) is
-    begin
-        ram_read_port.read_is_enabled_when_1 <= '1';
-        ram_read_port.address <= std_logic_vector(to_unsigned(offset + address, 11));
-
-    end read_data_from_ram;
-
-------------------------------------------------------------------------
-end package body ethernet_frame_ram_pkg; 

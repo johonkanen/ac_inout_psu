@@ -5,7 +5,7 @@ library ieee;
 library work;
     use work.ethernet_clocks_pkg.all;
     use work.ethernet_rx_ddio_pkg.all;
-    use work.ethernet_frame_ram_pkg.ram_write_control_group;
+    use work.ethernet_frame_ram_write_pkg.all;
 
 package ethernet_frame_receiver_pkg is
 
@@ -33,21 +33,13 @@ package ethernet_frame_receiver_pkg is
     
     -- signal ethernet_frame_receiver_clocks   : ethernet_frame_receiver_clock_group;
     -- signal ethernet_frame_receiver_FPGA_in  : ethernet_frame_receiver_FPGA_input_group;
-    -- signal ethernet_frame_receiver_FPGA_out : ethernet_frame_receiver_FPGA_output_group;
     -- signal ethernet_frame_receiver_data_in  : ethernet_frame_receiver_data_input_group;
     -- signal ethernet_frame_receiver_data_out : ethernet_frame_receiver_data_output_group
     
     -- u_ethernet_frame_receiver : ethernet_frame_receiver
     -- port map( ethernet_frame_receiver_clocks,
     -- 	  ethernet_frame_receiver_FPGA_in,
-    --	  ethernet_frame_receiver_FPGA_out,
     --	  ethernet_frame_receiver_data_in,
     --	  ethernet_frame_receiver_data_out);
 
 end package ethernet_frame_receiver_pkg;
-
-
-package body ethernet_frame_receiver_pkg is
-
-end package body ethernet_frame_receiver_pkg;
-
