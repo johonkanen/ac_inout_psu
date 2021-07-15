@@ -249,7 +249,7 @@ begin
                         shift_register <= get_ram_data(ethernet_data_out.ethernet_frame_ram_out) & shift_register(15 downto 8); 
                     end if;
                 WHEN 3 => 
-                    shift_register <= get_ram_data(ethernet_data_out.ethernet_frame_ram_out) & shift_register(15 downto 8); 
+                    load_ram_to_shift_register(ethernet_data_out.ethernet_frame_ram_out, shift_register);
                     ram_read_process_counter <= ram_read_process_counter +1;
                 WHEN 4 =>
                     transmit_16_bit_word_with_uart(uart_data_in, shift_register); 

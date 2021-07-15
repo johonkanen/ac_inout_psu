@@ -32,6 +32,10 @@ package ethernet_frame_ram_read_pkg is
     function ram_data_is_ready ( ram_read_port_data_out : ram_read_output_group)
         return boolean;
 ------------------------------------------------------------------------
+    procedure load_ram_to_shift_register (
+        ram_output : in ram_read_output_group;
+        signal ram_shift_register : inout std_logic_vector);
+
 
 end package ethernet_frame_ram_read_pkg;
 
@@ -91,6 +95,16 @@ package body ethernet_frame_ram_read_pkg is
         return ram_read_port_data_out.data_is_ready;
         
     end ram_data_is_ready;
+------------------------------------------------------------------------
+    procedure load_ram_to_shift_register
+    (
+        ram_output : in ram_read_output_group;
+        signal ram_shift_register : inout std_logic_vector
+    ) is
+    begin
+        ram_shift_register <= get_ram_data(ram_output) & ram_shift_register(ram_shift_register'left downto 8); 
+
+    end load_ram_to_shift_register;
 
 end package body ethernet_frame_ram_read_pkg;
 

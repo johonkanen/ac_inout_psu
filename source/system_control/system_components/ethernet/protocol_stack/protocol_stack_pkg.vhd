@@ -36,6 +36,5 @@ package protocol_stack_pkg is
     -- port map( protocol_stack_clocks,
     --	  protocol_stack_data_in,
     --	  protocol_stack_data_out);
-    
 
 end package protocol_stack_pkg;
