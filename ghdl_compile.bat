@@ -25,6 +25,8 @@ ghdl -a --ieee=synopsys %source%/system_clocks_pkg.vhd
         ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_common/dual_port_ethernet_ram/ethernet_frame_ram_pkg.vhd 
         ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_common/dual_port_ethernet_ram/ethernet_frame_ram.vhd 
 
+        ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/protocol_stack/protocol_stack_pkg.vhd
+
             ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_frame_receiver/ethernet_rx_ddio/ethernet_rx_ddio_pkg.vhd
             ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_frame_receiver/ethernet_rx_ddio/ethernet_rx_ddio.vhd
         ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_frame_receiver/ethernet_frame_receiver_pkg.vhd
