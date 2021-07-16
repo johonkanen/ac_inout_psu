@@ -32,13 +32,6 @@ architecture cyclone_10_lp of ethernet_frame_ram is
 	);
     end component dual_port_ethernet_ram;
 
-    signal data      : STD_LOGIC_VECTOR (7 DOWNTO 0)          ;
-    signal rdaddress : STD_LOGIC_VECTOR (10 DOWNTO 0)         ;
-    signal rdclock   : STD_LOGIC                              ;
-    signal rden      : STD_LOGIC                       := '1' ;
-    signal wraddress : STD_LOGIC_VECTOR (10 DOWNTO 0)         ;
-    signal wrclock   : STD_LOGIC                       := '1' ;
-    signal wren      : STD_LOGIC                       := '0' ;
     signal q         : STD_LOGIC_VECTOR (7 DOWNTO 0)          ;
 
     signal data_is_ready_to_be_read : boolean := false;
@@ -77,4 +70,3 @@ begin
                 q         => q);
 
 end cyclone_10_lp;
-
