@@ -36,6 +36,10 @@ package ethernet_rx_ddio_pkg is
         ethernet_rx_output : ethernet_rx_ddio_data_output_group)
         return std_logic_vector;
 ------------------------------------------------------------------------
+    function get_byte_with_inverted_bit_order (
+        ethernet_rx_output : ethernet_rx_ddio_data_output_group)
+        return std_logic_vector;
+------------------------------------------------------------------------
     function ethernet_rx_is_active ( ethernet_rx_ddr_output : ethernet_rx_ddio_data_output_group)
         return boolean;
 ------------------------------------------------------------------------
@@ -76,6 +80,29 @@ package body ethernet_rx_ddio_pkg is
         return byte_reversed; 
 
     end get_reversed_byte;
+------------------------------------------------------------------------
+    function get_byte_with_inverted_bit_order
+    (
+        ethernet_rx_output : ethernet_rx_ddio_data_output_group
+    )
+    return std_logic_vector 
+    is
+        variable inverted_byte : std_logic_vector(7 downto 0);
+    begin
+
+        inverted_byte := ethernet_rx_output.ethernet_rx_byte(0) &
+                         ethernet_rx_output.ethernet_rx_byte(1) &
+                         ethernet_rx_output.ethernet_rx_byte(2) &
+                         ethernet_rx_output.ethernet_rx_byte(3) &
+                         ethernet_rx_output.ethernet_rx_byte(4) &
+                         ethernet_rx_output.ethernet_rx_byte(5) &
+                         ethernet_rx_output.ethernet_rx_byte(6) &
+                         ethernet_rx_output.ethernet_rx_byte(7);
+
+        return inverted_byte; 
+
+        
+    end get_byte_with_inverted_bit_order;
 
 ------------------------------------------------------------------------
     function ethernet_rx_is_active

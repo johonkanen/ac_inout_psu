@@ -70,7 +70,7 @@ package body ethernet_frame_receiver_internal_pkg is
             WHEN receive_frame =>
 
                 ram_write_counter <= ram_write_counter + 1; 
-                write_data_to_ram(ram_write_control_port, ram_write_counter,  get_reversed_byte(ethernet_ddio_out)); 
+                write_data_to_ram(ram_write_control_port, ram_write_counter,  get_byte_with_inverted_bit_order(ethernet_ddio_out)); 
                 calculate_fcs(ethernet_rx, ethernet_ddio_out); 
 
         end CASE;
