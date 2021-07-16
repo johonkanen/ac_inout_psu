@@ -151,7 +151,7 @@ architecture rtl of system_components is
     constant force_1000MHz_connection : std_logic_vector(15 downto 0) := x"0140";
 
     signal shift_register : std_logic_vector(31 downto 0); 
-    signal ram_processor : ram_reader;
+    signal ram_read_controller : ram_reader;
 
 --------------------------------------------------
 begin
@@ -230,18 +230,18 @@ begin
 
             end if;
             
-            create_ram_read_controller(ethernet_data_in.ram_read_control_port, ethernet_data_out.ethernet_frame_ram_out, ram_processor, shift_register); 
+            create_ram_read_controller(ethernet_data_in.ram_read_control_port, ethernet_data_out.ethernet_frame_ram_out, ram_read_controller, shift_register); 
 
             CASE ram_read_process_counter is
                 WHEN 0 => 
 
-                    load_ram_with_offset_to_shift_register(ram_controller                      => ram_processor,
+                    load_ram_with_offset_to_shift_register(ram_controller                      => ram_read_controller,
                                                             start_address                      => test_counter*2,
                                                             number_of_ram_addresses_to_be_read => 4);
 
                     ram_read_process_counter <= ram_read_process_counter +1;
                 WHEN 1 =>
-                    if ram_is_buffered_to_shift_register(ram_processor) then
+                    if ram_is_buffered_to_shift_register(ram_read_controller) then
                         transmit_16_bit_word_with_uart(uart_data_in, shift_register(15 downto 0)); 
                         ram_read_process_counter <= ram_read_process_counter +1;
                     end if;
