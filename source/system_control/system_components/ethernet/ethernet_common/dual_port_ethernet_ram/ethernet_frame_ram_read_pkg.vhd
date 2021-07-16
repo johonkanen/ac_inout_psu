@@ -39,8 +39,8 @@ package ethernet_frame_ram_read_pkg is
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
     type ram_reader is record
-        number_addresses_left_to_read : natural range 0 to 7;
-        ram_read_address : natural range 0 to 7;
+        number_addresses_left_to_read : natural range 0 to 2**11-1;
+        ram_read_address : natural range 0 to 2**11-1;
         ram_buffering_is_complete : boolean;
         ram_offset : natural range 0 to 2**11-1;
     end record;
@@ -127,7 +127,7 @@ package body ethernet_frame_ram_read_pkg is
     ) is
     begin
         if ram_data_is_ready(ram_output) then
-            ram_shift_register <= get_ram_data(ram_output) & ram_shift_register(ram_shift_register'left downto 8);
+            ram_shift_register <=  ram_shift_register(ram_shift_register'left-8 downto 0) & get_ram_data(ram_output);
         end if;
 
     end load_ram_to_shift_register;
@@ -144,9 +144,9 @@ package body ethernet_frame_ram_read_pkg is
         init_ram_read(ram_read_port);
         load_ram_to_shift_register(ram_output_port, ram_shift_register);
 
-        if ram_controller.ram_read_address > 0 then
-            ram_controller.ram_read_address <= ram_controller.ram_read_address - 1;
-            read_data_from_ram(ram_read_port, ram_controller.ram_offset+ram_controller.ram_read_address-1);
+        if ram_controller.ram_read_address < ram_controller.ram_offset then
+            ram_controller.ram_read_address <= ram_controller.ram_read_address + 1;
+            read_data_from_ram(ram_read_port, ram_controller.ram_read_address);
         end if;
 
         ram_controller.ram_buffering_is_complete <= false;
@@ -167,9 +167,9 @@ package body ethernet_frame_ram_read_pkg is
         number_of_ram_addresses_to_be_read : natural
     ) is
     begin
-        ram_controller.ram_read_address              <= number_of_ram_addresses_to_be_read;
+        ram_controller.ram_read_address              <= start_address;
         ram_controller.number_addresses_left_to_read <= number_of_ram_addresses_to_be_read;
-        ram_controller.ram_offset                    <= start_address;
+        ram_controller.ram_offset                    <= start_address + number_of_ram_addresses_to_be_read;
 
     end load_ram_with_offset_to_shift_register;
 ------------------------------------------------------------------------
