@@ -25,6 +25,9 @@ architecture rtl of ethernet_protocol is
 
     signal frame_ram_read_control_port : ram_read_control_group;
 
+    type list_of_ethernet_protocol_processing_states is (wait_for_frame, source_mac_address, destination_mac_address, ethertype);
+    signal ethernet_protocol_processing_state : list_of_ethernet_protocol_processing_states := wait_for_frame;
+
 ------------------------------------------------------------------------
     procedure left_shift_register
     (
@@ -36,7 +39,7 @@ architecture rtl of ethernet_protocol is
     end left_shift_register;
 
 ------------------------------------------------------------------------
-    function is_toggled
+    function toggle_detected_in
     (
         shift_vector : std_logic_vector 
     )
@@ -44,7 +47,7 @@ architecture rtl of ethernet_protocol is
     is
     begin
         return shift_vector(shift_vector'left) = shift_vector(shift_vector'left-1);
-    end is_toggled;
+    end toggle_detected_in;
 
 ------------------------------------------------------------------------
 begin
@@ -61,6 +64,16 @@ begin
             init_ram_read(frame_ram_read_control_port);
             load_ram_to_shift_register(ethernet_protocol_data_in.frame_ram_output, shift_register);
             left_shift_register(frame_received_shift_register, ethernet_protocol_data_in.toggle_frame_is_received); 
+
+
+            CASE ethernet_protocol_processing_state is
+                WHEN wait_for_frame          =>
+                    if toggle_detected_in(frame_received_shift_register) then
+                    end if;
+                WHEN destination_mac_address =>
+                WHEN source_mac_address      =>
+                WHEN ethertype               =>
+            end CASE;
 
 
 
