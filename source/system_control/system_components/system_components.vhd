@@ -150,28 +150,63 @@ architecture rtl of system_components is
 
     constant force_1000MHz_connection : std_logic_vector(15 downto 0) := x"0140";
 
+    signal shift_register : std_logic_vector(15 downto 0);
+
+------------------------------------------------------------------------
+------------------------------------------------------------------------
     type ram_reader is record
-        shift_register : std_logic_vector(15 downto 0);
         transmit_counter : natural range 0 to 7;
         ram_read_address : natural range 0 to 7;
         ram_buffering_is_complete : boolean;
         ram_address_buffer_counter : natural range 0 to 7;
+        ram_offset : natural range 0 to 2**11-1;
     end record;
 
-    signal ram_processor : ram_reader;
 
+------------------------------------------------------------------------
     procedure create_ram_read_controller
     (
         signal ram_read_port : out ram_read_control_group;
         ram_output_port : in ram_read_output_group;
-        signal ram_controller : inout ram_reader
+        signal ram_controller : inout ram_reader;
+        signal ram_shift_register : inout std_logic_vector
     ) is
     begin
         init_ram_read(ram_read_port);
-        load_ram_to_shift_register(ram_output_port, ram_controller.shift_register);
-        
-    end create_ram_read_controller;
+        load_ram_to_shift_register(ram_output_port, ram_shift_register);
 
+        if ram_controller.ram_read_address > 0 then
+            ram_controller.ram_read_address <= ram_controller.ram_read_address - 1;
+            read_data_from_ram(ram_read_port, ram_controller.ram_offset+ram_controller.ram_read_address-1);
+        end if;
+
+        if ram_data_is_ready(ethernet_data_out.ethernet_frame_ram_out) then
+            ram_controller.ram_address_buffer_counter <= ram_controller.ram_address_buffer_counter + 1;
+        end if;
+
+        ram_controller.ram_buffering_is_complete <= false;
+        if ram_controller.ram_address_buffer_counter = 1 then
+            ram_controller.ram_buffering_is_complete <= true;
+        end if;
+        
+    end create_ram_read_controller; 
+
+------------------------------------------------------------------------
+    procedure read_number_of_registers_with_offset
+    (
+        signal ram_controller : inout  ram_reader;
+        start_address : natural;
+        number_of_ram_addresses_to_be_read : natural
+    ) is
+    begin
+        ram_controller.ram_read_address <= number_of_ram_addresses_to_be_read;
+        ram_controller.ram_address_buffer_counter <= 0;
+        ram_controller.ram_offset <= start_address; 
+
+    end read_number_of_registers_with_offset;
+------------------------------------------------------------------------
+
+    signal ram_processor : ram_reader;
 
 --------------------------------------------------
 begin
@@ -254,31 +289,16 @@ begin
 
             end if;
             
-            create_ram_read_controller(ethernet_data_in.ram_read_control_port, ethernet_data_out.ethernet_frame_ram_out, ram_processor);
-
-            if ram_processor.ram_read_address > 0 then
-                ram_processor.ram_read_address <= ram_processor.ram_read_address - 1;
-                read_data_from_ram(ethernet_data_in.ram_read_control_port, test_counter*2+ram_processor.ram_read_address-1);
-            end if;
-
-            if ram_data_is_ready(ethernet_data_out.ethernet_frame_ram_out) then
-                ram_processor.ram_address_buffer_counter <= ram_processor.ram_address_buffer_counter + 1;
-            end if;
-
-            ram_processor.ram_buffering_is_complete <= false;
-            if ram_processor.ram_address_buffer_counter = 1 then
-                ram_processor.ram_buffering_is_complete <= true;
-            end if;
-
+            create_ram_read_controller(ethernet_data_in.ram_read_control_port, ethernet_data_out.ethernet_frame_ram_out, ram_processor, shift_register); 
 
             CASE ram_read_process_counter is
                 WHEN 0 => 
-                    ram_processor.ram_read_address <= 2;
-                    ram_processor.ram_address_buffer_counter <= 0;
+                    read_number_of_registers_with_offset(ram_processor, test_counter*2,  2);
+
                     ram_read_process_counter <= ram_read_process_counter +1;
                 WHEN 1 =>
                     if ram_processor.ram_buffering_is_complete then
-                        transmit_16_bit_word_with_uart(uart_data_in, ram_processor.shift_register); 
+                        transmit_16_bit_word_with_uart(uart_data_in, shift_register); 
                         ram_read_process_counter <= ram_read_process_counter +1;
                     end if;
                 WHEN others => -- do nothing
