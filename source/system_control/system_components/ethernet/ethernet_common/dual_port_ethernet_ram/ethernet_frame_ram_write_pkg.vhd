@@ -32,6 +32,7 @@ package body ethernet_frame_ram_write_pkg is
     ) is
     begin
         ram_write_port.write_enabled_when_1 <= '0';
+        ram_write_port.address <= (others => '0');
     end init_ram_write;
 
 
