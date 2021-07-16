@@ -39,10 +39,9 @@ package ethernet_frame_ram_read_pkg is
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
     type ram_reader is record
-        transmit_counter : natural range 0 to 7;
+        number_addresses_left_to_read : natural range 0 to 7;
         ram_read_address : natural range 0 to 7;
         ram_buffering_is_complete : boolean;
-        ram_address_buffer_counter : natural range 0 to 7;
         ram_offset : natural range 0 to 2**11-1;
     end record;
 ------------------------------------------------------------------------
@@ -150,14 +149,13 @@ package body ethernet_frame_ram_read_pkg is
             read_data_from_ram(ram_read_port, ram_controller.ram_offset+ram_controller.ram_read_address-1);
         end if;
 
-        if ram_data_is_ready(ram_output_port) then
-            ram_controller.ram_address_buffer_counter <= ram_controller.ram_address_buffer_counter + 1;
-        end if;
-
         ram_controller.ram_buffering_is_complete <= false;
-        if ram_controller.ram_address_buffer_counter = 1 then
-            ram_controller.ram_buffering_is_complete <= true;
-        end if;
+        if ram_data_is_ready(ram_output_port) then
+            ram_controller.number_addresses_left_to_read <= ram_controller.number_addresses_left_to_read - 1;
+            if ram_controller.number_addresses_left_to_read = 1 then
+                ram_controller.ram_buffering_is_complete <= true;
+            end if;
+        end if; 
         
     end create_ram_read_controller; 
 
@@ -169,9 +167,9 @@ package body ethernet_frame_ram_read_pkg is
         number_of_ram_addresses_to_be_read : natural
     ) is
     begin
-        ram_controller.ram_read_address <= number_of_ram_addresses_to_be_read;
-        ram_controller.ram_address_buffer_counter <= 0;
-        ram_controller.ram_offset <= start_address; 
+        ram_controller.ram_read_address              <= number_of_ram_addresses_to_be_read;
+        ram_controller.number_addresses_left_to_read <= number_of_ram_addresses_to_be_read;
+        ram_controller.ram_offset                    <= start_address;
 
     end load_ram_with_offset_to_shift_register;
 ------------------------------------------------------------------------
@@ -185,9 +183,5 @@ package body ethernet_frame_ram_read_pkg is
        return ram_controller.ram_buffering_is_complete; 
     end ram_is_buffered_to_shift_register;
 ------------------------------------------------------------------------
-------------------------------------------------------------------------
 
-
-
-end package body ethernet_frame_ram_read_pkg;
-
+end package body ethernet_frame_ram_read_pkg; 
