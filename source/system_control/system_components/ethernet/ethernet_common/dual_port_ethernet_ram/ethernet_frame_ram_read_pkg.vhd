@@ -127,7 +127,7 @@ package body ethernet_frame_ram_read_pkg is
     ) is
     begin
         if ram_data_is_ready(ram_output) then
-            ram_shift_register <= ram_shift_register(ram_shift_register'left-8 downto 0) & get_ram_data(ram_output);
+            ram_shift_register <= get_ram_data(ram_output) & ram_shift_register(ram_shift_register'left downto 8);
         end if;
 
     end load_ram_to_shift_register;
