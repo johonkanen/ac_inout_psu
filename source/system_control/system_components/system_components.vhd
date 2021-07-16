@@ -192,7 +192,7 @@ architecture rtl of system_components is
     end create_ram_read_controller; 
 
 ------------------------------------------------------------------------
-    procedure read_number_of_registers_with_offset
+    procedure load_ram_with_offset_to_shift_register
     (
         signal ram_controller : inout  ram_reader;
         start_address : natural;
@@ -203,7 +203,18 @@ architecture rtl of system_components is
         ram_controller.ram_address_buffer_counter <= 0;
         ram_controller.ram_offset <= start_address; 
 
-    end read_number_of_registers_with_offset;
+    end load_ram_with_offset_to_shift_register;
+------------------------------------------------------------------------
+    function ram_is_buffered_to_shift_register
+    (
+        ram_controller : ram_reader
+    )
+    return boolean
+    is
+    begin
+       return ram_controller.ram_buffering_is_complete; 
+    end ram_is_buffered_to_shift_register;
+------------------------------------------------------------------------
 ------------------------------------------------------------------------
 
     signal ram_processor : ram_reader;
@@ -293,11 +304,14 @@ begin
 
             CASE ram_read_process_counter is
                 WHEN 0 => 
-                    read_number_of_registers_with_offset(ram_processor, test_counter*2,  2);
+
+                    load_ram_with_offset_to_shift_register(ram_controller                      => ram_processor,
+                                                            start_address                      => test_counter*2,
+                                                            number_of_ram_addresses_to_be_read => 2);
 
                     ram_read_process_counter <= ram_read_process_counter +1;
                 WHEN 1 =>
-                    if ram_processor.ram_buffering_is_complete then
+                    if ram_is_buffered_to_shift_register(ram_processor) then
                         transmit_16_bit_word_with_uart(uart_data_in, shift_register); 
                         ram_read_process_counter <= ram_read_process_counter +1;
                     end if;
