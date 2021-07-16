@@ -25,6 +25,7 @@ architecture rtl of ethernet_protocol is
 
     signal frame_ram_read_control_port : ram_read_control_group;
 
+------------------------------------------------------------------------
     procedure left_shift_register
     (
         signal shift_register : inout std_logic_vector;
@@ -34,6 +35,7 @@ architecture rtl of ethernet_protocol is
         shift_register <= shift_register(shift_register'left-1 downto 0) & data_input;
     end left_shift_register;
 
+------------------------------------------------------------------------
     function is_toggled
     (
         shift_vector : std_logic_vector 
@@ -44,6 +46,7 @@ architecture rtl of ethernet_protocol is
         return shift_vector(shift_vector'left) = shift_vector(shift_vector'left-1);
     end is_toggled;
 
+------------------------------------------------------------------------
 begin
 
     ethernet_protocol_data_out <= (
@@ -58,6 +61,8 @@ begin
             init_ram_read(frame_ram_read_control_port);
             load_ram_to_shift_register(ethernet_protocol_data_in.frame_ram_output, shift_register);
             left_shift_register(frame_received_shift_register, ethernet_protocol_data_in.toggle_frame_is_received); 
+
+
 
         end if; --rising_edge
     end process ethernet_protocol_processor;	

@@ -48,6 +48,7 @@ package body ethernet_frame_ram_read_pkg is
     ) is
     begin
         ram_read_port.read_is_enabled_when_1 <= '0'; 
+        ram_read_port.address <= (others => '0');
     end init_ram_read;
 
 ------------------------------------------------------------------------
