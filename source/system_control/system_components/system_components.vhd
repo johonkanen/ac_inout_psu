@@ -150,11 +150,27 @@ architecture rtl of system_components is
 
     constant force_1000MHz_connection : std_logic_vector(15 downto 0) := x"0140";
 
-    signal shift_register : std_logic_vector(15 downto 0);
-    signal transmit_counter : natural range 0 to 7;
-    signal ram_read_address : natural range 0 to 7;
-    signal ram_buffering_is_complete : boolean;
-    signal ram_address_buffer_counter : natural range 0 to 7;
+    type ram_reader is record
+        shift_register : std_logic_vector(15 downto 0);
+        transmit_counter : natural range 0 to 7;
+        ram_read_address : natural range 0 to 7;
+        ram_buffering_is_complete : boolean;
+        ram_address_buffer_counter : natural range 0 to 7;
+    end record;
+
+    signal ram_processor : ram_reader;
+
+    procedure create_ram_read_controller
+    (
+        signal ram_read_port : out ram_read_control_group;
+        ram_output_port : in ram_read_output_group;
+        signal ram_controller : inout ram_reader
+    ) is
+    begin
+        init_ram_read(ram_read_port);
+        load_ram_to_shift_register(ram_output_port, ram_controller.shift_register);
+        
+    end create_ram_read_controller;
 
 
 --------------------------------------------------
@@ -238,31 +254,31 @@ begin
 
             end if;
             
-            init_ram_read(ethernet_data_in.ram_read_control_port);
-            load_ram_to_shift_register(ethernet_data_out.ethernet_frame_ram_out, shift_register);
-            if ram_read_address > 0 then
-                ram_read_address <= ram_read_address - 1;
-                read_data_from_ram(ethernet_data_in.ram_read_control_port, test_counter*2+ram_read_address-1);
+            create_ram_read_controller(ethernet_data_in.ram_read_control_port, ethernet_data_out.ethernet_frame_ram_out, ram_processor);
+
+            if ram_processor.ram_read_address > 0 then
+                ram_processor.ram_read_address <= ram_processor.ram_read_address - 1;
+                read_data_from_ram(ethernet_data_in.ram_read_control_port, test_counter*2+ram_processor.ram_read_address-1);
             end if;
 
             if ram_data_is_ready(ethernet_data_out.ethernet_frame_ram_out) then
-                ram_address_buffer_counter <= ram_address_buffer_counter + 1;
+                ram_processor.ram_address_buffer_counter <= ram_processor.ram_address_buffer_counter + 1;
             end if;
 
-            ram_buffering_is_complete <= false;
-            if ram_address_buffer_counter = 1 then
-                ram_buffering_is_complete <= true;
+            ram_processor.ram_buffering_is_complete <= false;
+            if ram_processor.ram_address_buffer_counter = 1 then
+                ram_processor.ram_buffering_is_complete <= true;
             end if;
 
 
             CASE ram_read_process_counter is
                 WHEN 0 => 
-                    ram_read_address <= 2;
-                    ram_address_buffer_counter <= 0;
+                    ram_processor.ram_read_address <= 2;
+                    ram_processor.ram_address_buffer_counter <= 0;
                     ram_read_process_counter <= ram_read_process_counter +1;
                 WHEN 1 =>
-                    if ram_buffering_is_complete then
-                        transmit_16_bit_word_with_uart(uart_data_in, shift_register); 
+                    if ram_processor.ram_buffering_is_complete then
+                        transmit_16_bit_word_with_uart(uart_data_in, ram_processor.shift_register); 
                         ram_read_process_counter <= ram_read_process_counter +1;
                     end if;
                 WHEN others => -- do nothing
