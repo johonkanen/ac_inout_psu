@@ -28,6 +28,8 @@ architecture rtl of ethernet_protocol is
     type list_of_ethernet_protocol_processing_states is (wait_for_frame, source_mac_address, destination_mac_address, ethertype);
     signal ethernet_protocol_processing_state : list_of_ethernet_protocol_processing_states := wait_for_frame;
 
+    signal ram_read_address : natural range 0 to 2**11-1;
+
 ------------------------------------------------------------------------
     procedure left_shift_register
     (
@@ -50,12 +52,36 @@ architecture rtl of ethernet_protocol is
     end toggle_detected_in;
 
 ------------------------------------------------------------------------
+    signal ram_read_is_requested : boolean := false;
+
+    type ram_controller is record
+        ram_read_port : ram_read_control_group;
+        ram_address : natural;
+        ram_start_address : natural;
+    end record;
+
+    procedure read_number_of_registers
+    (
+        start_address : natural;
+        number_of_register_reads : natural;
+        signal ram_control : inout ram_controller
+    ) is
+    begin
+        
+    end read_number_of_registers;
+
+    signal number_of_ram_addresses_to_read : natural range 0 to 2**3-1; 
+    signal ram_address : natural range 0 to 2**11-1;
+    signal ram_offset  : natural range 0 to 2**11-1;
+
 begin
 
+------------------------------------------------------------------------
     ethernet_protocol_data_out <= (
                                       frame_ram_read_control => frame_ram_read_control_port
                                   );
 
+------------------------------------------------------------------------
     ethernet_protocol_processor : process(clock)
         
     begin
@@ -65,6 +91,10 @@ begin
             load_ram_to_shift_register(ethernet_protocol_data_in.frame_ram_output, shift_register);
             left_shift_register(frame_received_shift_register, ethernet_protocol_data_in.toggle_frame_is_received); 
 
+            if ram_read_address > 0 then
+                read_data_from_ram(frame_ram_read_control_port, ram_offset + ram_read_address - 1);
+                ram_read_address <= ram_read_address - 1;
+            end if;
 
             CASE ethernet_protocol_processing_state is
                 WHEN wait_for_frame          =>
@@ -73,9 +103,7 @@ begin
                 WHEN destination_mac_address =>
                 WHEN source_mac_address      =>
                 WHEN ethertype               =>
-            end CASE;
-
-
+            end CASE; 
 
         end if; --rising_edge
     end process ethernet_protocol_processor;	

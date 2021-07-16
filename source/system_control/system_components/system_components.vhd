@@ -152,6 +152,9 @@ architecture rtl of system_components is
 
     signal shift_register : std_logic_vector(15 downto 0);
     signal transmit_counter : natural range 0 to 7;
+    signal ram_read_address : natural range 0 to 7;
+    signal ram_buffering_is_complete : boolean;
+    signal ram_address_buffer_counter : natural range 0 to 7;
 
 
 --------------------------------------------------
@@ -237,23 +240,31 @@ begin
             
             init_ram_read(ethernet_data_in.ram_read_control_port);
             load_ram_to_shift_register(ethernet_data_out.ethernet_frame_ram_out, shift_register);
+            if ram_read_address > 0 then
+                ram_read_address <= ram_read_address - 1;
+                read_data_from_ram(ethernet_data_in.ram_read_control_port, test_counter*2+ram_read_address-1);
+            end if;
+
+            if ram_data_is_ready(ethernet_data_out.ethernet_frame_ram_out) then
+                ram_address_buffer_counter <= ram_address_buffer_counter + 1;
+            end if;
+
+            ram_buffering_is_complete <= false;
+            if ram_address_buffer_counter = 1 then
+                ram_buffering_is_complete <= true;
+            end if;
+
 
             CASE ram_read_process_counter is
                 WHEN 0 => 
-                    read_data_from_ram(ethernet_data_in.ram_read_control_port, test_counter*2);
+                    ram_read_address <= 2;
+                    ram_address_buffer_counter <= 0;
                     ram_read_process_counter <= ram_read_process_counter +1;
-                WHEN 1 => 
-                    read_data_from_ram(ethernet_data_in.ram_read_control_port, test_counter*2+1);
-                    ram_read_process_counter <= ram_read_process_counter +1;
-                WHEN 2 => 
-                    if ram_data_is_ready(ethernet_data_out.ethernet_frame_ram_out) then
+                WHEN 1 =>
+                    if ram_buffering_is_complete then
+                        transmit_16_bit_word_with_uart(uart_data_in, shift_register); 
                         ram_read_process_counter <= ram_read_process_counter +1;
                     end if;
-                WHEN 3 => 
-                    ram_read_process_counter <= ram_read_process_counter +1;
-                WHEN 4 =>
-                    transmit_16_bit_word_with_uart(uart_data_in, shift_register); 
-                    ram_read_process_counter <= ram_read_process_counter +1;
                 WHEN others => -- do nothing
             end CASE;
 
