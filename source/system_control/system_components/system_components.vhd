@@ -150,9 +150,7 @@ architecture rtl of system_components is
 
     constant force_1000MHz_connection : std_logic_vector(15 downto 0) := x"0140";
 
-    signal shift_register : std_logic_vector(15 downto 0);
-
-
+    signal shift_register : std_logic_vector(31 downto 0); 
     signal ram_processor : ram_reader;
 
 --------------------------------------------------
@@ -210,11 +208,7 @@ begin
                     WHEN 15 => transmit_16_bit_word_with_uart(uart_data_in, uart_rx_data);
                     WHEN others => -- get data from MDIO
                         register_counter := register_counter + 1;
-                        if test_counter = 150 then
-                            -- write_data_to_mdio(mdio_driver_data_in, x"00", x"00", force_1000MHz_connection);
-                        else
-                            read_data_from_mdio(mdio_driver_data_in, x"00", integer_to_std(register_counter, 8));
-                        end if;
+                        read_data_from_mdio(mdio_driver_data_in, x"00", integer_to_std(register_counter, 8));
                 end CASE; 
 
                 filter_data(bandpass_filter, get_square_wave_from_counter(test_counter));
@@ -226,8 +220,8 @@ begin
 
             if mdio_data_read_is_ready(mdio_driver_data_out) then
 
-                if test_counter < 129+32 then 
-                    if test_counter < 129 then
+                if test_counter < 128+32 then 
+                    if test_counter < 128 then
                         ram_read_process_counter <= 0;
                     else
                         transmit_16_bit_word_with_uart(uart_data_in, get_data_from_mdio(mdio_driver_data_out));
@@ -243,12 +237,12 @@ begin
 
                     load_ram_with_offset_to_shift_register(ram_controller                      => ram_processor,
                                                             start_address                      => test_counter*2,
-                                                            number_of_ram_addresses_to_be_read => 2);
+                                                            number_of_ram_addresses_to_be_read => 4);
 
                     ram_read_process_counter <= ram_read_process_counter +1;
                 WHEN 1 =>
                     if ram_is_buffered_to_shift_register(ram_processor) then
-                        transmit_16_bit_word_with_uart(uart_data_in, shift_register); 
+                        transmit_16_bit_word_with_uart(uart_data_in, shift_register(15 downto 0)); 
                         ram_read_process_counter <= ram_read_process_counter +1;
                     end if;
                 WHEN others => -- do nothing
