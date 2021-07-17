@@ -29,11 +29,11 @@ architecture rtl of ethernet_protocol is
     signal ram_read_controller : ram_reader;
     signal ram_offset : natural range 0 to 2**11-1;
 
+------------------------------------------------------------------------ 
     signal internet_protocol_clocks   : internet_protocol_clock_group;
     signal internet_protocol_data_in  : internet_protocol_data_input_group;
     signal internet_protocol_data_out : internet_protocol_data_output_group;
-
-    signal internet_protocol_control : protocol_control_record;
+    signal internet_protocol_control  : protocol_control_record;
 
 ------------------------------------------------------------------------ 
 begin
@@ -56,22 +56,29 @@ begin
         if rising_edge(clock) then
 
             create_ram_read_controller(frame_ram_read_control_port, ethernet_protocol_data_in.frame_ram_output, ram_read_controller, shift_register); 
-            frame_received_shift_register <= frame_received_shift_register(frame_received_shift_register'left-1 downto 0) & ethernet_protocol_data_in.toggle_frame_is_received;
+            -- frame_received_shift_register <= frame_received_shift_register(frame_received_shift_register'left-1 downto 0) & ethernet_protocol_data_in.toggle_frame_is_received;
             init_protocol_control(internet_protocol_control);
 
-            if toggle_detected_in(frame_received_shift_register) then 
+            if ethernet_protocol_data_in.protocol_processing_is_requested then 
 
                load_ram_with_offset_to_shift_register(ram_controller                     => ram_read_controller,
                                                        start_address                      => 0,
-                                                       number_of_ram_addresses_to_be_read => 14+7);
+                                                       number_of_ram_addresses_to_be_read => 14+8);
             end if;
 
             if ram_data_is_ready(ethernet_protocol_data_in.frame_ram_output) then
 
                 if get_ram_address(ethernet_protocol_data_in.frame_ram_output) = 14 then
                     if shift_register(15 downto 0) = x"0800" then
-                        ram_offset <= 14 + 8;
                         request_protocol_processing(internet_protocol_control, 14);
+                    end if;
+                end if;
+
+                if get_ram_address(ethernet_protocol_data_in.frame_ram_output) = 14+8 then
+                    if shift_register(7 downto 0) = x"11" then
+                        ram_offset <= 14 + 8;
+                    else
+                        ram_offset <= 0;
                     end if;
                 end if;
 

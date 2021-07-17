@@ -44,6 +44,10 @@ architecture rtl of ethernet is
     signal ethernet_protocol_data_out : ethernet_protocol_data_output_group;
 
     signal frame_ram_read_control_port : ram_read_control_group;
+
+    signal frame_is_received : boolean;
+
+    signal shift_register : std_logic_vector(2 downto 0);
 ------------------------------------------------------------------------ 
 
 begin 
@@ -91,11 +95,22 @@ begin
               ethernet_frame_transmitter_data_out);
 
 ------------------------------------------------------------------------ 
+
+    protocol_trigger : process(ethernet_clocks.core_clock)
+        
+    begin
+        if rising_edge(ethernet_clocks.core_clock) then
+            shift_register <= shift_register(shift_register'left-1 downto 0 ) & ethernet_frame_receiver_data_out.toggle_data_has_been_written;
+
+            frame_is_received <= shift_register(shift_register'left) = '0' AND shift_register(shift_register'left-1) = '1';
+
+        end if; --rising_edge
+    end process protocol_trigger;	
 ------------------------------------------------------------------------ 
     ethernet_protocol_clocks <= (clock => ethernet_clocks.core_clock);
 
     ethernet_protocol_data_in <= (frame_ram_output        => ethernet_frame_ram_data_out.ram_read_port_data_out,
-                                 toggle_frame_is_received => ethernet_frame_receiver_data_out.toggle_data_has_been_written);
+                                 protocol_processing_is_requested => frame_is_received); -- ethernet_frame_receiver_data_out.toggle_data_has_been_written);
                                    
 
     u_ethernet_protocol : ethernet_protocol

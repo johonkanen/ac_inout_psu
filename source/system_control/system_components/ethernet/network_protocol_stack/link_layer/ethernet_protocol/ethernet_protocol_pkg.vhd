@@ -13,7 +13,7 @@ package ethernet_protocol_pkg is
     
     type ethernet_protocol_data_input_group is record
         frame_ram_output         : ram_read_output_group;
-        toggle_frame_is_received : std_logic;
+        protocol_processing_is_requested : boolean;
     end record;
     
     type ethernet_protocol_data_output_group is record
