@@ -39,11 +39,16 @@ architecture rtl of ethernet_protocol is
 begin
 
 ------------------------------------------------------------------------
-    ethernet_protocol_data_out <= (
-                                      frame_ram_read_control => frame_ram_read_control_port,
-                                      ram_offset => ram_offset
-                                  );
+------------------------------------------------------------------------
+    route_data_out : process(frame_ram_read_control_port, internet_protocol_data_out.frame_ram_read_control, ram_offset) 
+    begin
+        ethernet_protocol_data_out <= (
+                                          frame_ram_read_control => frame_ram_read_control_port + internet_protocol_data_out.frame_ram_read_control,
+                                          ram_offset => ram_offset
+                                      );
 
+    end process route_data_out;	
+------------------------------------------------------------------------
 ------------------------------------------------------------------------
     ethernet_protocol_processor : process(clock)
         
@@ -52,6 +57,7 @@ begin
 
             create_ram_read_controller(frame_ram_read_control_port, ethernet_protocol_data_in.frame_ram_output, ram_read_controller, shift_register); 
             frame_received_shift_register <= frame_received_shift_register(frame_received_shift_register'left-1 downto 0) & ethernet_protocol_data_in.toggle_frame_is_received;
+            init_protocol_control(internet_protocol_control);
 
             if toggle_detected_in(frame_received_shift_register) then 
 
@@ -64,7 +70,8 @@ begin
 
                 if get_ram_address(ethernet_protocol_data_in.frame_ram_output) = 14 then
                     if shift_register(15 downto 0) = x"0800" then
-                        ram_offset <= 12;
+                        ram_offset <= 14;
+                        request_protocol_processing(internet_protocol_control, 14);
                     end if;
                 end if;
 
@@ -76,7 +83,8 @@ begin
 ------------------------------------------------------------------------
     internet_protocol_clocks <= (clock => clock);
 
-    internet_protocol_data_in <= (frame_ram_output => ethernet_protocol_data_in.frame_ram_output, protocol_control => internet_protocol_control);
+    internet_protocol_data_in <= (frame_ram_output => ethernet_protocol_data_in.frame_ram_output, 
+                                 protocol_control => internet_protocol_control);
 
     u_internet_protocol : internet_protocol
     port map( internet_protocol_clocks,

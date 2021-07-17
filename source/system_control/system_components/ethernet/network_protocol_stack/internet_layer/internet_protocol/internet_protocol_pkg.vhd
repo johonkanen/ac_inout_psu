@@ -23,6 +23,7 @@ package internet_protocol_pkg is
     
     type internet_protocol_data_output_group is record
         frame_ram_read_control : ram_read_control_group;
+        ram_offset : natural;
     end record;
     
     component internet_protocol is
@@ -47,11 +48,24 @@ package internet_protocol_pkg is
         signal control : out protocol_control_record;
         protocol_start_address : natural);
     
+    procedure init_protocol_control (
+        signal control : out protocol_control_record);
 ------------------------------------------------------------------------ 
 end package internet_protocol_pkg; 
 
 package body internet_protocol_pkg is
 
+------------------------------------------------------------------------
+    procedure init_protocol_control
+    (
+        signal control : out protocol_control_record
+    ) is
+    begin
+        control.protocol_processing_is_requested <= false;
+        control.protocol_start_address <= 0;
+    end init_protocol_control; 
+
+------------------------------------------------------------------------
     procedure request_protocol_processing
     (
         signal control : out protocol_control_record;
