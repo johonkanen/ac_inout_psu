@@ -18,6 +18,7 @@ package ethernet_protocol_pkg is
     
     type ethernet_protocol_data_output_group is record
         frame_ram_read_control : ram_read_control_group;
+        ram_offset : natural range 0 to 2**11-1;
     end record;
     
     component ethernet_protocol is
