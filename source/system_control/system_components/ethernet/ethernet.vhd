@@ -11,7 +11,7 @@ library work;
     use work.ethernet_frame_transmitter_pkg.all;
     use work.ethernet_frame_ram_pkg.all;
     use work.ethernet_frame_ram_read_pkg.all;
-    use work.ethernet_protocol_pkg.all;
+    use work.network_protocol_header_pkg.all;
 
 entity ethernet is
     port (
@@ -39,9 +39,10 @@ architecture rtl of ethernet is
     signal ethernet_frame_ram_data_in  : ethernet_frame_ram_data_input_group;
     signal ethernet_frame_ram_data_out : ethernet_frame_ram_data_output_group;
 
-    signal ethernet_protocol_clocks   : ethernet_protocol_clock_group;
-    signal ethernet_protocol_data_in  : ethernet_protocol_data_input_group;
-    signal ethernet_protocol_data_out : ethernet_protocol_data_output_group;
+
+    signal ethernet_protocol_clocks   : network_protocol_clock_group;
+    signal ethernet_protocol_data_in  : network_protocol_data_input_group;
+    signal ethernet_protocol_data_out : network_protocol_data_output_group;
 
     signal frame_ram_read_control_port : ram_read_control_group;
 
@@ -109,11 +110,14 @@ begin
 ------------------------------------------------------------------------ 
     ethernet_protocol_clocks <= (clock => ethernet_clocks.core_clock);
 
-    ethernet_protocol_data_in <= (frame_ram_output        => ethernet_frame_ram_data_out.ram_read_port_data_out,
-                                 protocol_processing_is_requested => frame_is_received); -- ethernet_frame_receiver_data_out.toggle_data_has_been_written);
+    ethernet_protocol_data_in <= (
+                                     frame_ram_output        => ethernet_frame_ram_data_out.ram_read_port_data_out,
+                                     protocol_control => (protocol_processing_is_requested => frame_is_received,
+                                                          protocol_start_address => 0)
+                                 );
                                    
 
-    u_ethernet_protocol : ethernet_protocol
+    u_ethernet_protocol : entity work.network_protocol(ethernet_protocol)
     port map( ethernet_protocol_clocks,
     	  ethernet_protocol_data_in,
     	  ethernet_protocol_data_out);

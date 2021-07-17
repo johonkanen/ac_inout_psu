@@ -2,25 +2,14 @@ library ieee;
     use ieee.std_logic_1164.all;
     use ieee.numeric_std.all;
 
-library work;
-    use work.ethernet_frame_ram_read_pkg.all;
-    use work.ethernet_protocol_pkg.all; 
-    use work.network_protocol_header_pkg.all; 
-
-entity ethernet_protocol is
-    port (
-        ethernet_protocol_clocks   : in ethernet_protocol_clock_group;
-        ethernet_protocol_data_in  : in ethernet_protocol_data_input_group;
-        ethernet_protocol_data_out : out ethernet_protocol_data_output_group
-    );
-end entity ethernet_protocol;
-
-
-architecture rtl of ethernet_protocol is 
-
-    alias clock is ethernet_protocol_clocks.clock; 
+architecture ethernet_protocol of network_protocol is 
 
     use work.ethernet_protocol_internal_pkg.all; 
+
+    alias clock is network_protocol_clocks.clock;
+    alias ethernet_protocol_data_in is network_protocol_data_in;
+    alias ethernet_protocol_data_out is network_protocol_data_out;
+    alias protocol_control is ethernet_protocol_data_in.protocol_control; 
 
 ------------------------------------------------------------------------ 
     signal frame_ram_read_control_port : ram_read_control_group;
@@ -36,6 +25,7 @@ architecture rtl of ethernet_protocol is
     signal internet_protocol_data_out : network_protocol_data_output_group;
     signal internet_protocol_control  : protocol_control_record;
 
+    -- for u_internet_protocol : network_protocol use entity work.network_protocol(internet_protocol);
 ------------------------------------------------------------------------ 
 begin
 
@@ -60,7 +50,7 @@ begin
             -- frame_received_shift_register <= frame_received_shift_register(frame_received_shift_register'left-1 downto 0) & ethernet_protocol_data_in.toggle_frame_is_received;
             init_protocol_control(internet_protocol_control);
 
-            if ethernet_protocol_data_in.protocol_processing_is_requested then 
+            if ethernet_protocol_data_in.protocol_control.protocol_processing_is_requested then 
 
                load_ram_with_offset_to_shift_register(ram_controller                     => ram_read_controller,
                                                        start_address                      => 0,
@@ -87,10 +77,10 @@ begin
     internet_protocol_data_in <= (frame_ram_output => ethernet_protocol_data_in.frame_ram_output, 
                                  protocol_control => internet_protocol_control);
 
-    u_internet_protocol : network_protocol
-    port map( internet_protocol_clocks,
-    	  internet_protocol_data_in,
-    	  internet_protocol_data_out); 
+    u_internet_protocol : entity work.network_protocol(internet_protocol)
+    port map( internet_protocol_clocks  ,
+              internet_protocol_data_in ,
+              internet_protocol_data_out); 
 
 ------------------------------------------------------------------------
-end rtl;
+end ethernet_protocol;
