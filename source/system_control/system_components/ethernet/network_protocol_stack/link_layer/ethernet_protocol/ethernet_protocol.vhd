@@ -26,12 +26,14 @@ architecture rtl of ethernet_protocol is
 
     signal frame_received_shift_register : std_logic_vector(2 downto 0);
     signal ram_read_controller : ram_reader;
+    signal ram_offset : natural range 0 to 2**11-1;
 
 begin
 
 ------------------------------------------------------------------------
     ethernet_protocol_data_out <= (
-                                      frame_ram_read_control => frame_ram_read_control_port
+                                      frame_ram_read_control => frame_ram_read_control_port,
+                                      ram_offset => ram_offset
                                   );
 
 ------------------------------------------------------------------------
@@ -52,8 +54,9 @@ begin
 
             if ram_data_is_ready(ethernet_protocol_data_in.frame_ram_output) then
 
-                if get_ram_address(ethernet_protocol_data_in.frame_ram_output) = 13 then
+                if get_ram_address(ethernet_protocol_data_in.frame_ram_output) = 14 then
                     if shift_register(15 downto 0) = x"0800" then
+                        ram_offset <= 12;
                     end if;
                 end if;
 

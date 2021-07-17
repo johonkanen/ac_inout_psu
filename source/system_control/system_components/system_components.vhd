@@ -234,13 +234,18 @@ begin
 
             end if;
             
-            create_ram_read_controller(ethernet_data_in.ram_read_control_port, ethernet_data_out.ethernet_frame_ram_out, ram_read_controller, shift_register); 
+            --------------------------------------------------
+            create_ram_read_controller(ethernet_data_in.ram_read_control_port    ,
+                                        ethernet_data_out.ethernet_frame_ram_out ,
+                                        ram_read_controller                      ,
+                                        shift_register); 
+            --------------------------------------------------
 
             CASE ram_read_process_counter is
                 WHEN 0 => 
 
                     load_ram_with_offset_to_shift_register(ram_controller                      => ram_read_controller,
-                                                            start_address                      => test_counter*2,
+                                                            start_address                      => test_counter*2+ethernet_data_out.ethernet_protocol_data_out.ram_offset,
                                                             number_of_ram_addresses_to_be_read => 4);
 
                     ram_read_process_counter <= ram_read_process_counter +1;
