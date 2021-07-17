@@ -23,13 +23,20 @@ architecture internet_protocol of network_protocol is
     signal ram_offset : natural range 0 to 2**11-1;
     signal header_offset : natural range 0 to 2**11-1;
 
+------------------------------------------------------------------------ 
+    signal udp_protocol_clocks   : network_protocol_clock_group;
+    signal udp_protocol_data_in  : network_protocol_data_input_group;
+    signal udp_protocol_data_out : network_protocol_data_output_group;
+    signal udp_protocol_control  : protocol_control_record;
+
+
 begin
 
 ------------------------------------------------------------------------
-    route_data_out : process(frame_ram_read_control_port, ram_offset) 
+    route_data_out : process(frame_ram_read_control_port, ram_offset, udp_protocol_data_out.frame_ram_read_control) 
     begin
         internet_protocol_data_out <= (
-                                          frame_ram_read_control => frame_ram_read_control_port,
+                                          frame_ram_read_control => frame_ram_read_control_port + udp_protocol_data_out.frame_ram_read_control,
                                           ram_offset => ram_offset
                                       );
 
@@ -57,4 +64,11 @@ begin
         end if; --rising_edge
     end process ip_header_processor;	
 
+------------------------------------------------------------------------ 
+    u_udp_protocol : entity work.network_protocol(arch_user_datagram_protocol)
+    port map( udp_protocol_clocks  ,
+              udp_protocol_data_in ,
+              udp_protocol_data_out); 
+
+------------------------------------------------------------------------ 
 end internet_protocol;

@@ -28,6 +28,7 @@ ghdl -a --ieee=synopsys %source%/system_clocks_pkg.vhd
         ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/network_protocol_stack/network_protocol_header_pkg.vhd
         ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/network_protocol_stack/network_protocol.vhd
 
+        ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/network_protocol_stack/transport_layer/user_datagram_protocol/arch_user_datagram_protocol.vhd
         ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/network_protocol_stack/internet_layer/internet_protocol/internet_protocol.vhd 
 
         ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/network_protocol_stack/link_layer/ethernet_protocol/ethernet_protocol_internal_pkg.vhd
