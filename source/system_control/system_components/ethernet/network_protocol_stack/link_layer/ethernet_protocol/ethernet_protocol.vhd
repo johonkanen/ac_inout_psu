@@ -46,7 +46,6 @@ begin
         if rising_edge(clock) then
 
             create_ram_read_controller(frame_ram_read_control_port, ethernet_protocol_data_in.frame_ram_output, ram_read_controller, shift_register); 
-            -- frame_received_shift_register <= frame_received_shift_register(frame_received_shift_register'left-1 downto 0) & ethernet_protocol_data_in.toggle_frame_is_received;
             init_protocol_control(internet_protocol_control);
 
             if ethernet_protocol_data_in.protocol_control.protocol_processing_is_requested then 
