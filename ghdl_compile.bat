@@ -27,7 +27,9 @@ ghdl -a --ieee=synopsys %source%/system_clocks_pkg.vhd
 
         ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/network_protocol_stack/transport_layer/user_datagram_protocol/user_datagram_protocol_pkg.vhd
         ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/network_protocol_stack/internet_layer/internet_protocol/internet_protocol_pkg.vhd
+
         ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/network_protocol_stack/link_layer/ethernet_protocol/ethernet_protocol_pkg.vhd
+        ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/network_protocol_stack/link_layer/ethernet_protocol/ethernet_protocol_internal_pkg.vhd
 
             ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_frame_receiver/ethernet_rx_ddio/ethernet_rx_ddio_pkg.vhd
             ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_frame_receiver/ethernet_rx_ddio/ethernet_rx_ddio.vhd
@@ -37,7 +39,7 @@ ghdl -a --ieee=synopsys %source%/system_clocks_pkg.vhd
             ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_frame_transmitter/ethernet_tx_ddio/ethernet_tx_ddio_pkg.vhd
             ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_frame_transmitter/ethernet_tx_ddio/ethernet_tx_ddio.vhd
         ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_frame_transmitter/ethernet_frame_transmitter_pkg.vhd
-        rem ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_frame_transmitter/ethernet_frame_transmitter_internal_pkg.vhd
+
     ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet/ethernet_pkg.vhd
 
             ghdl -a --ieee=synopsys %source%/system_control/system_components/power_supply_control/gate_drive_power/gate_drive_power_pkg.vhd

@@ -32,14 +32,16 @@ architecture cyclone_10_lp of ethernet_frame_ram is
 	);
     end component dual_port_ethernet_ram;
 
-    signal q         : STD_LOGIC_VECTOR (7 DOWNTO 0)          ;
+    signal q         : STD_LOGIC_VECTOR (7 DOWNTO 0);
 
     signal data_is_ready_to_be_read : boolean := false;
     signal data_is_ready_to_be_read_buffer : boolean := false;
+    signal address_buffer : std_logic_vector(10*2+1 downto 0);
 
 begin
 
-    ethernet_frame_ram_data_out <= (ram_read_port_data_out =>(data_is_ready => data_is_ready_to_be_read_buffer,
+    ethernet_frame_ram_data_out <= (ram_read_port_data_out =>(data_is_ready => data_is_ready_to_be_read_buffer                                   ,
+                                                              byte_address  => address_buffer(address_buffer'left downto address_buffer'left-10) ,
                                                               byte_from_ram => q)
                                   );
 
@@ -52,6 +54,7 @@ begin
             if ram_read_control_port.read_is_enabled_when_1 = '1' then
                 data_is_ready_to_be_read <= true;
             end if;
+            address_buffer <= address_buffer(10 downto 0) & ram_read_control_port.address;
             data_is_ready_to_be_read_buffer <= data_is_ready_to_be_read;
 
         end if; --rising_edge

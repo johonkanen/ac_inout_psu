@@ -56,6 +56,7 @@ derive_clock_uncertainty
 # Set False Path
 #**************************************************************
 
+set_false_path  -from  [get_clocks {u_ethernet_clocks|altpll_component|auto_generated|pll1|clk[0]}]  -to  [get_clocks {u_main_clocks|altpll_component|auto_generated|pll1|clk[0]}]
 set_false_path -from * -to [get_ports *mux*]
 set_false_path -from * -to [get_ports *uart_tx*]
 set_false_path -from [get_ports *uart_rx*] -to *
