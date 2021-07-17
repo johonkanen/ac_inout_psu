@@ -56,41 +56,41 @@ begin
 
             create_ram_read_controller(frame_ram_read_control_port, ethernet_protocol_data_in.frame_ram_output, ram_read_controller, shift_register); 
 
-            CASE ethernet_protocol_processing_state is
-                WHEN wait_for_frame          =>
-                    if toggle_detected_in(frame_received_shift_register) then
-
-
-                        -- read destination mac address
-                        load_ram_with_offset_to_shift_register(ram_controller                     => ram_read_controller,
-                                                               start_address                      => 0,
-                                                               number_of_ram_addresses_to_be_read => 6);
-                    end if;
-                WHEN destination_mac_address =>
-                    if ram_is_buffered_to_shift_register(ram_read_controller) then
-
-                        -- read source mac address
-                        load_ram_with_offset_to_shift_register(ram_controller                     => ram_read_controller,
-                                                               start_address                      => 6,
-                                                               number_of_ram_addresses_to_be_read => 6);
-                    end if;
-                WHEN source_mac_address =>
-
-                    if ram_is_buffered_to_shift_register(ram_read_controller) then
-
-                        -- read source mac address
-                        load_ram_with_offset_to_shift_register(ram_controller                     => ram_read_controller,
-                                                               start_address                      => 12,
-                                                               number_of_ram_addresses_to_be_read => 2);
-                    end if;
-                WHEN ethertype =>
-                    if ram_is_buffered_to_shift_register(ram_read_controller) then
-
-                        if shift_register(15 downto 0) = x"0800" then
-                        end if;
-                    end if;
-            end CASE; 
-
+            -- CASE ethernet_protocol_processing_state is
+            --     WHEN wait_for_frame          =>
+            --         if toggle_detected_in(frame_received_shift_register) then
+            --
+            --
+            --             -- read destination mac address
+            --             load_ram_with_offset_to_shift_register(ram_controller                     => ram_read_controller,
+            --                                                    start_address                      => 0,
+            --                                                    number_of_ram_addresses_to_be_read => 14);
+            --         end if;
+            --     WHEN destination_mac_address =>
+            --         if ram_is_buffered_to_shift_register(ram_read_controller) then
+            --
+            --             -- read source mac address
+            --             load_ram_with_offset_to_shift_register(ram_controller                     => ram_read_controller,
+            --                                                    start_address                      => 6,
+            --                                                    number_of_ram_addresses_to_be_read => 6);
+            --         end if;
+            --     WHEN source_mac_address =>
+            --
+            --         if ram_is_buffered_to_shift_register(ram_read_controller) then
+            --
+            --             -- read source mac address
+            --             load_ram_with_offset_to_shift_register(ram_controller                     => ram_read_controller,
+            --                                                    start_address                      => 12,
+            --                                                    number_of_ram_addresses_to_be_read => 2);
+            --         end if;
+            --     WHEN ethertype =>
+            --         if ram_is_buffered_to_shift_register(ram_read_controller) then
+            --
+            --             if shift_register(15 downto 0) = x"0800" then
+            --             end if;
+            --         end if;
+            -- end CASE; 
+            --
         end if; --rising_edge
     end process ethernet_protocol_processor;	
 

@@ -14,22 +14,26 @@ package ethernet_frame_ram_read_pkg is
             byte_from_ram : std_logic_vector(7 downto 0);
         end record;
 ------------------------------------------------------------------------ 
+    function "+" ( left, right : ram_read_control_group)
+        return ram_read_control_group; 
+
+------------------------------------------------------------------------ 
     procedure init_ram_read (
-        signal ram_read_port : out ram_read_control_group);
+        signal ram_read_control_port : out ram_read_control_group);
 ------------------------------------------------------------------------
     procedure read_data_from_ram (
-        signal ram_read_port : out ram_read_control_group;
+        signal ram_read_control_port : out ram_read_control_group;
         offset : natural;
         address : natural);
 ------------------------------------------------------------------------
     procedure read_data_from_ram (
-        signal ram_read_port : out ram_read_control_group;
+        signal ram_read_control_port : out ram_read_control_group;
         address : natural);
 ------------------------------------------------------------------------
-    function get_ram_data ( ram_read_port_data_out : ram_read_output_group)
+    function get_ram_data ( ram_read_control_port_data_out : ram_read_output_group)
         return std_logic_vector;
 ------------------------------------------------------------------------
-    function ram_data_is_ready ( ram_read_port_data_out : ram_read_output_group)
+    function ram_data_is_ready ( ram_read_control_port_data_out : ram_read_output_group)
         return boolean;
 ------------------------------------------------------------------------
     procedure load_ram_to_shift_register (
@@ -46,7 +50,7 @@ package ethernet_frame_ram_read_pkg is
     end record;
 ------------------------------------------------------------------------
     procedure create_ram_read_controller (
-        signal ram_read_port : out ram_read_control_group;
+        signal ram_read_control_port : out ram_read_control_group;
         ram_output_port : in ram_read_output_group;
         signal ram_controller : inout ram_reader;
         signal ram_shift_register : inout std_logic_vector);
@@ -67,56 +71,56 @@ package body ethernet_frame_ram_read_pkg is
 ------------------------------------------------------------------------
     procedure init_ram_read
     (
-        signal ram_read_port : out ram_read_control_group
+        signal ram_read_control_port : out ram_read_control_group
     ) is
     begin
-        ram_read_port.read_is_enabled_when_1 <= '0'; 
-        ram_read_port.address <= (others => '0');
+        ram_read_control_port.read_is_enabled_when_1 <= '0'; 
+        ram_read_control_port.address <= (others => '0');
     end init_ram_read;
 
 ------------------------------------------------------------------------
     procedure read_data_from_ram
     (
-        signal ram_read_port : out ram_read_control_group;
+        signal ram_read_control_port : out ram_read_control_group;
         address : natural
     ) is
     begin
-        ram_read_port.read_is_enabled_when_1 <= '1';
-        ram_read_port.address <= std_logic_vector(to_unsigned(address, 11));
+        ram_read_control_port.read_is_enabled_when_1 <= '1';
+        ram_read_control_port.address <= std_logic_vector(to_unsigned(address, 11));
 
     end read_data_from_ram;
 ------------------------------------------------------------------------
     procedure read_data_from_ram
     (
-        signal ram_read_port : out ram_read_control_group;
+        signal ram_read_control_port : out ram_read_control_group;
         offset : natural;
         address : natural
     ) is
     begin
-        ram_read_port.read_is_enabled_when_1 <= '1';
-        ram_read_port.address <= std_logic_vector(to_unsigned(offset + address, 11));
+        ram_read_control_port.read_is_enabled_when_1 <= '1';
+        ram_read_control_port.address <= std_logic_vector(to_unsigned(offset + address, 11));
 
     end read_data_from_ram;
 
 ------------------------------------------------------------------------
     function get_ram_data
     (
-        ram_read_port_data_out : ram_read_output_group
+        ram_read_control_port_data_out : ram_read_output_group
     )
     return std_logic_vector 
     is
     begin
-        return ram_read_port_data_out.byte_from_ram;
+        return ram_read_control_port_data_out.byte_from_ram;
     end get_ram_data;
 ------------------------------------------------------------------------
     function ram_data_is_ready
     (
-        ram_read_port_data_out : ram_read_output_group
+        ram_read_control_port_data_out : ram_read_output_group
     )
     return boolean
     is
     begin
-        return ram_read_port_data_out.data_is_ready;
+        return ram_read_control_port_data_out.data_is_ready;
         
     end ram_data_is_ready;
 ------------------------------------------------------------------------
@@ -135,18 +139,18 @@ package body ethernet_frame_ram_read_pkg is
 ------------------------------------------------------------------------
     procedure create_ram_read_controller
     (
-        signal ram_read_port : out ram_read_control_group;
+        signal ram_read_control_port : out ram_read_control_group;
         ram_output_port : in ram_read_output_group;
         signal ram_controller : inout ram_reader;
         signal ram_shift_register : inout std_logic_vector
     ) is
     begin
-        init_ram_read(ram_read_port);
+        init_ram_read(ram_read_control_port);
         load_ram_to_shift_register(ram_output_port, ram_shift_register);
 
         if ram_controller.ram_read_address < ram_controller.ram_offset then
             ram_controller.ram_read_address <= ram_controller.ram_read_address + 1;
-            read_data_from_ram(ram_read_port, ram_controller.ram_read_address);
+            read_data_from_ram(ram_read_control_port, ram_controller.ram_read_address);
         end if;
 
         ram_controller.ram_buffering_is_complete <= false;
@@ -183,5 +187,21 @@ package body ethernet_frame_ram_read_pkg is
        return ram_controller.ram_buffering_is_complete; 
     end ram_is_buffered_to_shift_register;
 ------------------------------------------------------------------------
+
+    function "+"
+    (
+        left, right : ram_read_control_group
+    )
+    return ram_read_control_group
+    is
+        variable combined_port : ram_read_control_group;
+    begin
+
+        combined_port.address := left.address OR right.address;
+        combined_port.read_is_enabled_when_1 := left.read_is_enabled_when_1 OR right.read_is_enabled_when_1;
+
+        return combined_port;
+        
+    end "+";
 
 end package body ethernet_frame_ram_read_pkg; 

@@ -10,6 +10,8 @@ library work;
     use work.ethernet_frame_receiver_pkg.all;
     use work.ethernet_frame_transmitter_pkg.all;
     use work.ethernet_frame_ram_pkg.all;
+    use work.ethernet_frame_ram_read_pkg.all;
+    use work.ethernet_protocol_pkg.all;
 
 entity ethernet is
     port (
@@ -30,23 +32,39 @@ architecture rtl of ethernet is
 
     signal ethernet_frame_receiver_data_out : ethernet_frame_receiver_data_output_group;
 
-    signal ethernet_frame_transmitter_data_in : ethernet_frame_transmitter_data_input_group;
+    signal ethernet_frame_transmitter_data_in  : ethernet_frame_transmitter_data_input_group;
     signal ethernet_frame_transmitter_data_out : ethernet_frame_transmitter_data_output_group;
 
     signal ethernet_frame_ram_clocks   : ethernet_frame_ram_clock_group;
     signal ethernet_frame_ram_data_in  : ethernet_frame_ram_data_input_group;
     signal ethernet_frame_ram_data_out : ethernet_frame_ram_data_output_group;
 
+    signal ethernet_protocol_clocks   : ethernet_protocol_clock_group;
+    signal ethernet_protocol_data_in  : ethernet_protocol_data_input_group;
+    signal ethernet_protocol_data_out : ethernet_protocol_data_output_group;
+
+    signal frame_ram_read_control_port : ram_read_control_group;
+------------------------------------------------------------------------ 
+
 begin 
 
 ------------------------------------------------------------------------
-    ethernet_data_out <= (mdio_driver_data_out  => mdio_driver_data_out,
-                         ethernet_frame_ram_out => ethernet_frame_ram_data_out.ram_read_port_data_out);
+    ethernet_data_out <= (mdio_driver_data_out      => mdio_driver_data_out,
+                         ethernet_frame_ram_out     => ethernet_frame_ram_data_out.ram_read_port_data_out,
+                         ethernet_protocol_data_out => ethernet_protocol_data_out);
+
+    ram_read_bus : process(ethernet_data_in.ram_read_control_port, ethernet_protocol_data_out.frame_ram_read_control)
+        
+    begin
+
+        frame_ram_read_control_port <= ethernet_data_in.ram_read_control_port +
+                                       ethernet_protocol_data_out.frame_ram_read_control;
+    end process ram_read_bus;	
 
 ------------------------------------------------------------------------
 
     ethernet_frame_ram_data_in <= (ram_write_control_port => ethernet_frame_receiver_data_out.ram_write_control_port,
-                                  ram_read_control_port   => ethernet_data_in.ram_read_control_port); 
+                                  ram_read_control_port   => frame_ram_read_control_port); 
 
     ethernet_frame_ram_clocks <= (read_clock => ethernet_clocks.core_clock, 
                                  write_clock => ethernet_clocks.rx_ddr_clocks.rx_ddr_clock);
@@ -68,6 +86,18 @@ begin
               ethernet_FPGA_out.ethernet_frame_transmitter_FPGA_out ,
               ethernet_frame_transmitter_data_in                    ,
               ethernet_frame_transmitter_data_out);
+
+------------------------------------------------------------------------ 
+    ethernet_protocol_clocks <= (clock => ethernet_clocks.core_clock);
+
+    ethernet_protocol_data_in <= (frame_ram_output        => ethernet_frame_ram_data_out.ram_read_port_data_out,
+                                 toggle_frame_is_received => ethernet_frame_receiver_data_out.toggle_data_has_been_written);
+                                   
+
+    u_ethernet_protocol : ethernet_protocol
+    port map( ethernet_protocol_clocks,
+    	  ethernet_protocol_data_in,
+    	  ethernet_protocol_data_out);
 
 ------------------------------------------------------------------------ 
     mdio_driver_clocks <= (clock => ethernet_clocks.core_clock);
