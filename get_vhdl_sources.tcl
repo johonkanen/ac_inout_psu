@@ -30,6 +30,9 @@ proc get_vhdl_sources {void}\
                 /system_control/system_components/ethernet/ethernet_common/dual_port_ethernet_ram/ethernet_frame_ram.vhd 
                 /system_control/system_components/ethernet/ethernet_common/dual_port_ethernet_ram/arch_cl10_ethernet_frame_ram.vhd 
 
+        /system_control/system_components/ethernet/network_protocol_stack/link_layer/ethernet_protocol/ethernet_protocol_pkg.vhd
+        /system_control/system_components/ethernet/network_protocol_stack/link_layer/ethernet_protocol/ethernet_protocol.vhd
+
                         /system_control/system_components/ethernet/ethernet_frame_transmitter/ethernet_tx_ddio/ethernet_tx_ddio_pkg.vhd
                         /system_control/system_components/ethernet/ethernet_frame_transmitter/ethernet_tx_ddio/ethernet_tx_ddio.vhd
                         /system_control/system_components/ethernet/ethernet_frame_transmitter/ethernet_tx_ddio/arch_cl10_tx_ddio.vhd

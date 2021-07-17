@@ -12,7 +12,7 @@ package ethernet_protocol_pkg is
     end record;
     
     type ethernet_protocol_data_input_group is record
-        frame_ram_output : ram_read_output_group;
+        frame_ram_output         : ram_read_output_group;
         toggle_frame_is_received : std_logic;
     end record;
     
@@ -35,7 +35,6 @@ package ethernet_protocol_pkg is
     -- u_ethernet_protocol : ethernet_protocol
     -- port map( ethernet_protocol_clocks,
     --	  ethernet_protocol_data_in,
-    --	  ethernet_protocol_data_out);
-    
+    --	  ethernet_protocol_data_out); 
 
 end package ethernet_protocol_pkg; 
