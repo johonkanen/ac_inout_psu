@@ -63,14 +63,14 @@ begin
 
                load_ram_with_offset_to_shift_register(ram_controller                     => ram_read_controller,
                                                        start_address                      => 0,
-                                                       number_of_ram_addresses_to_be_read => 14);
+                                                       number_of_ram_addresses_to_be_read => 14+7);
             end if;
 
             if ram_data_is_ready(ethernet_protocol_data_in.frame_ram_output) then
 
                 if get_ram_address(ethernet_protocol_data_in.frame_ram_output) = 14 then
                     if shift_register(15 downto 0) = x"0800" then
-                        ram_offset <= 14;
+                        ram_offset <= 14 + 8;
                         request_protocol_processing(internet_protocol_control, 14);
                     end if;
                 end if;
