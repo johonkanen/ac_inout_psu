@@ -25,7 +25,6 @@ architecture ethernet_protocol of network_protocol is
     signal internet_protocol_data_out : network_protocol_data_output_group;
     signal internet_protocol_control  : protocol_control_record;
 
-    -- for u_internet_protocol : network_protocol use entity work.network_protocol(internet_protocol);
 ------------------------------------------------------------------------ 
 begin
 

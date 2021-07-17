@@ -111,9 +111,11 @@ begin
     ethernet_protocol_clocks <= (clock => ethernet_clocks.core_clock);
 
     ethernet_protocol_data_in <= (
-                                     frame_ram_output        => ethernet_frame_ram_data_out.ram_read_port_data_out,
-                                     protocol_control => (protocol_processing_is_requested => frame_is_received,
-                                                          protocol_start_address => 0)
+                                     frame_ram_output => ethernet_frame_ram_data_out.ram_read_port_data_out,
+                                     protocol_control => (
+                                                             protocol_processing_is_requested => frame_is_received, 
+                                                             protocol_start_address => 0
+                                                         )
                                  );
                                    
 
