@@ -10,10 +10,15 @@ package internet_protocol_pkg is
     type internet_protocol_clock_group is record
         clock : std_logic;
     end record;
+
+    type protocol_control_record is record
+        protocol_processing_is_requested : boolean;
+        protocol_start_address : natural;
+    end record;
     
     type internet_protocol_data_input_group is record
         frame_ram_output : ram_read_output_group;
-        frame_is_received : boolean;
+        protocol_control : protocol_control_record; 
     end record;
     
     type internet_protocol_data_output_group is record
@@ -36,6 +41,26 @@ package internet_protocol_pkg is
     -- port map( internet_protocol_clocks,
     --	  internet_protocol_data_in,
     --	  internet_protocol_data_out);
-    
 
+------------------------------------------------------------------------
+    procedure request_protocol_processing (
+        signal control : out protocol_control_record;
+        protocol_start_address : natural);
+    
+------------------------------------------------------------------------ 
 end package internet_protocol_pkg; 
+
+package body internet_protocol_pkg is
+
+    procedure request_protocol_processing
+    (
+        signal control : out protocol_control_record;
+        protocol_start_address : natural
+    ) is
+    begin
+        control.protocol_processing_is_requested <= true;
+        control.protocol_start_address <= protocol_start_address;
+        
+    end request_protocol_processing;
+
+end package body internet_protocol_pkg;
