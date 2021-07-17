@@ -27,8 +27,7 @@ architecture internet_protocol of network_protocol is
     signal udp_protocol_clocks   : network_protocol_clock_group;
     signal udp_protocol_data_in  : network_protocol_data_input_group;
     signal udp_protocol_data_out : network_protocol_data_output_group;
-    signal udp_protocol_control  : protocol_control_record;
-
+    signal udp_protocol_control  : protocol_control_record; 
 
 begin
 
@@ -48,6 +47,7 @@ begin
     begin
         if rising_edge(clock) then
             create_ram_read_controller(frame_ram_read_control_port, internet_protocol_data_in.frame_ram_output, ram_read_controller, shift_register); 
+            init_protocol_control(udp_protocol_control);
 
             if protocol_control.protocol_processing_is_requested then
                 header_offset <= protocol_control.protocol_start_address;
@@ -55,7 +55,8 @@ begin
 
                 if get_ram_address(internet_protocol_data_in.frame_ram_output) = header_offset+8 then
                     if shift_register(7 downto 0) = x"11" then
-                        ram_offset <= 14 + 8;
+                        ram_offset <= header_offset+8;
+                        request_protocol_processing(udp_protocol_control, header_offset + 8);
                     else
                         ram_offset <= 0;
                     end if;
@@ -65,6 +66,11 @@ begin
     end process ip_header_processor;	
 
 ------------------------------------------------------------------------ 
+    udp_protocol_clocks <= (clock => clock);
+
+    udp_protocol_data_in <= (frame_ram_output => internet_protocol_data_in.frame_ram_output, 
+                                 protocol_control => udp_protocol_control);
+
     u_udp_protocol : entity work.network_protocol(arch_user_datagram_protocol)
     port map( udp_protocol_clocks  ,
               udp_protocol_data_in ,
