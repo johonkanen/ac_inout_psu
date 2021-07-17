@@ -6,6 +6,7 @@ library work;
     use work.ethernet_frame_ram_read_pkg.all;
     use work.ethernet_protocol_pkg.all; 
     use work.ethernet_protocol_internal_pkg.all; 
+    use work.internet_protocol_pkg.all; 
 
 entity ethernet_protocol is
     port (
@@ -28,6 +29,13 @@ architecture rtl of ethernet_protocol is
     signal ram_read_controller : ram_reader;
     signal ram_offset : natural range 0 to 2**11-1;
 
+    signal internet_protocol_clocks   : internet_protocol_clock_group;
+    signal internet_protocol_data_in  : internet_protocol_data_input_group;
+    signal internet_protocol_data_out : internet_protocol_data_output_group;
+
+    signal internet_protocol_control : protocol_control_record;
+
+------------------------------------------------------------------------ 
 begin
 
 ------------------------------------------------------------------------
@@ -65,4 +73,15 @@ begin
         end if; --rising_edge
     end process ethernet_protocol_processor;	
 
+------------------------------------------------------------------------
+    internet_protocol_clocks <= (clock => clock);
+
+    internet_protocol_data_in <= (frame_ram_output => ethernet_protocol_data_in.frame_ram_output, protocol_control => internet_protocol_control);
+
+    u_internet_protocol : internet_protocol
+    port map( internet_protocol_clocks,
+    	  internet_protocol_data_in,
+    	  internet_protocol_data_out); 
+
+------------------------------------------------------------------------
 end rtl;
