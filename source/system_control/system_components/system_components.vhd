@@ -239,9 +239,9 @@ begin
             CASE ram_read_process_counter is
                 WHEN 0 => 
 
-                    load_ram_with_offset_to_shift_register(ram_controller                     => ram_read_controller,
-                                                           start_address                      => ip_header_offset + ip_encapsulated_protocol,
-                                                           number_of_ram_addresses_to_be_read => 4);
+                    load_ram_with_offset_to_shift_register(ram_controller                      => ram_read_controller,
+                                                            start_address                      => test_counter*2,
+                                                            number_of_ram_addresses_to_be_read => 4);
 
                     ram_read_process_counter <= ram_read_process_counter +1;
                 WHEN 1 =>

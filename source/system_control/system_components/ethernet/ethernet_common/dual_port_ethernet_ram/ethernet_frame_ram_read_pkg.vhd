@@ -11,6 +11,7 @@ package ethernet_frame_ram_read_pkg is
 ------------------------------------------------------------------------
         type ram_read_output_group is record
             data_is_ready : boolean;
+            byte_address : std_logic_vector(10 downto 0);
             byte_from_ram : std_logic_vector(7 downto 0);
         end record;
 ------------------------------------------------------------------------ 
@@ -39,6 +40,9 @@ package ethernet_frame_ram_read_pkg is
     procedure load_ram_to_shift_register (
         ram_output : in ram_read_output_group;
         signal ram_shift_register : inout std_logic_vector);
+------------------------------------------------------------------------
+    function get_ram_address ( ram_data_out : ram_read_output_group)
+        return natural;
 
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
@@ -203,5 +207,16 @@ package body ethernet_frame_ram_read_pkg is
         return combined_port;
         
     end "+";
+------------------------------------------------------------------------
+    function get_ram_address
+    (
+        ram_data_out : ram_read_output_group
+    )
+    return natural
+    is
+    begin
+        return to_integer(unsigned(ram_data_out.byte_address));
+    end get_ram_address;
+------------------------------------------------------------------------
 
 end package body ethernet_frame_ram_read_pkg; 

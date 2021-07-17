@@ -116,12 +116,6 @@ package body ethernet_frame_receiver_internal_pkg is
             fcs_shift_register <= (others => '1');
 
             frame_receiver_state <= wait_for_start_of_frame;
-            if toggle_data_has_been_written = '1' then
-                toggle_data_has_been_written <= '0';
-            else
-                toggle_data_has_been_written <= '1';
-            end if;
-
         end if; 
     end idle_ethernet_rx; 
 
