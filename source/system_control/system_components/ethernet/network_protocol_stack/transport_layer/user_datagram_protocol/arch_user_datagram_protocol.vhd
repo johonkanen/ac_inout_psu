@@ -57,7 +57,7 @@ begin
 
                         load_ram_with_offset_to_shift_register(ram_controller                     => ram_read_controller,
                                                                start_address                      => protocol_control.protocol_start_address,
-                                                               number_of_ram_addresses_to_be_read => 20);
+                                                               number_of_ram_addresses_to_be_read => 8);
 
                         udp_protocol_state := read_header;
                     end if;
@@ -66,7 +66,7 @@ begin
 
                     if get_ram_address(udp_protocol_data_in.frame_ram_output) = header_offset+8 then
                         frame_processing_is_ready <= true;
-                        ram_offset <= 6;
+                        ram_offset <= header_offset;
                         udp_protocol_state := wait_for_process_request;
                     end if;
 

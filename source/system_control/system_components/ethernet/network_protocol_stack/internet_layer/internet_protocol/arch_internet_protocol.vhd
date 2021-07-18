@@ -61,7 +61,7 @@ begin
                     if protocol_control.protocol_processing_is_requested then
                         load_ram_with_offset_to_shift_register(ram_controller                     => ram_read_controller,
                                                                start_address                      => protocol_control.protocol_start_address,
-                                                               number_of_ram_addresses_to_be_read => 8);
+                                                               number_of_ram_addresses_to_be_read => 10);
 
                         header_offset <= protocol_control.protocol_start_address;
                         internet_protocol_state := read_header;
@@ -69,9 +69,9 @@ begin
 
                 WHEN read_header =>
 
-                    if get_ram_address(internet_protocol_data_in.frame_ram_output) = header_offset+8 then
+                    if get_ram_address(internet_protocol_data_in.frame_ram_output) = header_offset+10 then
                         if shift_register(7 downto 0) = x"11" then
-                            request_protocol_processing(udp_protocol_control, header_offset + 8);
+                            request_protocol_processing(udp_protocol_control, header_offset + 10);
                         else
                             ram_offset <= header_offset;
                             frame_processing_is_ready <= true; 
