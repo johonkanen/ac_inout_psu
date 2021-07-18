@@ -10,7 +10,7 @@ package ethernet_frame_ram_read_pkg is
         end record; 
 ------------------------------------------------------------------------
         type ram_read_output_group is record
-            data_is_ready : boolean;
+            ram_is_ready : boolean;
             byte_address : std_logic_vector(10 downto 0);
             byte_from_ram : std_logic_vector(7 downto 0);
         end record;
@@ -124,7 +124,7 @@ package body ethernet_frame_ram_read_pkg is
     return boolean
     is
     begin
-        return ram_read_control_port_data_out.data_is_ready;
+        return ram_read_control_port_data_out.ram_is_ready;
         
     end ram_data_is_ready;
 ------------------------------------------------------------------------

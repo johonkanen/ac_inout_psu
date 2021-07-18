@@ -10,7 +10,7 @@ library ieee;
 --     );
 -- end entity network_protocol;
 
-architecture internet_protocol of network_protocol is
+architecture arch_internet_protocol of network_protocol is
 
     alias clock is network_protocol_clocks.clock;
     alias internet_protocol_data_in is network_protocol_data_in;
@@ -50,17 +50,19 @@ begin
             init_protocol_control(udp_protocol_control);
 
             if protocol_control.protocol_processing_is_requested then
+                load_ram_with_offset_to_shift_register(ram_controller                     => ram_read_controller,
+                                                       start_address                      => protocol_control.protocol_start_address,
+                                                       number_of_ram_addresses_to_be_read => 20);
+
                 header_offset <= protocol_control.protocol_start_address;
             end if;
 
-                if get_ram_address(internet_protocol_data_in.frame_ram_output) = header_offset+8 then
-                    if shift_register(7 downto 0) = x"11" then
-                        ram_offset <= header_offset+8;
-                        request_protocol_processing(udp_protocol_control, header_offset + 8);
-                    else
-                        ram_offset <= 0;
-                    end if;
+            if get_ram_address(internet_protocol_data_in.frame_ram_output) = header_offset+8 then
+                if shift_register(7 downto 0) = x"11" then
+                    ram_offset <= header_offset+8;
+                    request_protocol_processing(udp_protocol_control, header_offset + 8);
                 end if;
+            end if;
 
         end if; --rising_edge
     end process ip_header_processor;	
@@ -77,4 +79,4 @@ begin
               udp_protocol_data_out); 
 
 ------------------------------------------------------------------------ 
-end internet_protocol;
+end arch_internet_protocol;

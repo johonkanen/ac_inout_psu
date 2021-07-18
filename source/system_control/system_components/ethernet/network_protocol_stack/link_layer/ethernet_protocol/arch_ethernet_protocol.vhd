@@ -1,8 +1,20 @@
-library ieee;
-    use ieee.std_logic_1164.all;
-    use ieee.numeric_std.all;
+-- library ieee;
+--     use ieee.std_logic_1164.all;
+--     use ieee.numeric_std.all;
+--
+-- library work;
+--     use work.ethernet_frame_ram_read_pkg.all;
+--     use work.network_protocol_header_pkg.all;
+--
+-- entity network_protocol is
+--     port (
+--         network_protocol_clocks   : in network_protocol_clock_group;
+--         network_protocol_data_in  : in network_protocol_data_input_group;
+--         network_protocol_data_out : out network_protocol_data_output_group
+--     );
+-- end entity network_protocol;
 
-architecture ethernet_protocol of network_protocol is 
+architecture arch_ethernet_protocol of network_protocol is 
 
     use work.ethernet_protocol_internal_pkg.all; 
 
@@ -52,7 +64,7 @@ begin
 
                load_ram_with_offset_to_shift_register(ram_controller                     => ram_read_controller,
                                                        start_address                      => 0,
-                                                       number_of_ram_addresses_to_be_read => 14+8);
+                                                       number_of_ram_addresses_to_be_read => 14);
             end if;
 
             if ram_data_is_ready(ethernet_protocol_data_in.frame_ram_output) then
@@ -75,10 +87,10 @@ begin
     internet_protocol_data_in <= (frame_ram_output => ethernet_protocol_data_in.frame_ram_output, 
                                  protocol_control => internet_protocol_control);
 
-    u_internet_protocol : entity work.network_protocol(internet_protocol)
+    u_internet_protocol : entity work.network_protocol(arch_internet_protocol)
     port map( internet_protocol_clocks  ,
               internet_protocol_data_in ,
               internet_protocol_data_out); 
 
 ------------------------------------------------------------------------
-end ethernet_protocol;
+end arch_ethernet_protocol;
