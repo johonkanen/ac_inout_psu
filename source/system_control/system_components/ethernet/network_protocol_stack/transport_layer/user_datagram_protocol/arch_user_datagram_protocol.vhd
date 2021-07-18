@@ -23,15 +23,18 @@ architecture arch_user_datagram_protocol of network_protocol is
     signal ram_offset : natural range 0 to 2**11-1;
     signal header_offset : natural range 0 to 2**11-1;
 
+    signal frame_processing_is_ready : boolean;
+
 begin
 
 ------------------------------------------------------------------------
     route_data_out : process(frame_ram_read_control_port, ram_offset) 
     begin
         udp_protocol_data_out <= (
-                                          frame_ram_read_control => frame_ram_read_control_port,
-                                          ram_offset => ram_offset
-                                      );
+                                      frame_ram_read_control    => frame_ram_read_control_port ,
+                                      ram_offset                => ram_offset                  ,
+                                      frame_processing_is_ready => frame_processing_is_ready
+                                  );
 
     end process route_data_out;	
 ------------------------------------------------------------------------
@@ -45,6 +48,8 @@ begin
         if rising_edge(clock) then
             create_ram_read_controller(frame_ram_read_control_port, udp_protocol_data_in.frame_ram_output, ram_read_controller, shift_register); 
 
+            frame_processing_is_ready <= false;
+            ram_offset <= 0;
             CASE udp_protocol_state is
                 WHEN wait_for_process_request =>
                     if protocol_control.protocol_processing_is_requested then
@@ -60,7 +65,8 @@ begin
                 WHEN read_header => 
 
                     if get_ram_address(udp_protocol_data_in.frame_ram_output) = header_offset+8 then
-                        ram_offset <= 5;
+                        frame_processing_is_ready <= true;
+                        ram_offset <= 6;
                         udp_protocol_state := wait_for_process_request;
                     end if;
 

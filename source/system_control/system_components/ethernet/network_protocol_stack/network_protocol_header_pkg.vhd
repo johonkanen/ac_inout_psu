@@ -24,6 +24,7 @@ package network_protocol_header_pkg is
     type network_protocol_data_output_group is record
         frame_ram_read_control : ram_read_control_group;
         ram_offset : natural;
+        frame_processing_is_ready : boolean;
     end record;
     
     component network_protocol is
@@ -51,11 +52,16 @@ package network_protocol_header_pkg is
     procedure init_protocol_control (
         signal control : out protocol_control_record);
 ------------------------------------------------------------------------ 
+    function protocol_processing_is_ready ( data_out : network_protocol_data_output_group)
+        return boolean;
+------------------------------------------------------------------------
+    function get_frame_address_offset ( data_out : network_protocol_data_output_group)
+        return natural;
+
+------------------------------------------------------------------------ 
 end package network_protocol_header_pkg;
 
-package body network_protocol_header_pkg is
-
-
+package body network_protocol_header_pkg is 
 
 ------------------------------------------------------------------------
     procedure init_protocol_control
@@ -78,6 +84,27 @@ package body network_protocol_header_pkg is
         control.protocol_start_address <= protocol_start_address;
         
     end request_protocol_processing;
+
+------------------------------------------------------------------------
+    function protocol_processing_is_ready
+    (
+        data_out : network_protocol_data_output_group
+    )
+    return boolean
+    is
+    begin
+        return data_out.frame_processing_is_ready;
+    end protocol_processing_is_ready;
+------------------------------------------------------------------------
+    function get_frame_address_offset
+    (
+        data_out : network_protocol_data_output_group
+    )
+    return natural
+    is
+    begin
+        return data_out.ram_offset;
+    end get_frame_address_offset;
 
 ------------------------------------------------------------------------
 end package body network_protocol_header_pkg;
