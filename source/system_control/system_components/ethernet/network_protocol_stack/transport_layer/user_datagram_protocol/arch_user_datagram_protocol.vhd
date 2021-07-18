@@ -37,22 +37,34 @@ begin
 ------------------------------------------------------------------------
 
     udp_header_processor : process(clock)
+
+        type list_of_protocol_processor_states is (wait_for_process_request, read_header);
+        variable udp_protocol_state : list_of_protocol_processor_states := wait_for_process_request;
         
     begin
         if rising_edge(clock) then
             create_ram_read_controller(frame_ram_read_control_port, udp_protocol_data_in.frame_ram_output, ram_read_controller, shift_register); 
 
-            -- if protocol_control.protocol_processing_is_requested then
-            --     header_offset <= protocol_control.protocol_start_address;
-            -- end if;
-            --
-            --     if get_ram_address(udp_protocol_data_in.frame_ram_output) = header_offset+8 then
-            --         if shift_register(7 downto 0) = x"11" then
-            --             ram_offset <= 14 + 8;
-            --         else
-            --             ram_offset <= 0;
-            --         end if;
-            --     end if;
+            CASE udp_protocol_state is
+                WHEN wait_for_process_request =>
+                    if protocol_control.protocol_processing_is_requested then
+                        header_offset <= protocol_control.protocol_start_address;
+
+                        load_ram_with_offset_to_shift_register(ram_controller                     => ram_read_controller,
+                                                               start_address                      => protocol_control.protocol_start_address,
+                                                               number_of_ram_addresses_to_be_read => 20);
+
+                        udp_protocol_state := read_header;
+                    end if;
+
+                WHEN read_header => 
+
+                    if get_ram_address(udp_protocol_data_in.frame_ram_output) = header_offset+8 then
+                        ram_offset <= 5;
+                        udp_protocol_state := wait_for_process_request;
+                    end if;
+
+            end CASE;
 
         end if; --rising_edge
     end process udp_header_processor;	
