@@ -112,14 +112,14 @@ begin
 
     ethernet_protocol_data_in <= (
                                      frame_ram_output => ethernet_frame_ram_data_out.ram_read_port_data_out,
-                                     protocol_control => (
-                                                             protocol_processing_is_requested => frame_is_received, 
-                                                             protocol_start_address => 0
+                                     protocol_control => ( 
+                                                             protocol_processing_is_requested => frame_is_received,
+                                                             protocol_start_address           => 0
                                                          )
                                  );
                                    
 
-    u_ethernet_protocol : entity work.network_protocol(ethernet_protocol)
+    u_ethernet_protocol : entity work.network_protocol(arch_ethernet_protocol)
     port map( ethernet_protocol_clocks,
     	  ethernet_protocol_data_in,
     	  ethernet_protocol_data_out);

@@ -36,33 +36,45 @@ begin
     begin
         internet_protocol_data_out <= (
                                           frame_ram_read_control => frame_ram_read_control_port + udp_protocol_data_out.frame_ram_read_control,
-                                          ram_offset => ram_offset
+                                          ram_offset => udp_protocol_data_out.ram_offset + ram_offset
                                       );
 
     end process route_data_out;	
 ------------------------------------------------------------------------
 
     ip_header_processor : process(clock)
+
+        type list_of_protocol_processor_states is (wait_for_process_request, read_header);
+        variable internet_protocol_state : list_of_protocol_processor_states := wait_for_process_request;
         
     begin
         if rising_edge(clock) then
             create_ram_read_controller(frame_ram_read_control_port, internet_protocol_data_in.frame_ram_output, ram_read_controller, shift_register); 
             init_protocol_control(udp_protocol_control);
 
-            if protocol_control.protocol_processing_is_requested then
-                load_ram_with_offset_to_shift_register(ram_controller                     => ram_read_controller,
-                                                       start_address                      => protocol_control.protocol_start_address,
-                                                       number_of_ram_addresses_to_be_read => 20);
+            CASE internet_protocol_state is
+                WHEN wait_for_process_request =>
+                    if protocol_control.protocol_processing_is_requested then
+                        load_ram_with_offset_to_shift_register(ram_controller                     => ram_read_controller,
+                                                               start_address                      => protocol_control.protocol_start_address,
+                                                               number_of_ram_addresses_to_be_read => 8);
 
-                header_offset <= protocol_control.protocol_start_address;
-            end if;
+                        header_offset <= protocol_control.protocol_start_address;
+                        internet_protocol_state := read_header;
+                    end if;
 
-            if get_ram_address(internet_protocol_data_in.frame_ram_output) = header_offset+8 then
-                if shift_register(7 downto 0) = x"11" then
-                    ram_offset <= header_offset+8;
-                    request_protocol_processing(udp_protocol_control, header_offset + 8);
-                end if;
-            end if;
+                WHEN read_header =>
+
+                    if get_ram_address(internet_protocol_data_in.frame_ram_output) = header_offset+8 then
+                        if shift_register(7 downto 0) = x"11" then
+                            ram_offset <= header_offset+8;
+                            request_protocol_processing(udp_protocol_control, header_offset + 8);
+                        else
+                            ram_offset <= header_offset; 
+                        end if;
+                        internet_protocol_state := wait_for_process_request;
+                    end if;
+            end CASE;
 
         end if; --rising_edge
     end process ip_header_processor;	
