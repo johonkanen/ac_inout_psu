@@ -254,7 +254,7 @@ begin
                         transmit_16_bit_word_with_uart(uart_data_in, shift_register(31 downto 16)); 
                         ram_read_process_counter <= ram_read_process_counter +1;
                     end if;
-                WHEN others => -- do nothing
+                WHEN others => -- hang here and wait for counter being set to zero
             end CASE;
 
         end if; --rising_edge

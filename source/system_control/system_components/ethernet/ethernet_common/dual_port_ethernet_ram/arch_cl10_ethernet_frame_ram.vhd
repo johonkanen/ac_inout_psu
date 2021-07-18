@@ -40,7 +40,7 @@ architecture cyclone_10_lp of ethernet_frame_ram is
 
 begin
 
-    ethernet_frame_ram_data_out <= (ram_read_port_data_out =>(data_is_ready => data_is_ready_to_be_read_buffer                                   ,
+    ethernet_frame_ram_data_out <= (ram_read_port_data_out =>(ram_is_ready  => data_is_ready_to_be_read_buffer                                   ,
                                                               byte_address  => address_buffer(address_buffer'left downto address_buffer'left-10) ,
                                                               byte_from_ram => q)
                                   );
