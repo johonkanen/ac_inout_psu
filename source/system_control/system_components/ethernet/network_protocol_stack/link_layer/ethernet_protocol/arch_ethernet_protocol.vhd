@@ -38,16 +38,18 @@ architecture arch_ethernet_protocol of network_protocol is
     signal internet_protocol_data_out : network_protocol_data_output_group;
     signal internet_protocol_control  : protocol_control_record;
 
+    signal frame_processing_is_ready : boolean;
 ------------------------------------------------------------------------ 
 begin
 
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
-    route_data_out : process(frame_ram_read_control_port, internet_protocol_data_out.frame_ram_read_control, ram_offset) 
+    route_data_out : process(frame_ram_read_control_port, internet_protocol_data_out, ram_offset) 
     begin
         ethernet_protocol_data_out <= (
-                                          frame_ram_read_control => frame_ram_read_control_port + internet_protocol_data_out.frame_ram_read_control,
-                                          ram_offset => internet_protocol_data_out.ram_offset + ram_offset
+                                          frame_ram_read_control => frame_ram_read_control_port + internet_protocol_data_out.frame_ram_read_control ,
+                                          ram_offset => internet_protocol_data_out.ram_offset + ram_offset                                          ,
+                                          frame_processing_is_ready => frame_processing_is_ready or internet_protocol_data_out.frame_processing_is_ready
                                       );
 
     end process route_data_out;	
@@ -64,6 +66,8 @@ begin
             create_ram_read_controller(frame_ram_read_control_port, ethernet_protocol_data_in.frame_ram_output, ram_read_controller, shift_register); 
             init_protocol_control(internet_protocol_control);
 
+            frame_processing_is_ready <= false;
+            ram_offset <= 0;
             CASE ethernet_protocol_state is
                 WHEN wait_for_process_request =>
                     if ethernet_protocol_data_in.protocol_control.protocol_processing_is_requested then 
@@ -82,9 +86,8 @@ begin
 
                             if shift_register(15 downto 0) = ethertype_ipv4 then
                                 request_protocol_processing(internet_protocol_control, ethernet_frame_length);
-                                ram_offset <= 0;
                             else
-                                ram_offset <= 14;
+                                frame_processing_is_ready <= true;
                             end if;
                             ethernet_protocol_state := wait_for_process_request;
 

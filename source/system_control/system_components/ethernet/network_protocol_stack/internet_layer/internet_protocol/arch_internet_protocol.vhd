@@ -28,15 +28,17 @@ architecture arch_internet_protocol of network_protocol is
     signal udp_protocol_data_in  : network_protocol_data_input_group;
     signal udp_protocol_data_out : network_protocol_data_output_group;
     signal udp_protocol_control  : protocol_control_record; 
+    signal frame_processing_is_ready : boolean;
 
 begin
 
 ------------------------------------------------------------------------
-    route_data_out : process(frame_ram_read_control_port, ram_offset, udp_protocol_data_out.frame_ram_read_control) 
+    route_data_out : process(frame_ram_read_control_port, ram_offset, udp_protocol_data_out) 
     begin
         internet_protocol_data_out <= (
-                                          frame_ram_read_control => frame_ram_read_control_port + udp_protocol_data_out.frame_ram_read_control,
-                                          ram_offset => udp_protocol_data_out.ram_offset + ram_offset
+                                          frame_ram_read_control => frame_ram_read_control_port + udp_protocol_data_out.frame_ram_read_control ,
+                                          ram_offset => udp_protocol_data_out.ram_offset + ram_offset                                          ,
+                                          frame_processing_is_ready => frame_processing_is_ready or udp_protocol_data_out.frame_processing_is_ready
                                       );
 
     end process route_data_out;	
@@ -52,6 +54,8 @@ begin
             create_ram_read_controller(frame_ram_read_control_port, internet_protocol_data_in.frame_ram_output, ram_read_controller, shift_register); 
             init_protocol_control(udp_protocol_control);
 
+            frame_processing_is_ready <= false;
+            ram_offset <= 0; 
             CASE internet_protocol_state is
                 WHEN wait_for_process_request =>
                     if protocol_control.protocol_processing_is_requested then
@@ -67,10 +71,10 @@ begin
 
                     if get_ram_address(internet_protocol_data_in.frame_ram_output) = header_offset+8 then
                         if shift_register(7 downto 0) = x"11" then
-                            ram_offset <= header_offset+8;
                             request_protocol_processing(udp_protocol_control, header_offset + 8);
                         else
-                            ram_offset <= header_offset; 
+                            ram_offset <= header_offset;
+                            frame_processing_is_ready <= true; 
                         end if;
                         internet_protocol_state := wait_for_process_request;
                     end if;

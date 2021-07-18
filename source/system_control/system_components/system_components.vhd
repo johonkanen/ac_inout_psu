@@ -12,6 +12,7 @@ library work;
     use work.ethernet_pkg.all; 
     use work.ethernet_clocks_pkg.all; 
     use work.ethernet_frame_ram_read_pkg.all;
+    use work.network_protocol_header_pkg.all;
 
 library math_library;
     use math_library.multiplier_pkg.all;
@@ -157,6 +158,8 @@ architecture rtl of system_components is
     constant ip_header_length_offset : natural := 0;
     constant ip_encapsulated_protocol : natural := 8;
 
+    signal ram_address_offset : natural range 0 to 2**11-1;
+
 --------------------------------------------------
 begin
 
@@ -240,12 +243,16 @@ begin
                                         ram_read_controller                      ,
                                         shift_register); 
             --------------------------------------------------
+            if protocol_processing_is_ready(ethernet_data_out.ethernet_protocol_data_out) then
+                ram_address_offset <= get_frame_address_offset(ethernet_data_out.ethernet_protocol_data_out);
+            end if;
+            --------------------------------------------------
 
             CASE ram_read_process_counter is
                 WHEN 0 => 
 
-                    load_ram_with_offset_to_shift_register(ram_controller                      => ram_read_controller,
-                                                            start_address                      => test_counter*2 + ethernet_data_out.ethernet_protocol_data_out.ram_offset,
+                    load_ram_with_offset_to_shift_register(ram_controller                      => ram_read_controller                 ,
+                                                            start_address                      => test_counter*2 + ram_address_offset ,
                                                             number_of_ram_addresses_to_be_read => 2);
 
                     ram_read_process_counter <= ram_read_process_counter +1;
