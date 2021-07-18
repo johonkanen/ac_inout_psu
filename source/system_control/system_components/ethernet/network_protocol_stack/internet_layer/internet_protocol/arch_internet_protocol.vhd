@@ -71,18 +71,20 @@ begin
 
                 WHEN read_header =>
 
-                    if get_ram_address(internet_protocol_data_in.frame_ram_output) = header_offset+2 then
-                        ip_header_offset_in_bytes <= to_integer(unsigned(shift_register(3 downto 0)))*4;
-                    end if;
-
-                    if get_ram_address(internet_protocol_data_in.frame_ram_output) = header_offset+10 then
-                        if shift_register(7 downto 0) = x"11" then
-                            request_protocol_processing(udp_protocol_control, header_offset + 20);
-                        else
-                            ram_offset <= header_offset;
-                            frame_processing_is_ready <= true; 
+                    if ram_data_is_ready(internet_protocol_data_in.frame_ram_output) then
+                        if get_ram_address(internet_protocol_data_in.frame_ram_output) = header_offset+1 then
+                            ip_header_offset_in_bytes <= to_integer(unsigned(shift_register(3 downto 0)))*4;
                         end if;
-                        internet_protocol_state := wait_for_process_request;
+
+                        if get_ram_address(internet_protocol_data_in.frame_ram_output) = header_offset+10 then
+                            if shift_register(7 downto 0) = x"11" then
+                                request_protocol_processing(udp_protocol_control, header_offset + 20);
+                            else
+                                ram_offset <= header_offset;
+                                frame_processing_is_ready <= true; 
+                            end if;
+                            internet_protocol_state := wait_for_process_request;
+                        end if;
                     end if;
             end CASE;
 
