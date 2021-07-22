@@ -5,6 +5,7 @@ library ieee;
 library work;
     use work.ethernet_clocks_pkg.all;
     use work.ethernet_frame_transmitter_pkg.all;
+    use work.ethernet_frame_transmitter_internal_pkg.all;
     use work.ethernet_tx_ddio_pkg.all;
 
 entity ethernet_frame_transmitter is
@@ -30,8 +31,10 @@ architecture rtl of ethernet_frame_transmitter is
     signal counter_for_333ms : natural range 0 to 2**16-1 := counter_value_at_333ms;
 
     signal transmit_byte_counter : natural range 0 to 255;
-    signal byte_counter_offset : natural range 0 to 255 := 0;
+    signal byte_counter_offset : natural range 0 to 255 := 0; 
 
+
+    signal transmit_control : frame_transmit_control_group;
 
 begin
 
@@ -39,7 +42,6 @@ begin
         
     begin
         if rising_edge(tx_ddr_clocks.tx_ddr_clock) then
-            init_ethernet_tx_ddio(ethernet_tx_ddio_data_in);
 
             if counter_for_100kHz > 0 then
                 counter_for_100kHz <= counter_for_100kHz - 1;
@@ -55,10 +57,9 @@ begin
                 end if;
             end if; 
 
-            if transmit_byte_counter > 0 then
-                transmit_byte_counter <= transmit_byte_counter - 1;
-                transmit_8_bits_of_data(ethernet_tx_ddio_data_in, byte_counter_offset+ transmit_byte_counter);
-            end if; 
+        --------------------------------------------------
+            init_ethernet_tx_ddio(ethernet_tx_ddio_data_in);
+            create_transmit_controller(transmit_control, ethernet_tx_ddio_data_in);
 
         end if; --rising_edge
     end process frame_transmitter;	

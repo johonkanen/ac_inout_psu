@@ -44,7 +44,7 @@ begin
 
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
-    route_data_out : process(frame_ram_read_control_port, internet_protocol_data_out, ram_offset) 
+    route_data_out : process(frame_ram_read_control_port, internet_protocol_data_out, ram_offset, frame_processing_is_ready) 
     begin
         ethernet_protocol_data_out <= (
                                           frame_ram_read_control => frame_ram_read_control_port + internet_protocol_data_out.frame_ram_read_control ,

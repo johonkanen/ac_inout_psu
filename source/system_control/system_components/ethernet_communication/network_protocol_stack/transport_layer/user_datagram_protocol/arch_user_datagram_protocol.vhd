@@ -28,7 +28,7 @@ architecture arch_user_datagram_protocol of network_protocol is
 begin
 
 ------------------------------------------------------------------------
-    route_data_out : process(frame_ram_read_control_port, ram_offset) 
+    route_data_out : process(frame_ram_read_control_port, ram_offset, frame_processing_is_ready) 
     begin
         udp_protocol_data_out <= (
                                       frame_ram_read_control    => frame_ram_read_control_port ,
