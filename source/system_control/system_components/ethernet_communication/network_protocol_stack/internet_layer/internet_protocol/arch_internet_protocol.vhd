@@ -35,7 +35,7 @@ architecture arch_internet_protocol of network_protocol is
 begin
 
 ------------------------------------------------------------------------
-    route_data_out : process(frame_ram_read_control_port, ram_offset, udp_protocol_data_out) 
+    route_data_out : process(frame_ram_read_control_port, ram_offset, udp_protocol_data_out, frame_processing_is_ready) 
     begin
         internet_protocol_data_out <= (
                                           frame_ram_read_control => frame_ram_read_control_port + udp_protocol_data_out.frame_ram_read_control ,

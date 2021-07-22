@@ -258,13 +258,16 @@ begin
                                                            number_of_ram_addresses_to_be_read => 2);
 
                     ram_read_process_counter <= ram_read_process_counter +1;
+
                 WHEN 1 =>
                     if ram_is_buffered_to_shift_register(ram_read_controller) then
                         transmit_16_bit_word_with_uart(uart_data_in, shift_register(15 downto 0)); 
                         ram_read_process_counter <= ram_read_process_counter + 1;
                     end if;
+
                 WHEN others => -- hang here and wait for counter being set to zero
             end CASE;
+            -------------------------------------------------- 
 
         end if; --rising_edge
     end process test_with_uart;	
