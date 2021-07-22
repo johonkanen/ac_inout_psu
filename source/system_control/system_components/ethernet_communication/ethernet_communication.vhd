@@ -47,10 +47,12 @@ architecture rtl of ethernet_communication is
 begin
 
 ------------------------------------------------------------------------ 
+------------------------------------------------------------------------ 
     ethernet_communication_data_out <= ( ethernet_data_out          => ethernet_data_out          ,
                                          ethernet_protocol_data_out => ethernet_protocol_data_out ,
                                          frame_ram_data_out         => ethernet_frame_ram_data_out.ram_read_port_data_out); 
 
+------------------------------------------------------------------------
 ------------------------------------------------------------------------
     ram_read_bus : process(ethernet_communication_data_in.frame_ram_read_control_port, ethernet_protocol_data_out.frame_ram_read_control)
         
@@ -59,7 +61,6 @@ begin
         frame_ram_read_control_port <= ethernet_communication_data_in.frame_ram_read_control_port +
                                        ethernet_protocol_data_out.frame_ram_read_control;
     end process ram_read_bus;	
-------------------------------------------------------------------------
 ------------------------------------------------------------------------
 
     ethernet_frame_ram_data_in <= (ram_write_control_port => ethernet_data_out.ram_write_control_port,
@@ -74,6 +75,7 @@ begin
               ethernet_frame_ram_data_out);
 
 ------------------------------------------------------------------------ 
+------------------------------------------------------------------------ 
     ethernet_protocol_clocks <= (clock => ethernet_communication_clocks.core_clock);
 
     ethernet_protocol_data_in <= (
@@ -86,8 +88,8 @@ begin
 ------------------------------------------------------------------------ 
 
     u_ethernet_protocol : entity work.network_protocol(arch_ethernet_protocol)
-    port map( ethernet_protocol_clocks,
-    	  ethernet_protocol_data_in,
+    port map( ethernet_protocol_clocks ,
+    	  ethernet_protocol_data_in    ,
     	  ethernet_protocol_data_out);
 
 ------------------------------------------------------------------------ 
