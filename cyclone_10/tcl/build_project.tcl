@@ -49,6 +49,8 @@ set_global_assignment -name QIP_FILE $project_root/cyclone_10/IP/ethernet_IP/eth
 set_global_assignment -name QIP_FILE $project_root/cyclone_10/IP/ethernet_IP/ddio_in/ethddio_rx.qip
 set_global_assignment -name QIP_FILE $project_root/cyclone_10/IP/ethernet_IP/ddio_out/ethddio_tx.qip
 set_global_assignment -name QIP_FILE $project_root/cyclone_10/IP/ethernet_IP/memory/dual_port_ethernet_ram.qip
+set_global_assignment -name QIP_FILE $project_root/cyclone_10/IP/ethernet_IP/memory/transmit_ram/transmit_ram.qip
+set_global_assignment -name QIP_FILE $project_root/cyclone_10/IP/ethernet_IP/memory/transmit_fifo/tx_fifo.qip
 
 
 foreach x [get_vhdl_sources ../] \
