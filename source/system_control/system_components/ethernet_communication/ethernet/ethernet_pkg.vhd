@@ -8,7 +8,6 @@ library work;
     use work.ethernet_frame_transmitter_pkg.all;
     use work.ethernet_clocks_pkg.all;
     use work.ethernet_frame_ram_write_pkg.all;
-    use work.network_protocol_header_pkg.all;
 
 package ethernet_pkg is
 
