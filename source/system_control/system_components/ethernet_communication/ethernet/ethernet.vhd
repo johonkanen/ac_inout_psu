@@ -9,9 +9,7 @@ library work;
     use work.mdio_driver_pkg.all;
     use work.ethernet_frame_receiver_pkg.all;
     use work.ethernet_frame_transmitter_pkg.all;
-    use work.ethernet_frame_ram_pkg.all;
     use work.ethernet_frame_ram_read_pkg.all;
-    use work.network_protocol_header_pkg.all;
 
 entity ethernet is
     port (
@@ -34,10 +32,6 @@ architecture rtl of ethernet is
 
     signal ethernet_frame_transmitter_data_in  : ethernet_frame_transmitter_data_input_group;
     signal ethernet_frame_transmitter_data_out : ethernet_frame_transmitter_data_output_group;
-
-    signal ethernet_frame_ram_clocks   : ethernet_frame_ram_clock_group;
-    signal ethernet_frame_ram_data_in  : ethernet_frame_ram_data_input_group;
-    signal ethernet_frame_ram_data_out : ethernet_frame_ram_data_output_group;
 
     signal frame_ram_read_control_port : ram_read_control_group; 
     signal frame_is_received : boolean; 

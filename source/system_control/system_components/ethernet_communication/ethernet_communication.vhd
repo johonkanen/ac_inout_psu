@@ -8,8 +8,7 @@ library work;
     use work.ethernet_pkg.all;
     use work.network_protocol_header_pkg.all;
     use work.ethernet_frame_ram_pkg.all;
-    use work.ethernet_frame_ram_read_pkg.all;
-
+    use work.ethernet_frame_ram_read_pkg.all; 
 
 entity ethernet_communication is
     port (
@@ -42,30 +41,17 @@ architecture rtl of ethernet_communication is
     signal ethernet_frame_ram_data_in  : ethernet_frame_ram_data_input_group;
     signal ethernet_frame_ram_data_out : ethernet_frame_ram_data_output_group; 
 
-    signal frame_is_received : boolean;
-
     signal frame_ram_read_control_port : ram_read_control_group; 
-------------------------------------------------------------------------
 
+------------------------------------------------------------------------ 
 begin
 
+------------------------------------------------------------------------ 
     ethernet_communication_data_out <= ( ethernet_data_out          => ethernet_data_out          ,
                                          ethernet_protocol_data_out => ethernet_protocol_data_out ,
-                                         frame_ram_data_out         => ethernet_frame_ram_data_out.ram_read_port_data_out);
-
-
-
------------------------------------------------------------------------- 
-    u_ethernet : ethernet
-    port map( ethernet_communication_clocks                         ,
-              ethernet_communication_FPGA_in.ethernet_FPGA_in       ,
-              ethernet_communication_FPGA_out.ethernet_FPGA_out     ,
-              ethernet_communication_FPGA_inout.ethernet_FPGA_inout ,
-              ethernet_communication_data_in.ethernet_data_in       ,
-              ethernet_data_out);
+                                         frame_ram_data_out         => ethernet_frame_ram_data_out.ram_read_port_data_out); 
 
 ------------------------------------------------------------------------
------------------------------------------------------------------------- 
     ram_read_bus : process(ethernet_communication_data_in.frame_ram_read_control_port, ethernet_protocol_data_out.frame_ram_read_control)
         
     begin
@@ -73,6 +59,7 @@ begin
         frame_ram_read_control_port <= ethernet_communication_data_in.frame_ram_read_control_port +
                                        ethernet_protocol_data_out.frame_ram_read_control;
     end process ram_read_bus;	
+------------------------------------------------------------------------
 ------------------------------------------------------------------------
 
     ethernet_frame_ram_data_in <= (ram_write_control_port => ethernet_data_out.ram_write_control_port,
@@ -96,10 +83,26 @@ begin
                                                              protocol_start_address           => 0
                                                          )
                                  ); 
+------------------------------------------------------------------------ 
 
     u_ethernet_protocol : entity work.network_protocol(arch_ethernet_protocol)
     port map( ethernet_protocol_clocks,
     	  ethernet_protocol_data_in,
     	  ethernet_protocol_data_out);
+
+------------------------------------------------------------------------ 
+------------------------------------------------------------------------ 
+    ethernet_data_in <= (
+                            mdio_driver_data_in => ethernet_communication_data_in.ethernet_data_in.mdio_driver_data_in
+                        );
+
+    u_ethernet : ethernet
+    port map( ethernet_communication_clocks                         ,
+              ethernet_communication_FPGA_in.ethernet_FPGA_in       ,
+              ethernet_communication_FPGA_out.ethernet_FPGA_out     ,
+              ethernet_communication_FPGA_inout.ethernet_FPGA_inout ,
+              ethernet_data_in                                      ,
+              ethernet_data_out);
+
 ------------------------------------------------------------------------ 
 end rtl;
