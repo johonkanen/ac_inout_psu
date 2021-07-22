@@ -297,10 +297,11 @@ begin
     	  system_components_data_out.power_supply_control_data_out); 
 
 ------------------------------------------------------------------------ 
-    ethernet_communication_clocks <= (core_clock => clock, reset_n => '1', 
-                        rx_ddr_clocks => (rx_ddr_clock => system_clocks.ethernet_rx_ddr_clock, reset_n => '1'),
-                        tx_ddr_clocks => (tx_ddr_clock => system_clocks.ethernet_tx_ddr_clock, reset_n => '1')
-                       );
+    ethernet_communication_clocks <= (
+                                         core_clock => clock, reset_n => '1', 
+                                         rx_ddr_clocks => (rx_ddr_clock => system_clocks.ethernet_rx_ddr_clock, reset_n => '1'),
+                                         tx_ddr_clocks => (tx_ddr_clock => system_clocks.ethernet_tx_ddr_clock, reset_n => '1')
+                                     );
 
     u_ethernet_communication : ethernet_communication
     port map( ethernet_communication_clocks                              ,
