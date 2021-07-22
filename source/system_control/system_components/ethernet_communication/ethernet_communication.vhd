@@ -49,6 +49,12 @@ architecture rtl of ethernet_communication is
 
 begin
 
+    ethernet_communication_data_out <= ( ethernet_data_out          => ethernet_data_out          ,
+                                         ethernet_protocol_data_out => ethernet_protocol_data_out ,
+                                         frame_ram_data_out         => ethernet_frame_ram_data_out.ram_read_port_data_out);
+
+
+
 ------------------------------------------------------------------------ 
     u_ethernet : ethernet
     port map( ethernet_communication_clocks                         ,
