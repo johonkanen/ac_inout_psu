@@ -240,13 +240,13 @@ begin
             end if;
             
             --------------------------------------------------
-            create_ram_read_controller(ethernet_data_in.ram_read_control_port    ,
-                                        ethernet_data_out.ethernet_frame_ram_out ,
-                                        ram_read_controller                      ,
+            create_ram_read_controller(ethernet_communication_data_in.frame_ram_read_control_port ,
+                                        ethernet_communication_data_out.frame_ram_data_out        ,
+                                        ram_read_controller                                       ,
                                         shift_register); 
             --------------------------------------------------
-            if protocol_processing_is_ready(ethernet_data_out.ethernet_protocol_data_out) then
-                ram_address_offset <= get_frame_address_offset(ethernet_data_out.ethernet_protocol_data_out);
+            if protocol_processing_is_ready(ethernet_communication_data_out.ethernet_protocol_data_out) then
+                ram_address_offset <= get_frame_address_offset(ethernet_communication_data_out.ethernet_protocol_data_out);
             end if;
             --------------------------------------------------
 

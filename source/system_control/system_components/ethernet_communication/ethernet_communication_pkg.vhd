@@ -5,6 +5,10 @@ library ieee;
 library work;
     use work.ethernet_clocks_pkg.all;
     use work.ethernet_pkg.all;
+    use work.ethernet_frame_ram_pkg.all;
+    use work.ethernet_frame_ram_read_pkg.all;
+    use work.ethernet_frame_ram_pkg.all;
+    use work.network_protocol_header_pkg.all;
 
 package ethernet_communication_pkg is
 
@@ -21,11 +25,14 @@ package ethernet_communication_pkg is
     end record;
     
     type ethernet_communication_data_input_group is record
-        ethernet_data_in : ethernet_data_input_group;
+        ethernet_data_in            : ethernet_data_input_group;
+        frame_ram_read_control_port : ram_read_control_group;
     end record;
     
     type ethernet_communication_data_output_group is record
-        ethernet_data_out : ethernet_data_output_group;
+        ethernet_data_out          : ethernet_data_output_group;
+        ethernet_protocol_data_out : network_protocol_data_output_group;
+        frame_ram_data_out         : ram_read_output_group;
     end record;
     
     component ethernet_communication is
