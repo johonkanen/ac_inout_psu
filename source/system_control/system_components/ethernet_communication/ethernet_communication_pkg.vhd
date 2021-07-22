@@ -4,7 +4,7 @@ library ieee;
 
 library work;
     use work.ethernet_clocks_pkg.all;
-    use work.ethernet.all;
+    use work.ethernet_pkg.all;
 
 package ethernet_communication_pkg is
 
@@ -33,17 +33,18 @@ package ethernet_communication_pkg is
             ethernet_communication_clocks     : in  ethernet_clock_group;
             ethernet_communication_FPGA_in    : in  ethernet_communication_FPGA_input_group;
             ethernet_communication_FPGA_out   : out ethernet_communication_FPGA_output_group;
-            ethernet_communication_FPGA_inout : out ethernet_communication_FPGA_inout_record;
+            ethernet_communication_FPGA_inout : inout ethernet_communication_FPGA_inout_record;
             ethernet_communication_data_in    : in  ethernet_communication_data_input_group;
             ethernet_communication_data_out   : out ethernet_communication_data_output_group
         );
     end component ethernet_communication;
     
-    -- signal ethernet_communication_clocks   : ethernet_communication_clock_group;
-    -- signal ethernet_communication_FPGA_in  : ethernet_communication_FPGA_input_group;
-    -- signal ethernet_communication_FPGA_out : ethernet_communication_FPGA_output_group;
-    -- signal ethernet_communication_data_in  : ethernet_communication_data_input_group;
-    -- signal ethernet_communication_data_out : ethernet_communication_data_output_group
+    -- signal ethernet_communication_clocks     : ethernet_communication_clock_group;
+    -- signal ethernet_communication_FPGA_in    : ethernet_communication_FPGA_input_group;
+    -- signal ethernet_communication_FPGA_out   : ethernet_communication_FPGA_output_group;
+    -- signal ethernet_communication_FPGA_inout : ethernet_communication_FPGA_inout_record;
+    -- signal ethernet_communication_data_in    : ethernet_communication_data_input_group;
+    -- signal ethernet_communication_data_out   : ethernet_communication_data_output_group;
     
     -- u_ethernet_communication : ethernet_communication
     -- port map( ethernet_communication_clocks,
