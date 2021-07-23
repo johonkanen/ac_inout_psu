@@ -41,24 +41,25 @@ architecture rtl of ethernet is
 begin 
 
 ------------------------------------------------------------------------
+------------------------------------------------------------------------
     ethernet_data_out <= (mdio_driver_data_out  => mdio_driver_data_out                                    ,
                          ram_write_control_port => ethernet_frame_receiver_data_out.ram_write_control_port ,
                          frame_is_received      => frame_is_received);
 
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------ 
-
     u_ethernet_frame_receiver : ethernet_frame_receiver
     port map( ethernet_clocks.rx_ddr_clocks                    ,
               ethernet_FPGA_in.ethernet_frame_receiver_FPGA_in ,
               ethernet_frame_receiver_data_out); 
 
+------------------------------------------------------------------------ 
     protocol_trigger : process(ethernet_clocks.core_clock)
         
     begin
         if rising_edge(ethernet_clocks.core_clock) then
-            shift_register <= shift_register(shift_register'left-1 downto 0 ) & ethernet_frame_receiver_data_out.toggle_data_has_been_written;
 
+            shift_register <= shift_register(shift_register'left-1 downto 0 ) & ethernet_frame_receiver_data_out.toggle_data_has_been_written; 
             frame_is_received <= shift_register(shift_register'left) = '0' AND shift_register(shift_register'left-1) = '1';
 
         end if; --rising_edge
