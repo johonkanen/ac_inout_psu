@@ -240,7 +240,7 @@ begin
             end if;
             
             --------------------------------------------------
-            create_ram_read_controller(ethernet_communication_data_in.frame_ram_read_control_port ,
+            create_ram_read_controller(ethernet_communication_data_in.receiver_ram_read_control_port ,
                                         ethernet_communication_data_out.frame_ram_data_out        ,
                                         ram_read_controller                                       ,
                                         shift_register); 

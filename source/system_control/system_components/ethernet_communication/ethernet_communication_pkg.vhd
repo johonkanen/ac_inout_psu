@@ -26,7 +26,7 @@ package ethernet_communication_pkg is
     
     type ethernet_communication_data_input_group is record
         ethernet_data_in            : ethernet_data_input_group;
-        frame_ram_read_control_port : ram_read_control_group;
+        receiver_ram_read_control_port : ram_read_control_group;
     end record;
     
     type ethernet_communication_data_output_group is record

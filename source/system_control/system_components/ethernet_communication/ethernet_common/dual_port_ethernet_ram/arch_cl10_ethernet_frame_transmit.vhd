@@ -13,12 +13,12 @@
 --     );
 -- end entity ethernet_frame_ram;
 
-architecture arch_cl10_ethernet_frame_ram of ethernet_frame_ram is
+architecture arch_cl10_ethernet_frame_transmit of ethernet_frame_ram is
 
     alias ram_write_control_port is ethernet_frame_ram_data_in.ram_write_control_port;
     alias ram_read_control_port is ethernet_frame_ram_data_in.ram_read_control_port;
     
-    component dual_port_ethernet_ram IS
+    component transmit_ram IS
 	PORT
 	(
 		data      : IN STD_LOGIC_VECTOR (7 DOWNTO 0);
@@ -30,7 +30,7 @@ architecture arch_cl10_ethernet_frame_ram of ethernet_frame_ram is
 		wren      : IN STD_LOGIC                       := '0';
 		q         : OUT STD_LOGIC_VECTOR (7 DOWNTO 0)
 	);
-    end component dual_port_ethernet_ram;
+    end component transmit_ram;
 
     signal q         : STD_LOGIC_VECTOR (7 DOWNTO 0);
 
@@ -60,7 +60,7 @@ begin
         end if; --rising_edge
     end process data_is_ready_pipeline;	
 
-    u_dual_port_ethernet_ram : dual_port_ethernet_ram
+    u_dual_port_ethernet_ram : transmit_ram
     port map(
                 wrclock   => ethernet_frame_ram_clocks.write_clock,
                 data      => ram_write_control_port.byte_to_write,
@@ -72,4 +72,4 @@ begin
                 rden      => ram_read_control_port.read_is_enabled_when_1,
                 q         => q);
 
-end arch_cl10_ethernet_frame_ram;
+end arch_cl10_ethernet_frame_transmit;

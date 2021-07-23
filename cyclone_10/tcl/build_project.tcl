@@ -45,6 +45,7 @@ set need_to_close_project 1
 source $project_root/get_vhdl_sources.tcl
 
 set_global_assignment -name QIP_FILE $project_root/cyclone_10/IP/main_clocks/main_clocks.qip
+
 set_global_assignment -name QIP_FILE $project_root/cyclone_10/IP/ethernet_IP/ethernet_clocks_generator/ethernet_clocks_generator.qip
 set_global_assignment -name QIP_FILE $project_root/cyclone_10/IP/ethernet_IP/ddio_in/ethddio_rx.qip
 set_global_assignment -name QIP_FILE $project_root/cyclone_10/IP/ethernet_IP/ddio_out/ethddio_tx.qip

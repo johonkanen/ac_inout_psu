@@ -29,6 +29,7 @@ proc get_vhdl_sources {void}\
                         /system_control/system_components/ethernet_communication/ethernet_common/dual_port_ethernet_ram/ethernet_frame_ram_pkg.vhd 
                         /system_control/system_components/ethernet_communication/ethernet_common/dual_port_ethernet_ram/ethernet_frame_ram.vhd 
                         /system_control/system_components/ethernet_communication/ethernet_common/dual_port_ethernet_ram/arch_cl10_ethernet_frame_ram.vhd 
+                        /system_control/system_components/ethernet_communication/ethernet_common/dual_port_ethernet_ram/arch_cl10_ethernet_frame_transmit.vhd 
 
                 /system_control/system_components/ethernet_communication/network_protocol_stack/network_protocol_header_pkg.vhd
                 /system_control/system_components/ethernet_communication/network_protocol_stack/network_protocol.vhd
