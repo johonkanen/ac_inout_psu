@@ -33,7 +33,7 @@ set rgmii_tx_3 PIN_A14
 set enet_ref_clk_125MHz PIN_B8
 set rx_ctl PIN_B5
 
-set ethernet_rx_ddio_in_0 PIN_A6
-set ethernet_rx_ddio_in_1 PIN_B6
-set ethernet_rx_ddio_in_2 PIN_A7
-set ethernet_rx_ddio_in_3 PIN_B7
+set ethernet_rx_ddio_in_0 PIN_B7
+set ethernet_rx_ddio_in_1 PIN_A7
+set ethernet_rx_ddio_in_2 PIN_B6
+set ethernet_rx_ddio_in_3 PIN_A6
