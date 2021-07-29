@@ -51,6 +51,7 @@ foreach x [get_vhdl_sources ../] \
     } 
 }
 
+source $project_root/cyclone_10/tcl/evaluation_kit_pin_map.tcl
 source $cyclone_10_tcl_dir/make_assignments.tcl
 source $cyclone_10_tcl_dir/set_io_locations.tcl 
     export_assignments 
