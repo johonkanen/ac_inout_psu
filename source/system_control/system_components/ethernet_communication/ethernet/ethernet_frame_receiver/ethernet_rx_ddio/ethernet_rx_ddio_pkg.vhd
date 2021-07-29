@@ -90,14 +90,14 @@ package body ethernet_rx_ddio_pkg is
         variable inverted_byte : std_logic_vector(7 downto 0);
     begin
 
-        inverted_byte := ethernet_rx_output.ethernet_rx_byte(0) &
-                         ethernet_rx_output.ethernet_rx_byte(1) &
+        inverted_byte := ethernet_rx_output.ethernet_rx_byte(3) &
                          ethernet_rx_output.ethernet_rx_byte(2) &
-                         ethernet_rx_output.ethernet_rx_byte(3) &
-                         ethernet_rx_output.ethernet_rx_byte(4) &
-                         ethernet_rx_output.ethernet_rx_byte(5) &
+                         ethernet_rx_output.ethernet_rx_byte(1) &
+                         ethernet_rx_output.ethernet_rx_byte(0) &
+                         ethernet_rx_output.ethernet_rx_byte(7) &
                          ethernet_rx_output.ethernet_rx_byte(6) &
-                         ethernet_rx_output.ethernet_rx_byte(7);
+                         ethernet_rx_output.ethernet_rx_byte(5) &
+                         ethernet_rx_output.ethernet_rx_byte(4);
 
         return inverted_byte; 
 
@@ -128,7 +128,7 @@ package body ethernet_rx_ddio_pkg is
     return std_logic_vector 
     is
     begin
-        return ethernet_rx_output.ethernet_rx_byte; 
+        return get_reversed_byte(ethernet_rx_output);
     end get_byte;
 
 ------------------------------------------------------------------------
