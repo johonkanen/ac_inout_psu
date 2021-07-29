@@ -151,7 +151,7 @@ architecture rtl of system_components is
     constant activate_loopback_at_100MHz : std_logic_vector(15 downto 0) := x"6000";
     constant activate_loopback_at_1000MHz : std_logic_vector(15 downto 0) := x"4040";
 
-    constant force_1000MHz_connection : std_logic_vector(15 downto 0) := x"0140";
+    constant force_1000MHz_connection : std_logic_vector(15 downto 0) := x"1140";
 
     signal shift_register : std_logic_vector(31 downto 0); 
     signal ram_read_controller : ram_reader;
@@ -217,7 +217,11 @@ begin
                     WHEN 15 => transmit_16_bit_word_with_uart(uart_data_in, uart_rx_data);
                     WHEN others => -- get data from MDIO
                         register_counter := register_counter + 1;
-                        read_data_from_mdio(mdio_driver_data_in, x"00", integer_to_std(register_counter, 8));
+                        if test_counter = 4600 then
+                            write_data_to_mdio(mdio_driver_data_in, x"00", x"09", x"1e00");
+                        else
+                            read_data_from_mdio(mdio_driver_data_in, x"00", integer_to_std(register_counter, 8));
+                        end if;
                 end CASE; 
 
                 filter_data(bandpass_filter, get_square_wave_from_counter(test_counter));
