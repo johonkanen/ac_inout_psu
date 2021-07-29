@@ -2,31 +2,12 @@ package require ::quartus::project
 package require ::quartus::flow
 package require cmdline
 
-
-# set options \
-# {\
-#     # { "load_program_to.arg"} \
-#     # { "usb_cable.arg"} \
-# }
-#
-# array set opts [::cmdline::getoptions quartus(args) $options]
-#
-
 variable cyclone_10_tcl_dir [ file dirname [ file normalize [ info script ] ] ]
 
 set project_root $cyclone_10_tcl_dir/../../
 set source_folder $project_root/source
 set fpga_device 10CL025YU256I7G
 set output_dir ./output
-
-# if {[llength $output_dir] != 0} \
-# {
-#     puts "clean $output_dir"
-#     file delete -force {*}[glob -directory $output_dir *];
-# }
-#
-# puts "Clean build"
-
 
 set need_to_close_project 0
 
@@ -42,9 +23,11 @@ else \
 set need_to_close_project 1
 #
 # read sources
+#
+source $project_root/cyclone_10/tcl/control_card_pin_map.tcl
 source $project_root/get_vhdl_sources.tcl
 
-set_global_assignment -name QIP_FILE $project_root/cyclone_10/IP/main_clocks/main_clocks.qip
+set_global_assignment -name QIP_FILE $project_root/cyclone_10/IP/main_clocks/main_clocks.qip 
 
 set_global_assignment -name QIP_FILE $project_root/cyclone_10/IP/ethernet_IP/ethernet_clocks_generator/ethernet_clocks_generator.qip
 set_global_assignment -name QIP_FILE $project_root/cyclone_10/IP/ethernet_IP/ddio_in/ethddio_rx.qip
