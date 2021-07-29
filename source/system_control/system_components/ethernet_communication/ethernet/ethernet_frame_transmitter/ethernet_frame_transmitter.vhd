@@ -79,7 +79,7 @@ begin
                 WHEN transmit_fifo =>
                     if fifo_is_not_almost_empty then
                         -- read_word_from_fifo(fifo);
-                        -- transmit_8_bits_of_data(ethernet_tx_ddio_data_in, data_from_fifo);
+                        transmit_8_bits_of_data(ethernet_tx_ddio_data_in, data_from_fifo);
                         fcs_shift_register <= nextCRC32_D8(data_from_fifo, fcs_shift_register);
                         transmit_counter <= 3;
                     end if;
@@ -91,11 +91,11 @@ begin
                         transmit_ddr_state <= wait_for_start;
                     end if;
                     fcs_shift_register <= fcs_shift_register(23 downto 0) & x"FF";
-                    -- transmit_8_bits_of_data(ethernet_tx_ddio_data_in, fcs_shift_register(31 downto 24));
+                    transmit_8_bits_of_data(ethernet_tx_ddio_data_in, fcs_shift_register(31 downto 24));
             end CASE;
 
             if transmit_counter > 0 then
-                -- transmit_counter <= transmit_counter - 1;
+                transmit_counter <= transmit_counter - 1;
             end if;
 
             init_fifo(fifo_data_input);
@@ -110,7 +110,7 @@ begin
             end if;
 
             if fifo_is_not_almost_empty and transmitter_is_enabled then
-                -- transmit_8_bits_of_data(ethernet_tx_ddio_data_in, data_from_fifo);
+                transmit_8_bits_of_data(ethernet_tx_ddio_data_in, data_from_fifo);
             end if;
 
         end if; --rising_edge
