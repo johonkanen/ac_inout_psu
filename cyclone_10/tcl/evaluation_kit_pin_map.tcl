@@ -1,7 +1,7 @@
 set main_clock PIN_E1 
 
-set uart_rx PIN_R3
-set uart_tx PIN_T3
+set uart_rx PIN_R1
+set uart_tx PIN_P1
 
 set gate_drive_pwm_0 PIN_L13
 set gate_drive_pwm_1 PIN_L16
@@ -22,7 +22,7 @@ set test_ad_mux_2 PIN_M8
 set MDIO_inout_data PIN_A4
 set mdio_clock PIN_B4 
 
-set ethernet_tx_ddr_clock PIN_B14
+set ethernet_tx_ddr_clock PIN_D3
 
 set tx_ctl PIN_D6
 set rgmii_tx_0 PIN_E6
@@ -33,7 +33,7 @@ set rgmii_tx_3 PIN_A2
 set enet_ref_clk_125MHz PIN_B8
 set rx_ctl PIN_A5
 
-set ethernet_rx_ddio_in_0 PIN_A7
-set ethernet_rx_ddio_in_1 PIN_B7
-set ethernet_rx_ddio_in_2 PIN_A6
-set ethernet_rx_ddio_in_3 PIN_B6
+set ethernet_rx_ddio_in_3 PIN_A7
+set ethernet_rx_ddio_in_2 PIN_B7
+set ethernet_rx_ddio_in_1 PIN_A6
+set ethernet_rx_ddio_in_0 PIN_B6
