@@ -35,15 +35,15 @@ begin
     ethernet_tx_ddio_FPGA_out <= ( tx_ctl => dataout(4),
                                  rgmii_tx => dataout(3 downto 0));
 
-    ddio_data_out_h <= ethernet_tx_ddio_data_in.tx_ctl(1) & ethernet_tx_ddio_data_in.tx_byte(7 downto 4);
     ddio_data_out_l <= ethernet_tx_ddio_data_in.tx_ctl(0) & ethernet_tx_ddio_data_in.tx_byte(3 downto 0);
+    ddio_data_out_h <= ethernet_tx_ddio_data_in.tx_ctl(1) & ethernet_tx_ddio_data_in.tx_byte(7 downto 4);
 ------------------------------------------------------------------------
     u_ethddio : ethddio_tx
         PORT map(
-            ddio_data_out_h                      ,
-            ddio_data_out_l                      ,
-            ethernet_tx_ddio_clocks.tx_ddr_clock ,
-            dataout
+            datain_h => ddio_data_out_h                      ,
+            datain_l => ddio_data_out_l                      ,
+            outclock => ethernet_tx_ddio_clocks.tx_ddr_clock ,
+            dataout  => dataout
         );
 
 ------------------------------------------------------------------------
