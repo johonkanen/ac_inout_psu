@@ -22,15 +22,13 @@ architecture sim of tb_ethernet_frame_transmitter is
     constant clock_per : time := 1 ns;
     constant clock_half_per : time := 0.5 ns;
     constant simtime_in_clocks : integer := 150;
-    signal simulator_counter : natural := 0;
-
-    signal ethernet_ddio : std_logic_vector(3 downto 0);
-    signal byte : std_logic_vector(7 downto 0);
+    signal simulator_counter : natural := 0; 
 
 ------------------------------------------------------------------------
     alias core_clock is simulator_clock;
     alias reset_n is clocked_reset;
     signal ethernet_clocks   : ethernet_clock_group;
+    signal transmitted_byte : std_logic_vector(7 downto 0);
     
 --------------------------------------------------
     function invert_bit_order
@@ -65,8 +63,7 @@ architecture sim of tb_ethernet_frame_transmitter is
 --------------------------------------------------
 
 
-    type list_of_frame_transmitter_states is (idle, transmit_preable, transmit_data, transmit_fcs);
-    
+    type list_of_frame_transmitter_states is (idle, transmit_preable, transmit_data, transmit_fcs); 
 
     type frame_transmitter_record is record
         frame_transmitter_state : list_of_frame_transmitter_states;
@@ -82,7 +79,7 @@ architecture sim of tb_ethernet_frame_transmitter is
                                                                     fcs                      => (others => '0'),
                                                                     byte_counter             => 0,
                                                                     frame_length             => 93,
-                                                                    byte => x"00");
+                                                                    byte                     => x"00");
 
     signal frame_transmit_controller : frame_transmitter_record := init_transmit_controller;
 
@@ -109,44 +106,51 @@ architecture sim of tb_ethernet_frame_transmitter is
     (
         signal transmit_controller : inout frame_transmitter_record
     ) is
+        alias frame_transmitter_state is transmit_controller.frame_transmitter_state;
+        alias fcs_shift_register      is transmit_controller.fcs_shift_register;
+        alias fcs                     is transmit_controller.fcs;
+        alias byte_counter            is transmit_controller.byte_counter;
+        alias frame_length            is transmit_controller.frame_length;
+        alias byte                    is transmit_controller.byte;
+
         variable data_to_ethernet : std_logic_vector(7 downto 0);
     begin
-        CASE transmit_controller.frame_transmitter_state is
+        CASE frame_transmitter_state is
             WHEN idle =>
-                transmit_controller.frame_transmitter_state <= transmit_preable;
-                transmit_controller.byte_counter <= 0;
+                frame_transmitter_state <= transmit_preable;
+                byte_counter <= 0;
             WHEN transmit_preable =>
-                transmit_controller.byte_counter <= transmit_controller.byte_counter + 1;
-                if transmit_controller.byte_counter < 7 then
-                    transmit_controller.byte <= x"aa";
+                byte_counter <= byte_counter + 1;
+                if byte_counter < 7 then
+                    byte <= x"aa";
                 end if;
-                if transmit_controller.byte_counter = 8 then
-                    transmit_controller.byte <= x"ab";
-                    transmit_controller.frame_transmitter_state <= transmit_data;
-                    transmit_controller.byte_counter <= 0;
+                if byte_counter = 8 then
+                    byte <= x"ab";
+                    frame_transmitter_state <= transmit_data;
+                    byte_counter <= 0;
                 end if;
             WHEN transmit_data => 
 
-                transmit_controller.byte_counter <= transmit_controller.byte_counter + 1; 
-                data_to_ethernet := get_byte_from_vector(ethernet_test_frame_in_order, transmit_controller.byte_counter);
-                if transmit_controller.byte_counter < transmit_controller.frame_length then
-                    transmit_controller.fcs_shift_register <= nextCRC32_D8(reverse_bit_order(data_to_ethernet), transmit_controller.fcs_shift_register);
-                    transmit_controller.fcs                <= not invert_bit_order(nextCRC32_D8((data_to_ethernet), transmit_controller.fcs_shift_register));
-                    transmit_controller.byte               <= data_to_ethernet;
+                byte_counter <= byte_counter + 1; 
+                data_to_ethernet := get_byte_from_vector(ethernet_test_frame_in_order, byte_counter);
+                if byte_counter < frame_length then
+                    fcs_shift_register <= nextCRC32_D8(reverse_bit_order(data_to_ethernet), fcs_shift_register);
+                    fcs                <= not invert_bit_order(nextCRC32_D8((data_to_ethernet), fcs_shift_register));
+                    byte               <= data_to_ethernet;
                 end if;
 
-                if transmit_controller.byte_counter = transmit_controller.frame_length-1 then
-                    transmit_controller.frame_transmitter_state <= transmit_fcs;
-                    transmit_controller.byte_counter <= 0;
+                if byte_counter = frame_length-1 then
+                    frame_transmitter_state <= transmit_fcs;
+                    byte_counter <= 0;
                 end if;
 
             WHEN transmit_fcs => 
-                transmit_controller.byte_counter <= transmit_controller.byte_counter + 1; 
-                transmit_controller.fcs  <= x"ff" & transmit_controller.fcs(transmit_controller.fcs'left downto 8);
-                transmit_controller.byte <= transmit_controller.fcs(7 downto 0);
-                if transmit_controller.byte_counter = 3 then
-                    transmit_controller.frame_transmitter_state <= idle;
-                    transmit_controller.byte <= x"00";
+                byte_counter <= byte_counter + 1;
+                fcs          <= x"ff" & fcs(fcs'left downto 8);
+                byte         <= fcs(7 downto 0);
+                if byte_counter = 3 then
+                    frame_transmitter_state <= idle;
+                    byte <= x"00";
                 end if;
         end CASE; 
 
@@ -211,7 +215,7 @@ begin
         end if; --rising_edge
     end process frame_transmitter_starter;	
 
-    byte <= frame_transmit_controller.byte; 
+    transmitted_byte <= frame_transmit_controller.byte; 
 
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
