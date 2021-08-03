@@ -1,21 +1,23 @@
 rem simulate ethernet_frame_transmitter.vhd
 rem
-set ethernet_mac_source=../../
-
 echo off
-ghdl -a --std=08 --ieee=synopsys %ethernet_mac_source%..\ethernet_clocks_pkg.vhd
-ghdl -a --std=08 --ieee=synopsys %ethernet_mac_source%..\ethernet_frame_definitions_pkg.vhd
+FOR /F "tokens=* USEBACKQ" %%F IN (`git rev-parse --show-toplevel`) DO (
+SET project_root=%%F
+)
+SET source=%project_root%/source
 
-ghdl -a --std=08 --ieee=synopsys %ethernet_mac_source%\ethernet_frame_transmitter\ethernet_tx_ddio\ethernet_tx_ddio_pkg.vhd
-ghdl -a --std=08 --ieee=synopsys %ethernet_mac_source%\ethernet_frame_transmitter\ethernet_tx_ddio\ethernet_tx_ddio.vhd
-ghdl -a --std=08 --ieee=synopsys %ethernet_mac_source%\ethernet_frame_transmitter\ethernet_tx_ddio\arch_simulation_tx_ddio.vhd
-ghdl -a --std=08 --ieee=synopsys %ethernet_mac_source%\ethernet_frame_transmitter\ethernet_frame_transmitter_pkg.vhd
-ghdl -a --std=08 --ieee=synopsys %ethernet_mac_source%\ethernet_frame_transmitter\ethernet_frame_transmitter_internal_pkg.vhd
-ghdl -a --std=08 --ieee=synopsys %ethernet_mac_source%\ethernet_frame_transmitter\ethernet_frame_transmitter.vhd
 
-ghdl -a --std=08 --ieee=synopsys tb_ethernet_frame_transmitter.vhd
-ghdl -e --std=08 --ieee=synopsys tb_ethernet_frame_transmitter
-ghdl -r --std=08 --ieee=synopsys tb_ethernet_frame_transmitter --vcd=tb_ethernet_frame_transmitter.vcd
+ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet_communication/ethernet/ethernet_clocks_pkg.vhd 
+    ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet_communication/ethernet_common/PCK_CRC_32_D8.vhd 
+
+
+rem ghdl -a --ieee=synopsys %ethernet_mac_source%\ethernet_frame_transmitter\ethernet_frame_transmitter_pkg.vhd
+rem ghdl -a --ieee=synopsys %ethernet_mac_source%\ethernet_frame_transmitter\ethernet_frame_transmitter_internal_pkg.vhd
+rem ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet_communication/ethernet_frame_transmitter/ethernet_frame_transmitter.vhd
+
+ghdl -a --ieee=synopsys tb_ethernet_frame_transmitter.vhd
+ghdl -e --ieee=synopsys tb_ethernet_frame_transmitter
+ghdl -r --ieee=synopsys tb_ethernet_frame_transmitter --vcd=tb_ethernet_frame_transmitter.vcd
 
 
 IF %1 EQU 1 start "" gtkwave tb_ethernet_frame_transmitter.vcd
