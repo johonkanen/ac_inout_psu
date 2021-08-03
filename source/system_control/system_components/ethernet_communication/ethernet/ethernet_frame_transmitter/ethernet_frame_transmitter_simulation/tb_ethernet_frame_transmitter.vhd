@@ -33,6 +33,7 @@ architecture sim of tb_ethernet_frame_transmitter is
     alias reset_n is clocked_reset;
     signal ethernet_clocks   : ethernet_clock_group;
     
+--------------------------------------------------
     function invert_bit_order
     (
         std_vector : std_logic_vector(31 downto 0)
@@ -47,6 +48,7 @@ architecture sim of tb_ethernet_frame_transmitter is
         return reordered_vector;
     end invert_bit_order;
 
+--------------------------------------------------
     function reverse_bit_order
     (
         std_vector : std_logic_vector 
@@ -61,30 +63,25 @@ architecture sim of tb_ethernet_frame_transmitter is
         return reordered_vector;
     end reverse_bit_order;
 
-    function reverse_bits
-    (
-        std_vector : std_logic_vector 
-    )
-    return std_logic_vector 
-    is
-        variable reordered_vector : std_logic_vector(std_vector'high downto 0);
-    begin
-        for i in std_vector'range loop
-            reordered_vector(i) := std_vector(std_vector'high - i);
-        end loop;
-        return reordered_vector;
-    end reverse_bits;
-
-
+--------------------------------------------------
     constant ethernet_test_frame_in_order : std_logic_vector := x"ffffffffffffc46516ae5e4f08004500004e3ca700008011574aa9fe52b1a9feffff00890089003a567b91c9011000010000000000002045454542454f454745504644464443414341434143414341434143414341424d00002000014db0c955"; 
     -- ff ff ff ff ff ff c4 65 16 ae 5e 4f 08 00 45 00 00 4e 3c a7 00 00 80 11 57 4a a9 fe 52 b1 a9 fe ff ff 00 89 00 89 00 3a 56 7b 91 c9 01 10 00 01 00 00 00 00 00 00 20 45 45 45 42 45 4f 45 47 45 50 46 44 46 44 43 41 43 41 43 41 43 41 43 41 43 41 43 41 43 41 42 4d 00 00 20 00 01 4d b0 c9 55
     constant ethernet_test_frame_in_order_2 : std_logic_vector := x"01005e000016c46516ae5e4f08004600002890d900000102b730a9fe52b1e0000016940400002200f9010000000104000000e00000fc000000000000fe50b726";
     -- 01 00 5e 00 00 16 c4 65 16 ae 5e 4f 08 00 46 00 00 28 90 d9 00 00 01 02 b7 30 a9 fe 52 b1 e0 00 00 16 94 04 00 00 22 00 f9 01 00 00 00 01 04 00 00 00 e0 00 00 fc 00 00 00 00 00 00 fe 50 b7 26
+
     signal fcs_shift_register : std_logic_vector(31 downto 0) := (others => '1');
     signal fcs : std_logic_vector(31 downto 0) := (others => '0');
 
     constant frame_length : natural := 93;
+    type list_of_frame_transmitter_states is (idle, transmit_preable, transmit_data, transmit_fcs);
+    signal frame_transmitter_state : list_of_frame_transmitter_states;
 
+    type frame_transmitter_record is record
+        data : std_logic;
+    end record;
+
+--------------------------------------------------
+-------- test function ---------------------------
     function get_byte_from_vector
     (
         frame_data_vector : std_logic_vector;
@@ -99,7 +96,7 @@ architecture sim of tb_ethernet_frame_transmitter is
             return x"00";
         end if;
 
-    end get_byte_from_vector;
+    end get_byte_from_vector; 
 
 ------------------------------------------------------------------------
 begin
@@ -146,8 +143,6 @@ begin
 
         variable data_to_ethernet : std_logic_vector(7 downto 0);
 
-        type list_of_frame_transmitter_states is (idle, transmit_preable, transmit_data, transmit_fcs);
-        variable frame_transmitter_state : list_of_frame_transmitter_states;
         
     begin
         if rising_edge(simulator_clock) then
@@ -160,7 +155,7 @@ begin
 
                 CASE frame_transmitter_state is
                     WHEN idle =>
-                        frame_transmitter_state := transmit_preable;
+                        frame_transmitter_state <= transmit_preable;
                         byte_counter <= 0;
                     WHEN transmit_preable =>
                         byte_counter <= byte_counter + 1;
@@ -169,7 +164,7 @@ begin
                         end if;
                         if byte_counter = 8 then
                             byte <= x"ab";
-                            frame_transmitter_state := transmit_data;
+                            frame_transmitter_state <= transmit_data;
                             byte_counter <= 0;
                         end if;
                     WHEN transmit_data => 
@@ -183,7 +178,7 @@ begin
                         end if;
 
                         if byte_counter = frame_length-1 then
-                            frame_transmitter_state := transmit_fcs;
+                            frame_transmitter_state <= transmit_fcs;
                             byte_counter <= 0;
                         end if;
 
@@ -193,7 +188,7 @@ begin
                         fcs  <= x"ff" & fcs(fcs'left downto 8);
                         byte <= fcs(7 downto 0);
                         if byte_counter = 3 then
-                            frame_transmitter_state := idle;
+                            frame_transmitter_state <= idle;
                             byte <= x"00";
                         end if;
                 end CASE;
