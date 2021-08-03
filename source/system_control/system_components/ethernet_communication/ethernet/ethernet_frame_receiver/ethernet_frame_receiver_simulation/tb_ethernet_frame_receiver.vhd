@@ -26,7 +26,6 @@ architecture sim of tb_ethernet_frame_receiver is
 
     signal ethernet_frame_receiver_clocks   : ethernet_rx_ddr_clock_group;
     signal ethernet_frame_receiver_FPGA_in  : ethernet_frame_receiver_FPGA_input_group;
-    signal ethernet_frame_receiver_data_in  : ethernet_frame_receiver_data_input_group;
     signal ethernet_frame_receiver_data_out : ethernet_frame_receiver_data_output_group;
 
     signal simulation_counter : natural := 0;
