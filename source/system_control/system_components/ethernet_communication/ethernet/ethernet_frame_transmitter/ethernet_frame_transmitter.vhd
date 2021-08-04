@@ -38,13 +38,12 @@ architecture rtl of ethernet_frame_transmitter is
     signal frame_transmit_controller : frame_transmitter_record := init_transmit_controller;
 
     signal led_state : std_logic := '1';
-    signal testicounter : natural range 0 to 255;
+    signal testicounter : natural range 0 to 255 := 25;
     signal transmit_is_requested : boolean;
 
 begin
 
-    ethernet_frame_transmitter_FPGA_out.led <= led_state;
-
+    ethernet_frame_transmitter_FPGA_out.led <= led_state; 
     frame_transmitter : process(tx_ddr_clocks.tx_ddr_clock)
         
     begin
@@ -60,7 +59,11 @@ begin
                     counter_for_333ms <= counter_for_333ms - 1;
                 else
                     counter_for_333ms <= counter_value_at_333ms;
-                    transmit_ethernet_frame(frame_transmit_controller, 25);
+                    testicounter <= testicounter + 1;
+                    if testicounter > 100 then
+                        testicounter <= 25;
+                    end if;
+                    transmit_ethernet_frame(frame_transmit_controller, testicounter);
                     led_state <= not led_state;
                 end if;
             end if; 
