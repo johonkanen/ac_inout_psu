@@ -149,7 +149,7 @@ architecture rtl of system_components is
 
     constant activate_loopback_at_10MHz : std_logic_vector(15 downto 0) := x"4000";
     constant activate_loopback_at_100MHz : std_logic_vector(15 downto 0) := x"6000";
-    constant activate_loopback_at_1000MHz : std_logic_vector(15 downto 0) := x"4040";
+    constant activate_loopback_at_1000MHz : std_logic_vector(15 downto 0) := x"4140";
 
     constant force_1000MHz_connection : std_logic_vector(15 downto 0) := x"1140";
 
@@ -218,7 +218,7 @@ begin
                     WHEN others => -- get data from MDIO
                         register_counter := register_counter + 1;
                         if test_counter = 4600 then
-                            write_data_to_mdio(mdio_driver_data_in, x"00", x"09", x"1e00");
+                            write_data_to_mdio(mdio_driver_data_in, x"00", x"00", activate_loopback_at_1000MHz);
                         else
                             read_data_from_mdio(mdio_driver_data_in, x"00", integer_to_std(register_counter, 8));
                         end if;
