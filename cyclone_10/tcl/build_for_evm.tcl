@@ -56,6 +56,6 @@ source $cyclone_10_tcl_dir/make_assignments.tcl
 source $cyclone_10_tcl_dir/set_io_locations.tcl 
     export_assignments 
 
-set_global_assignment -name SDC_FILE $cyclone_10_tcl_dir/ac_inout_constraints.sdc
+set_global_assignment -name SDC_FILE $cyclone_10_tcl_dir/ac_inout_constraints_evm.sdc
 
 execute_flow -compile 

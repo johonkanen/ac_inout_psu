@@ -13,7 +13,7 @@ ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet_commu
 
 rem ghdl -a --ieee=synopsys %ethernet_mac_source%\ethernet_frame_transmitter\ethernet_frame_transmitter_pkg.vhd
 rem ghdl -a --ieee=synopsys %ethernet_mac_source%\ethernet_frame_transmitter\ethernet_frame_transmitter_internal_pkg.vhd
-rem ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet_communication/ethernet_frame_transmitter/ethernet_frame_transmitter.vhd
+            ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet_communication/ethernet/ethernet_frame_transmitter/ethernet_frame_transmit_controller_pkg.vhd
 
 ghdl -a --ieee=synopsys tb_ethernet_frame_transmitter.vhd
 ghdl -e --ieee=synopsys tb_ethernet_frame_transmitter

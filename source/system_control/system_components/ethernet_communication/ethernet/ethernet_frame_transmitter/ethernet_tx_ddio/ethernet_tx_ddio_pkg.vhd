@@ -73,14 +73,14 @@ package body ethernet_tx_ddio_pkg is
     ) is
     begin
         ethernet_tx_ddio_input.tx_ctl  <= "11";
-        ethernet_tx_ddio_input.tx_byte <= data_to_output(0) & 
-                                          data_to_output(1) &
-                                          data_to_output(2) &
-                                          data_to_output(3) &
-                                          data_to_output(4) &
+        ethernet_tx_ddio_input.tx_byte <= data_to_output(4) & 
                                           data_to_output(5) &
                                           data_to_output(6) &
-                                          data_to_output(7);
+                                          data_to_output(7) &
+                                          data_to_output(0) &
+                                          data_to_output(1) &
+                                          data_to_output(2) &
+                                          data_to_output(3);
     end transmit_8_bits_of_data;
 
 ------------------------------------------------------------------------
