@@ -11,11 +11,12 @@ package ethernet_frame_transmit_controller_pkg is
 
     type frame_transmitter_record is record
         frame_transmitter_state : list_of_frame_transmitter_states;
-        fcs_shift_register : std_logic_vector(31 downto 0);
-        fcs : std_logic_vector(31 downto 0);
-        byte_counter : natural range 0 to 2**12-1;
-        frame_length : natural range 0 to 2**12-1;
-        byte : std_logic_vector(7 downto 0);
+        fcs_shift_register      : std_logic_vector(31 downto 0);
+        fcs                     : std_logic_vector(31 downto 0);
+        byte_counter            : natural range 0 to 2**12-1;
+        frame_length            : natural range 0 to 2**12-1;
+        byte                    : std_logic_vector(7 downto 0);
+        test_counter            : natural range 0 to 255;
     end record;
 
     constant init_transmit_controller : frame_transmitter_record := (frame_transmitter_state => idle,
@@ -23,7 +24,8 @@ package ethernet_frame_transmit_controller_pkg is
                                                                     fcs                      => (others => '0'),
                                                                     byte_counter             => 0,
                                                                     frame_length             => 60,
-                                                                    byte                     => x"00");
+                                                                    byte                     => x"00",
+                                                                    test_counter             => 0);
 ------------------------------------------------------------------------
     procedure create_transmit_controller (
         signal transmit_controller : inout frame_transmitter_record);
@@ -98,14 +100,16 @@ package body ethernet_frame_transmit_controller_pkg is
         alias byte_counter            is transmit_controller.byte_counter;
         alias frame_length            is transmit_controller.frame_length;
         alias byte                    is transmit_controller.byte;
+        alias test_counter            is transmit_controller.test_counter;
 
         variable data_to_ethernet : std_logic_vector(7 downto 0);
     begin
+        test_counter <= 0;
         CASE frame_transmitter_state is
             WHEN idle =>
                 byte_counter <= 0;
                 fcs_shift_register <= (others => '1');
-                byte <= x"31";
+                byte <= x"00";
             WHEN transmit_preable =>
                 fcs_shift_register <= (others => '1');
                 byte_counter <= byte_counter + 1;
@@ -121,12 +125,14 @@ package body ethernet_frame_transmit_controller_pkg is
                 end if;
             WHEN transmit_data => 
 
+                test_counter <= test_counter + 1;
+                data_to_ethernet := reverse_bit_order(std_logic_vector(to_unsigned(test_counter,8)));
+
                 byte_counter <= byte_counter + 1; 
-                data_to_ethernet := std_logic_vector(to_unsigned(byte_counter,8));
                 if byte_counter < frame_length then
-                    fcs_shift_register <= nextCRC32_D8(reverse_bit_order(std_logic_vector(to_unsigned(byte_counter,8))), fcs_shift_register);
-                    fcs                <= not invert_bit_order(nextCRC32_D8((std_logic_vector(to_unsigned(byte_counter,8))), fcs_shift_register));
-                    byte               <= reverse_bit_order(std_logic_vector(to_unsigned(byte_counter,8)));
+                    fcs_shift_register <= nextCRC32_D8(data_to_ethernet, fcs_shift_register);
+                    fcs                <= not invert_bit_order(nextCRC32_D8(data_to_ethernet, fcs_shift_register));
+                    byte               <= data_to_ethernet;
                 end if;
 
                 frame_transmitter_state <= transmit_data;
@@ -143,6 +149,7 @@ package body ethernet_frame_transmit_controller_pkg is
                 frame_transmitter_state <= transmit_fcs;
                 if byte_counter = 3 then
                     frame_transmitter_state <= idle;
+                    byte_counter <= 0;
                 end if;
         end CASE; 
 

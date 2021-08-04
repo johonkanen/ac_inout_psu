@@ -31,7 +31,11 @@ architecture sim of tb_ethernet_frame_transmitter is
     signal ethernet_clocks   : ethernet_clock_group;
     signal transmitted_byte : std_logic_vector(7 downto 0); 
 
+    signal fcs   : std_logic_vector(31 downto 0);
+    signal crc32 : std_logic_vector(31 downto 0);
+
     signal frame_transmit_controller : frame_transmitter_record := init_transmit_controller;
+    signal counter : natural;
 
 ------------------------------------------------------------------------
 begin
@@ -85,7 +89,7 @@ begin
                 simulator_counter <= simulator_counter + 1;
                 create_transmit_controller(frame_transmit_controller);
                 if simulator_counter = 10 then
-                    transmit_ethernet_frame(frame_transmit_controller);
+                    transmit_ethernet_frame(frame_transmit_controller, 27);
                 end if; 
 
             end if; -- rstn
@@ -94,6 +98,9 @@ begin
 
     transmitted_byte <= frame_transmit_controller.byte; 
 
+    fcs  <= frame_transmit_controller.fcs;
+    crc32 <= frame_transmit_controller.fcs_shift_register;
+    counter <=  frame_transmit_controller.byte_counter;
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
     -- ethernet_ddio   <= ethernet_frame_transmitter_FPGA_out.ethernet_tx_ddio_FPGA_out.ethernet_tx_ddio_FPGA_io;
