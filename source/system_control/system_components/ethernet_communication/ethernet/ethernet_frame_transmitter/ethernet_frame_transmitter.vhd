@@ -79,7 +79,7 @@ begin
                 else
                     counter_for_333ms <= counter_value_at_333ms;
                     testicounter <= testicounter + 1;
-                    if testicounter > 100 then
+                    if testicounter > 237 then
                         testicounter <= 25;
                     end if;
                     transmit_ethernet_frame(frame_transmit_controller, testicounter);
@@ -94,8 +94,7 @@ begin
             transmit_is_requested <= frame_transmit_controller.frame_transmitter_state /= idle;
             if frame_transmit_controller.frame_transmitter_state /= idle OR transmit_is_requested then
                 write_data_to_fifo(fifo_data_input, frame_transmit_controller.byte);
-            end if;
-
+            end if; 
 
             CASE ddr_control_state is
                 WHEN idle =>
@@ -106,15 +105,16 @@ begin
                     end if;
                 WHEN transmit =>
                     ddr_control_state := transmit;
-                        if fifo_data_output.almost_empty /= '1' then
-                            load_data_from_fifo(fifo_data_input);
-                            transmit_8_bits_of_data(ethernet_tx_ddio_data_in, get_data_from_fifo(fifo_data_output));
-                        else
-                            transmit_8_bits_of_data(ethernet_tx_ddio_data_in, get_data_from_fifo(fifo_data_output));
-                            ddr_control_state := idle;
-                        end if;
-            end CASE; 
+                    if fifo_data_output.almost_empty /= '1' then
+                        load_data_from_fifo(fifo_data_input);
+                        transmit_8_bits_of_data(ethernet_tx_ddio_data_in, get_data_from_fifo(fifo_data_output));
+                    else
+                        transmit_8_bits_of_data(ethernet_tx_ddio_data_in, get_data_from_fifo(fifo_data_output));
+                        ddr_control_state := idle;
+                    end if;
 
+                    -- if fifo_data_output.almost_empty /= '1' then
+            end CASE; 
         end if; --rising_edge
     end process frame_transmitter;	
 
