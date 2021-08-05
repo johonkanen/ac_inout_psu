@@ -10,18 +10,6 @@ library work;
 package ethernet_frame_transmitter_internal_pkg is
 ------------------------------------------------------------------------
 
-    type list_of_transmitter_states is (wait_for_transmit_request, transmit_preamble, transmit_data, transmit_fcs);
-
-    type frame_transmit_control_group is record
-        transmitter_state : list_of_transmitter_states;
-        transmitter_counter : natural range 0 to 2047;
-    end record;
-
-    --------------------------------------------------
-    procedure create_transmit_controller (
-        signal transmit_controller : inout frame_transmit_control_group;
-        signal ethernet_tx_ddio_input : out ethernet_tx_ddio_data_input_group);
-    --------------------------------------------------
 -- package cl10_fifo_control_pkg is
 
     component tx_fifo IS
@@ -70,6 +58,9 @@ package ethernet_frame_transmitter_internal_pkg is
 ------------------------------------------------------------------------
     function fifo_is_full ( fifo_out : fifo_output_control_group)
         return boolean;
+------------------------------------------------------------------------
+    function get_data_from_fifo ( fifo_out : fifo_output_control_group)
+        return std_logic_vector;
 
 ------------------------------------------------------------------------
 -- end package cl10_fifo_control_pkg;
@@ -99,35 +90,6 @@ end package ethernet_frame_transmitter_internal_pkg;
 
 package body ethernet_frame_transmitter_internal_pkg is
 ------------------------------------------------------------------------
-    procedure create_transmit_controller
-    (
-        signal transmit_controller    : inout frame_transmit_control_group;
-        signal ethernet_tx_ddio_input : out ethernet_tx_ddio_data_input_group
-    ) is
-        alias transmitter_state is transmit_controller.transmitter_state;
-        alias transmitter_counter is transmit_controller.transmitter_counter;
-    begin
-
-        CASE transmitter_state is
-            WHEN wait_for_transmit_request => 
-                transmitter_counter <= 56;
-
-            WHEN transmit_preamble =>
-
-                if transmitter_counter > 0 then
-                    transmit_8_bits_of_data(ethernet_tx_ddio_input, x"AA");
-                    transmitter_counter <= transmitter_counter - 1;
-                else
-                    transmit_8_bits_of_data(ethernet_tx_ddio_input, x"AB");
-                    transmitter_state <= transmit_data;
-                end if;
-
-            WHEN transmit_data =>
-            WHEN transmit_fcs  =>
-        end CASE;
-        
-    end create_transmit_controller;
-
 -- package body cl10_fifo_control_pkg is
 ------------------------------------------------------------------------
     procedure init_fifo
@@ -191,6 +153,17 @@ package body ethernet_frame_transmitter_internal_pkg is
     begin
         return fifo_out.full = '1';
     end fifo_is_full;
+
+------------------------------------------------------------------------
+    function get_data_from_fifo
+    (
+        fifo_out : fifo_output_control_group
+    )
+    return std_logic_vector 
+    is
+    begin
+        return fifo_out.q;
+    end get_data_from_fifo;
 
 -- end package body cl10_fifo_control_pkg;
 ------------------------------------------------------------------------
