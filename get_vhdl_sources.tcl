@@ -44,7 +44,7 @@ proc get_vhdl_sources {void}\
                                 /system_control/system_components/ethernet_communication/ethernet/ethernet_frame_transmitter/ethernet_tx_ddio/ethernet_tx_ddio.vhd
                                 /system_control/system_components/ethernet_communication/ethernet/ethernet_frame_transmitter/ethernet_tx_ddio/arch_cl10_tx_ddio.vhd
                             /system_control/system_components/ethernet_communication/ethernet/ethernet_frame_transmitter/ethernet_frame_transmitter_pkg.vhd
-                            /system_control/system_components/ethernet_communication/ethernet/ethernet_frame_transmitter/ethernet_frame_transmitter_internal_pkg.vhd
+                            /system_control/system_components/ethernet_communication/ethernet/ethernet_frame_transmitter/ethernet_transmit_fifo_pkg.vhd
                             /system_control/system_components/ethernet_communication/ethernet/ethernet_frame_transmitter/ethernet_frame_transmit_controller_pkg.vhd
                             /system_control/system_components/ethernet_communication/ethernet/ethernet_frame_transmitter/ethernet_frame_transmitter.vhd
 

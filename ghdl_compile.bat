@@ -44,7 +44,7 @@ ghdl -a --ieee=synopsys %source%/system_clocks_pkg.vhd
                 ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet_communication/ethernet/ethernet_frame_transmitter/ethernet_tx_ddio/ethernet_tx_ddio_pkg.vhd
                 ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet_communication/ethernet/ethernet_frame_transmitter/ethernet_tx_ddio/ethernet_tx_ddio.vhd
             ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet_communication/ethernet/ethernet_frame_transmitter/ethernet_frame_transmitter_pkg.vhd
-            ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet_communication/ethernet/ethernet_frame_transmitter/ethernet_frame_transmitter_internal_pkg.vhd
+            ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet_communication/ethernet/ethernet_frame_transmitter/ethernet_transmit_fifo_pkg.vhd
             ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet_communication/ethernet/ethernet_frame_transmitter/ethernet_frame_transmit_controller_pkg.vhd
 
         ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet_communication/ethernet/ethernet_pkg.vhd
