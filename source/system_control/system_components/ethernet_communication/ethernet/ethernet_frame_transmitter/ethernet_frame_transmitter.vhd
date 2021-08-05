@@ -6,8 +6,9 @@ library work;
     use work.ethernet_clocks_pkg.all;
     use work.ethernet_frame_transmitter_pkg.all;
     use work.ethernet_frame_transmit_controller_pkg.all;
-    use work.ethernet_frame_transmitter_internal_pkg.all;
     use work.ethernet_tx_ddio_pkg.all;
+
+    use work.ethernet_transmit_fifo_pkg.all;
 
 entity ethernet_frame_transmitter is
     port (
@@ -43,6 +44,9 @@ architecture rtl of ethernet_frame_transmitter is
     signal fifo_data_input  : fifo_input_control_group;
     signal fifo_data_output : fifo_output_control_group;
 
+    signal ddr_control_state : list_of_ddr_control_states;
+
+
 ------------------------------------------------------------------------
 begin
 
@@ -62,8 +66,6 @@ begin
 
     frame_transmitter : process(tx_ddr_clocks.tx_ddr_clock)
 
-        type list_of_ddr_control_states is (idle, transmit);
-        variable ddr_control_state : list_of_ddr_control_states;
         
     begin
         if rising_edge(tx_ddr_clocks.tx_ddr_clock) then
@@ -98,22 +100,21 @@ begin
 
             CASE ddr_control_state is
                 WHEN idle =>
-                    ddr_control_state := idle;
+                    ddr_control_state <= idle;
                     if frame_transmit_is_requested(frame_transmit_controller) then
-                        ddr_control_state := transmit;
+                        ddr_control_state <= transmit;
                         load_data_from_fifo(fifo_data_input);
                     end if;
                 WHEN transmit =>
-                    ddr_control_state := transmit;
+                    ddr_control_state <= transmit;
                     if fifo_data_output.almost_empty /= '1' then
                         load_data_from_fifo(fifo_data_input);
                         transmit_8_bits_of_data(ethernet_tx_ddio_data_in, get_data_from_fifo(fifo_data_output));
                     else
                         transmit_8_bits_of_data(ethernet_tx_ddio_data_in, get_data_from_fifo(fifo_data_output));
-                        ddr_control_state := idle;
+                        ddr_control_state <= idle;
                     end if;
 
-                    -- if fifo_data_output.almost_empty /= '1' then
             end CASE; 
         end if; --rising_edge
     end process frame_transmitter;	

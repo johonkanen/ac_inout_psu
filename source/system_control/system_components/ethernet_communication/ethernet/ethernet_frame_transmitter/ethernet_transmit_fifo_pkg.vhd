@@ -2,15 +2,11 @@ library ieee;
     use ieee.std_logic_1164.all;
     use ieee.numeric_std.all;
 
-library work;
-    use work.ethernet_frame_transmitter_pkg.all;
-    use work.ethernet_tx_ddio_pkg.all;
-
-
-package ethernet_frame_transmitter_internal_pkg is
+package ethernet_transmit_fifo_pkg is
 ------------------------------------------------------------------------
 
--- package cl10_fifo_control_pkg is
+    type list_of_ddr_control_states is (idle, transmit);
+-- package cl10_ethernet_transmit_fifo_pkg is
 
     component tx_fifo IS
 	PORT
@@ -62,7 +58,7 @@ package ethernet_frame_transmitter_internal_pkg is
     function get_data_from_fifo ( fifo_out : fifo_output_control_group)
         return std_logic_vector; 
 ------------------------------------------------------------------------
--- end package cl10_fifo_control_pkg;
+-- end package cl10_ethernet_transmit_fifo_pkg;
 
     -- signal fifo_output_control : fifo_output_control_group;
     -- signal fifo_control_input : fifo_input_control_group;
@@ -84,12 +80,12 @@ package ethernet_frame_transmitter_internal_pkg is
 
 
 ------------------------------------------------------------------------
-end package ethernet_frame_transmitter_internal_pkg;
+end package ethernet_transmit_fifo_pkg;
 
 
-package body ethernet_frame_transmitter_internal_pkg is
+package body ethernet_transmit_fifo_pkg is
 ------------------------------------------------------------------------
--- package body cl10_fifo_control_pkg is
+-- package body cl10_ethernet_transmit_fifo_pkg is
 ------------------------------------------------------------------------
     procedure init_fifo
     (
@@ -164,6 +160,6 @@ package body ethernet_frame_transmitter_internal_pkg is
         return fifo_out.q;
     end get_data_from_fifo;
 
--- end package body cl10_fifo_control_pkg;
+-- end package body cl10_ethernet_transmit_fifo_pkg;
 ------------------------------------------------------------------------
-end package body ethernet_frame_transmitter_internal_pkg; 
+end package body ethernet_transmit_fifo_pkg; 
