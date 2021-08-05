@@ -157,6 +157,7 @@ package body ethernet_frame_transmit_controller_pkg is
         frame_length <= number_of_bytes_to_transmit;
         
     end transmit_ethernet_frame;
+
 ------------------------------------------------------------------------
     function frame_transmit_is_requested
     (
@@ -166,8 +167,7 @@ package body ethernet_frame_transmit_controller_pkg is
     is
     begin
         return transmit_controller.frame_transmit_requested;
-    end frame_transmit_is_requested;
+    end frame_transmit_is_requested; 
 
-
-end package body ethernet_frame_transmit_controller_pkg;
-
+------------------------------------------------------------------------
+end package body ethernet_frame_transmit_controller_pkg; 

@@ -60,8 +60,7 @@ package ethernet_frame_transmitter_internal_pkg is
         return boolean;
 ------------------------------------------------------------------------
     function get_data_from_fifo ( fifo_out : fifo_output_control_group)
-        return std_logic_vector;
-
+        return std_logic_vector; 
 ------------------------------------------------------------------------
 -- end package cl10_fifo_control_pkg;
 
