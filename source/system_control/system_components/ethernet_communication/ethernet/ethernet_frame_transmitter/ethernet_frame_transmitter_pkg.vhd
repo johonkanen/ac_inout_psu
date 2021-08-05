@@ -10,7 +10,6 @@ package ethernet_frame_transmitter_pkg is
 
     type ethernet_frame_transmitter_FPGA_output_group is record
         ethernet_tx_ddio_FPGA_out : ethernet_tx_ddio_FPGA_output_group; 
-        led :std_logic;
     end record;
     
     type ethernet_frame_transmitter_data_input_group is record

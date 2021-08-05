@@ -6,6 +6,7 @@ library work;
     use work.ethernet_clocks_pkg.all;
     use work.ethernet_frame_transmitter_pkg.all;
     use work.ethernet_frame_transmit_controller_pkg.all;
+    use work.ethernet_frame_transmitter_internal_pkg.all;
     use work.ethernet_tx_ddio_pkg.all;
 
 entity ethernet_frame_transmitter is
@@ -17,8 +18,7 @@ entity ethernet_frame_transmitter is
     );
 end entity ethernet_frame_transmitter;
 
-architecture rtl of ethernet_frame_transmitter is
-
+architecture rtl of ethernet_frame_transmitter is 
     
     signal ethernet_tx_ddio_clocks   : ethernet_tx_ddr_clock_group;
     signal ethernet_tx_ddio_FPGA_out : ethernet_tx_ddio_FPGA_output_group;
@@ -37,14 +37,33 @@ architecture rtl of ethernet_frame_transmitter is
     signal transmit_counter : natural range 0 to 511;
     signal frame_transmit_controller : frame_transmitter_record := init_transmit_controller;
 
-    signal led_state : std_logic := '1';
     signal testicounter : natural range 0 to 255 := 25;
     signal transmit_is_requested : boolean;
 
+    signal fifo_data_input  : fifo_input_control_group;
+    signal fifo_data_output : fifo_output_control_group;
+
+------------------------------------------------------------------------
 begin
 
-    ethernet_frame_transmitter_FPGA_out.led <= led_state; 
+------------------------------------------------------------------------
+    u_tx_fifo : tx_fifo
+	PORT map
+	(
+		clock        => tx_ddr_clocks.tx_ddr_clock    ,
+		data         => fifo_data_input.data          ,
+		rdreq        => fifo_data_input.rdreq         ,
+		wrreq        => fifo_data_input.wrreq         ,
+		almost_empty => fifo_data_output.almost_empty ,
+		empty        => fifo_data_output.empty        ,
+		q            => fifo_data_output.q            
+	);
+------------------------------------------------------------------------ 
+
     frame_transmitter : process(tx_ddr_clocks.tx_ddr_clock)
+
+        type list_of_ddr_control_states is (idle, transmit);
+        variable ddr_control_state : list_of_ddr_control_states;
         
     begin
         if rising_edge(tx_ddr_clocks.tx_ddr_clock) then
@@ -64,34 +83,40 @@ begin
                         testicounter <= 25;
                     end if;
                     transmit_ethernet_frame(frame_transmit_controller, testicounter);
-                    led_state <= not led_state;
                 end if;
             end if; 
 
         --------------------------------------------------
             init_ethernet_tx_ddio(ethernet_tx_ddio_data_in);
+            init_fifo(fifo_data_input);
             create_transmit_controller(frame_transmit_controller);
 
             transmit_is_requested <= frame_transmit_controller.frame_transmitter_state /= idle;
             if frame_transmit_controller.frame_transmitter_state /= idle OR transmit_is_requested then
-                transmit_8_bits_of_data(ethernet_tx_ddio_data_in, frame_transmit_controller.byte);
+                write_data_to_fifo(fifo_data_input, frame_transmit_controller.byte);
             end if;
+
+
+            CASE ddr_control_state is
+                WHEN idle =>
+                    ddr_control_state := idle;
+                    if frame_transmit_is_requested(frame_transmit_controller) then
+                        ddr_control_state := transmit;
+                        load_data_from_fifo(fifo_data_input);
+                    end if;
+                WHEN transmit =>
+                    ddr_control_state := transmit;
+                        if fifo_data_output.almost_empty /= '1' then
+                            load_data_from_fifo(fifo_data_input);
+                            transmit_8_bits_of_data(ethernet_tx_ddio_data_in, get_data_from_fifo(fifo_data_output));
+                        else
+                            transmit_8_bits_of_data(ethernet_tx_ddio_data_in, get_data_from_fifo(fifo_data_output));
+                            ddr_control_state := idle;
+                        end if;
+            end CASE; 
 
         end if; --rising_edge
     end process frame_transmitter;	
-
-------------------------------------------------------------------------
-    -- u_tx_fifo : tx_fifo
-	-- PORT map
-	-- (
-	-- 	clock        => tx_ddr_clocks.tx_ddr_clock    ,
-	-- 	data         => fifo_data_input.data          ,
-	-- 	rdreq        => fifo_data_input.rdreq         ,
-	-- 	wrreq        => fifo_data_input.wrreq         ,
-	-- 	almost_empty => fifo_data_output.almost_empty ,
-	-- 	empty        => fifo_data_output.empty        ,
-	-- 	q            => fifo_data_output.q            
-	-- );
 
 ------------------------------------------------------------------------
     u_ethernet_tx_ddio_pkg : ethernet_tx_ddio
