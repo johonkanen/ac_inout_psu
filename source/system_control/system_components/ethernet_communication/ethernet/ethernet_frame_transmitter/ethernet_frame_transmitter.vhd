@@ -101,10 +101,10 @@ begin
                 else
                     counter_for_333ms <= counter_value_at_333ms;
                     testicounter <= testicounter + 1;
-                    if testicounter > 237 then
-                        testicounter <= 60;
+                    if testicounter > 101 then
+                        testicounter <= 92;
                     end if;
-                    request_ethernet_frame_transmission(frame_transmit_controller, 92);
+                    request_ethernet_frame_transmission(frame_transmit_controller, testicounter);
                 end if;
             end if; 
 
