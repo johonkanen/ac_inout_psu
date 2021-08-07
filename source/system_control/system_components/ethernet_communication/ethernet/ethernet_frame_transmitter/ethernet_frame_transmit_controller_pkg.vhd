@@ -24,23 +24,26 @@ package ethernet_frame_transmit_controller_pkg is
         ram_output_port          : ram_read_output_group;
     end record;
 
-    constant init_transmit_controller : frame_transmitter_record := (frame_transmitter_state => idle                                ,
-                                                                    fcs_shift_register       => (others                     => '1') ,
-                                                                    fcs                      => (others                     => '0') ,
-                                                                    byte_counter             => 0                                   ,
-                                                                    frame_length             => 0                                   ,
-                                                                    byte                     => x"00"                               ,
-                                                                    frame_transmit_requested => false                               ,
-                                                                    write_data_to_fifo       => false                               ,
-                                                                    ram_shift_register       => (others                     => '0') ,
-                                                                    ram_read_controller      => ram_reader_init, 
-                                                                    ram_output_port          => ram_read_output_init
-                                                                );
+    constant init_transmit_controller : frame_transmitter_record := 
+    (
+        frame_transmitter_state  => idle            ,
+        fcs_shift_register       => (others => '1') ,
+        fcs                      => (others => '0') ,
+        byte_counter             => 0               ,
+        frame_length             => 0               ,
+        byte                     => x"00"           ,
+        frame_transmit_requested => false           ,
+        write_data_to_fifo       => false           ,
+        ram_shift_register       => (others => '0') ,
+        ram_read_controller      => ram_reader_init ,
+        ram_output_port          => ram_read_output_init
+    );
+
 ------------------------------------------------------------------------
     procedure create_transmit_controller (
         signal transmit_controller : inout frame_transmitter_record);
 ------------------------------------------------------------------------
-    procedure transmit_ethernet_frame (
+    procedure request_ethernet_frame_transmission (
         signal transmit_controller : inout frame_transmitter_record;
         number_of_bytes_to_transmit : natural range 0 to 2047);
 ------------------------------------------------------------------------
@@ -167,7 +170,7 @@ package body ethernet_frame_transmit_controller_pkg is
     end create_transmit_controller;
 
 ------------------------------------------------------------------------
-    procedure transmit_ethernet_frame
+    procedure request_ethernet_frame_transmission
     (
         signal transmit_controller : inout frame_transmitter_record;
         number_of_bytes_to_transmit : natural range 0 to 2047
@@ -178,7 +181,7 @@ package body ethernet_frame_transmit_controller_pkg is
         frame_transmitter_state <= transmit_preable;
         frame_length <= number_of_bytes_to_transmit;
         
-    end transmit_ethernet_frame;
+    end request_ethernet_frame_transmission;
 
 ------------------------------------------------------------------------
     function frame_transmit_is_requested
