@@ -8,6 +8,9 @@ library work;
     use work.ethernet_frame_transmit_controller_pkg.all;
     use work.ethernet_tx_ddio_pkg.all;
 
+    use work.ethernet_frame_ram_pkg.all;
+    use work.ethernet_frame_ram_read_pkg.all; 
+
     use work.ethernet_transmit_fifo_pkg.all;
 
 entity ethernet_frame_transmitter is
@@ -46,9 +49,27 @@ architecture rtl of ethernet_frame_transmitter is
 
     signal ddr_control_state : list_of_ddr_control_states;
 
+    signal ethernet_frame_ram_clocks   : ethernet_frame_ram_clock_group;
+    signal ethernet_frame_transmitter_ram_data_in  : ethernet_frame_ram_data_input_group;
+    signal ethernet_frame_transmitter_ram_data_out : ethernet_frame_ram_data_output_group; 
+
+    signal transmitter_ram_read_control_port : ram_read_control_group; 
+
 
 ------------------------------------------------------------------------
 begin
+
+    -- ethernet_frame_transmitter_ram_data_in <= (ram_write_control_port => ethernet_data_out.ram_write_control_port ,
+    --                                            ram_read_control_port  => transmitter_ram_read_control_port);
+    ethernet_frame_transmitter_ram_data_in.ram_read_control_port  <= transmitter_ram_read_control_port;
+
+    ethernet_frame_ram_clocks <= (read_clock  => tx_ddr_clocks.tx_ddr_clock ,
+                                  write_clock => tx_ddr_clocks.tx_ddr_clock);
+
+    u_ethernet_transmitter_ram : entity work.ethernet_frame_ram(arch_cl10_ethernet_frame_transmit)
+    port map( ethernet_frame_ram_clocks              ,
+              ethernet_frame_transmitter_ram_data_in ,
+              ethernet_frame_transmitter_ram_data_out); 
 
 ------------------------------------------------------------------------
     u_tx_fifo : tx_fifo
@@ -62,10 +83,9 @@ begin
 		empty        => fifo_data_output.empty        ,
 		q            => fifo_data_output.q            
 	);
+
 ------------------------------------------------------------------------ 
-
-    frame_transmitter : process(tx_ddr_clocks.tx_ddr_clock)
-
+    frame_transmitter : process(tx_ddr_clocks.tx_ddr_clock) 
         
     begin
         if rising_edge(tx_ddr_clocks.tx_ddr_clock) then
@@ -91,6 +111,12 @@ begin
         --------------------------------------------------
             init_ethernet_tx_ddio(ethernet_tx_ddio_data_in);
             init_fifo(fifo_data_input);
+            
+            create_ram_read_controller(transmitter_ram_read_control_port                               ,
+                                        ethernet_frame_transmitter_ram_data_out.ram_read_port_data_out ,
+                                        frame_transmit_controller.ram_read_controller                  ,
+                                        frame_transmit_controller.ram_shift_register); 
+
             create_transmit_controller(frame_transmit_controller);
 
             transmit_is_requested <= frame_transmit_controller.frame_transmitter_state /= idle;

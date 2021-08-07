@@ -4,30 +4,36 @@ library ieee;
 
 library work;
     use work.PCK_CRC32_D8.all;
+    use work.ethernet_frame_ram_read_pkg.all; 
 
 package ethernet_frame_transmit_controller_pkg is
 ------------------------------------------------------------------------
     type list_of_frame_transmitter_states is (idle, transmit_preable, transmit_data, transmit_fcs); 
 
     type frame_transmitter_record is record
-        frame_transmitter_state     : list_of_frame_transmitter_states;
-        fcs_shift_register          : std_logic_vector(31 downto 0);
-        fcs                         : std_logic_vector(31 downto 0);
-        byte_counter                : natural range 0 to 2**12-1;
-        frame_length                : natural range 0 to 2**12-1;
-        byte                        : std_logic_vector(7 downto 0);
+        frame_transmitter_state  : list_of_frame_transmitter_states;
+        fcs_shift_register       : std_logic_vector(31 downto 0);
+        fcs                      : std_logic_vector(31 downto 0);
+        byte_counter             : natural range 0 to 2**12-1;
+        frame_length             : natural range 0 to 2**12-1;
+        byte                     : std_logic_vector(7 downto 0);
         frame_transmit_requested : boolean;
-        test_counter                : natural range 0 to 255;
+        test_counter             : natural range 0 to 255;
+        ram_shift_register       : std_logic_vector(31 downto 0);
+        ram_read_controller      : ram_reader;
     end record;
 
-    constant init_transmit_controller : frame_transmitter_record := (frame_transmitter_state    => idle,
-                                                                    fcs_shift_register          => (others => '1'),
-                                                                    fcs                         => (others => '0'),
-                                                                    byte_counter                => 0,
-                                                                    frame_length                => 60,
-                                                                    byte                        => x"00",
-                                                                    frame_transmit_requested => false,
-                                                                    test_counter                => 0);
+    constant init_transmit_controller : frame_transmitter_record := (frame_transmitter_state => idle            ,
+                                                                    fcs_shift_register       => (others => '1') ,
+                                                                    fcs                      => (others => '0') ,
+                                                                    byte_counter             => 0               ,
+                                                                    frame_length             => 60              ,
+                                                                    byte                     => x"00"           ,
+                                                                    frame_transmit_requested => false           ,
+                                                                    test_counter             => 0               ,
+                                                                    ram_shift_register       => (others => '0') ,
+                                                                    ram_read_controller      => ram_reader_init
+                                                                );
 ------------------------------------------------------------------------
     procedure create_transmit_controller (
         signal transmit_controller : inout frame_transmitter_record);
@@ -109,11 +115,17 @@ package body ethernet_frame_transmit_controller_pkg is
                     byte <= x"ab";
                     frame_transmitter_state <= transmit_data;
                     byte_counter <= 0;
+
+                    load_ram_with_offset_to_shift_register(ram_controller                     => transmit_controller.ram_read_controller ,
+                                                           start_address                      => 0                   ,
+                                                           number_of_ram_addresses_to_be_read => 60);
+
                 end if;
             WHEN transmit_data => 
 
                 test_counter <= test_counter + 1;
-                data_to_ethernet := reverse_bit_order(std_logic_vector(to_unsigned(test_counter,8)));
+                data_to_ethernet := reverse_bit_order(transmit_controller.ram_shift_register(7 downto 0));
+
 
                 byte_counter <= byte_counter + 1; 
                 if byte_counter < frame_length then
