@@ -41,7 +41,7 @@ architecture rtl of ethernet_frame_transmitter is
     signal transmit_counter : natural range 0 to 511;
     signal frame_transmit_controller : frame_transmitter_record := init_transmit_controller;
 
-    signal testicounter : natural range 0 to 255 := 25;
+    signal testicounter : natural range 0 to 255 := 60;
     signal transmit_is_requested : boolean;
 
     signal fifo_data_input  : fifo_input_control_group;
@@ -102,9 +102,9 @@ begin
                     counter_for_333ms <= counter_value_at_333ms;
                     testicounter <= testicounter + 1;
                     if testicounter > 237 then
-                        testicounter <= 25;
+                        testicounter <= 60;
                     end if;
-                    transmit_ethernet_frame(frame_transmit_controller, testicounter);
+                    request_ethernet_frame_transmission(frame_transmit_controller, 92);
                 end if;
             end if; 
 
