@@ -47,7 +47,6 @@ architecture rtl of ethernet_communication is
     signal ethernet_frame_transmitter_ram_data_in  : ethernet_frame_ram_data_input_group;
     signal ethernet_frame_transmitter_ram_data_out : ethernet_frame_ram_data_output_group; 
 
-
 ------------------------------------------------------------------------ 
 begin
 
@@ -59,28 +58,27 @@ begin
 
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
-    ram_read_bus : process(ethernet_communication_data_in.receiver_ram_read_control_port, ethernet_protocol_data_out.frame_ram_read_control)
-        
+    ram_read_bus : process(ethernet_communication_data_in.receiver_ram_read_control_port, ethernet_protocol_data_out.frame_ram_read_control) 
     begin
 
         receiver_ram_read_control_port <= ethernet_communication_data_in.receiver_ram_read_control_port +
                                        ethernet_protocol_data_out.frame_ram_read_control;
     end process ram_read_bus;	
-------------------------------------------------------------------------
-------------------------------------------------------------------------
 
-    ethernet_frame_receiver_ram_data_in <= (ram_write_control_port => ethernet_data_out.ram_write_control_port,
+------------------------------------------------------------------------
+------------------------------------------------------------------------ 
+    ethernet_frame_receiver_ram_data_in <= (ram_write_control_port => ethernet_data_out.ram_write_control_port ,
                                            ram_read_control_port   => receiver_ram_read_control_port); 
 
-    ethernet_frame_ram_clocks <= (read_clock  => ethernet_communication_clocks.core_clock,
+    ethernet_frame_ram_clocks <= (read_clock  => ethernet_communication_clocks.core_clock ,
                                   write_clock => ethernet_communication_clocks.rx_ddr_clocks.rx_ddr_clock);
 
     u_ethernet_receiver_ram : entity work.ethernet_frame_ram(arch_cl10_ethernet_frame_ram)
-    port map( ethernet_frame_ram_clocks  ,
+    port map( ethernet_frame_ram_clocks           ,
               ethernet_frame_receiver_ram_data_in ,
               ethernet_frame_receiver_ram_data_out);
------------------------------------------------------------------------- 
 
+------------------------------------------------------------------------ 
     ethernet_frame_transmit_ram_clocks <= (read_clock => ethernet_communication_clocks.rx_ddr_clocks.rx_ddr_clock,
                                           write_clock => ethernet_communication_clocks.core_clock);
 

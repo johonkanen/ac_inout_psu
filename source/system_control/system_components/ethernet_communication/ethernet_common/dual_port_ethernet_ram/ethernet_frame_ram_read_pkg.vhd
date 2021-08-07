@@ -52,6 +52,8 @@ package ethernet_frame_ram_read_pkg is
         ram_buffering_is_complete : boolean;
         ram_offset : natural range 0 to 2**11-1;
     end record;
+
+    constant ram_reader_init : ram_reader := (0, 0, false, 0);
 ------------------------------------------------------------------------
     procedure create_ram_read_controller (
         signal ram_read_control_port : out ram_read_control_group;

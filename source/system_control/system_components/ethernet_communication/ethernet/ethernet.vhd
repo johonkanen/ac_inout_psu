@@ -48,12 +48,6 @@ begin
 
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------ 
-    u_ethernet_frame_receiver : ethernet_frame_receiver
-    port map( ethernet_clocks.rx_ddr_clocks                    ,
-              ethernet_FPGA_in.ethernet_frame_receiver_FPGA_in ,
-              ethernet_frame_receiver_data_out); 
-
------------------------------------------------------------------------- 
     protocol_trigger : process(ethernet_clocks.core_clock)
         
     begin
@@ -67,6 +61,11 @@ begin
 
 ------------------------------------------------------------------------ 
 ------------------------------------------------------------------------ 
+    u_ethernet_frame_receiver : ethernet_frame_receiver
+    port map( ethernet_clocks.rx_ddr_clocks                    ,
+              ethernet_FPGA_in.ethernet_frame_receiver_FPGA_in ,
+              ethernet_frame_receiver_data_out); 
+
     u_ethernet_frame_transmitter : ethernet_frame_transmitter
     port map( ethernet_clocks.tx_ddr_clocks                         ,
               ethernet_FPGA_out.ethernet_frame_transmitter_FPGA_out ,
