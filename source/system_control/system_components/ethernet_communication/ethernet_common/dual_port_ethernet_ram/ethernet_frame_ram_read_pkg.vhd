@@ -14,6 +14,8 @@ package ethernet_frame_ram_read_pkg is
             byte_address : std_logic_vector(10 downto 0);
             byte_from_ram : std_logic_vector(7 downto 0);
         end record;
+
+    constant ram_read_output_init : ram_read_output_group := (false, (others => '0'), (others => '0'));
 ------------------------------------------------------------------------ 
     function "+" ( left, right : ram_read_control_group)
         return ram_read_control_group; 
