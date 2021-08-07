@@ -118,9 +118,9 @@ begin
                                         frame_transmit_controller.ram_shift_register); 
 
             create_transmit_controller(frame_transmit_controller);
+            frame_transmit_controller.ram_output_port <= ethernet_frame_transmitter_ram_data_out.ram_read_port_data_out;
 
-            transmit_is_requested <= frame_transmit_controller.frame_transmitter_state /= idle;
-            if frame_transmit_controller.frame_transmitter_state /= idle OR transmit_is_requested then
+            if frame_transmit_controller.write_data_to_fifo then
                 write_data_to_fifo(fifo_data_input, frame_transmit_controller.byte);
             end if; 
 

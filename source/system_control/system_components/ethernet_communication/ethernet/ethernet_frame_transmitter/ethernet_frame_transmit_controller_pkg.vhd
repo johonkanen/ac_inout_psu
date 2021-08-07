@@ -18,21 +18,23 @@ package ethernet_frame_transmit_controller_pkg is
         frame_length             : natural range 0 to 2**12-1;
         byte                     : std_logic_vector(7 downto 0);
         frame_transmit_requested : boolean;
-        test_counter             : natural range 0 to 255;
+        write_data_to_fifo       : boolean;
         ram_shift_register       : std_logic_vector(31 downto 0);
         ram_read_controller      : ram_reader;
+        ram_output_port          : ram_read_output_group;
     end record;
 
-    constant init_transmit_controller : frame_transmitter_record := (frame_transmitter_state => idle            ,
-                                                                    fcs_shift_register       => (others => '1') ,
-                                                                    fcs                      => (others => '0') ,
-                                                                    byte_counter             => 0               ,
-                                                                    frame_length             => 60              ,
-                                                                    byte                     => x"00"           ,
-                                                                    frame_transmit_requested => false           ,
-                                                                    test_counter             => 0               ,
-                                                                    ram_shift_register       => (others => '0') ,
-                                                                    ram_read_controller      => ram_reader_init
+    constant init_transmit_controller : frame_transmitter_record := (frame_transmitter_state => idle                                ,
+                                                                    fcs_shift_register       => (others                     => '1') ,
+                                                                    fcs                      => (others                     => '0') ,
+                                                                    byte_counter             => 0                                   ,
+                                                                    frame_length             => 0                                   ,
+                                                                    byte                     => x"00"                               ,
+                                                                    frame_transmit_requested => false                               ,
+                                                                    write_data_to_fifo       => false                               ,
+                                                                    ram_shift_register       => (others                     => '0') ,
+                                                                    ram_read_controller      => ram_reader_init, 
+                                                                    ram_output_port          => ram_read_output_init
                                                                 );
 ------------------------------------------------------------------------
     procedure create_transmit_controller (
@@ -85,25 +87,28 @@ package body ethernet_frame_transmit_controller_pkg is
     (
         signal transmit_controller : inout frame_transmitter_record
     ) is
-        alias frame_transmitter_state  is transmit_controller.frame_transmitter_state;
-        alias fcs_shift_register       is transmit_controller.fcs_shift_register;
-        alias fcs                      is transmit_controller.fcs;
-        alias byte_counter             is transmit_controller.byte_counter;
-        alias frame_length             is transmit_controller.frame_length;
-        alias byte                     is transmit_controller.byte;
-        alias test_counter             is transmit_controller.test_counter;
-        alias frame_transmit_requested is transmit_controller.frame_transmit_requested;
+        alias frame_transmitter_state  is  transmit_controller.frame_transmitter_state;
+        alias fcs_shift_register       is  transmit_controller.fcs_shift_register;
+        alias fcs                      is  transmit_controller.fcs;
+        alias byte_counter             is  transmit_controller.byte_counter;
+        alias frame_length             is  transmit_controller.frame_length;
+        alias byte                     is  transmit_controller.byte;
+        alias frame_transmit_requested is  transmit_controller.frame_transmit_requested;
+        alias write_data_to_fifo       is  transmit_controller.write_data_to_fifo;
 
         variable data_to_ethernet : std_logic_vector(7 downto 0);
     begin
-        test_counter <= 0;
         frame_transmit_requested <= false;
+        write_data_to_fifo <= false;
         CASE frame_transmitter_state is
             WHEN idle =>
                 byte_counter <= 0;
                 fcs_shift_register <= (others => '1');
                 byte <= x"00";
             WHEN transmit_preable =>
+
+                write_data_to_fifo <= true;
+
                 fcs_shift_register <= (others => '1');
                 byte_counter <= byte_counter + 1;
                 if byte_counter < 7 then
@@ -116,31 +121,36 @@ package body ethernet_frame_transmit_controller_pkg is
                     frame_transmitter_state <= transmit_data;
                     byte_counter <= 0;
 
+
                     load_ram_with_offset_to_shift_register(ram_controller                     => transmit_controller.ram_read_controller ,
                                                            start_address                      => 0                   ,
-                                                           number_of_ram_addresses_to_be_read => 60);
+                                                           number_of_ram_addresses_to_be_read => frame_length);
 
                 end if;
             WHEN transmit_data => 
+                if ram_data_is_ready(transmit_controller.ram_output_port) then
+                    write_data_to_fifo <= true;
 
-                test_counter <= test_counter + 1;
-                data_to_ethernet := reverse_bit_order(transmit_controller.ram_shift_register(7 downto 0));
+                    data_to_ethernet := reverse_bit_order(transmit_controller.ram_shift_register(7 downto 0));
 
 
-                byte_counter <= byte_counter + 1; 
-                if byte_counter < frame_length then
-                    fcs_shift_register <= nextCRC32_D8(data_to_ethernet, fcs_shift_register);
-                    fcs                <= not invert_bit_order(nextCRC32_D8(data_to_ethernet, fcs_shift_register));
-                    byte               <= data_to_ethernet;
-                end if;
+                    byte_counter <= byte_counter + 1; 
+                    if byte_counter < frame_length then
+                        fcs_shift_register <= nextCRC32_D8(data_to_ethernet, fcs_shift_register);
+                        fcs                <= not invert_bit_order(nextCRC32_D8(data_to_ethernet, fcs_shift_register));
+                        byte               <= data_to_ethernet;
+                    end if;
 
-                frame_transmitter_state <= transmit_data;
-                if byte_counter = frame_length-1 then
-                    frame_transmitter_state <= transmit_fcs;
-                    byte_counter <= 0;
-                end if;
+                    frame_transmitter_state <= transmit_data;
+                    if byte_counter = frame_length-1 then
+                        frame_transmitter_state <= transmit_fcs;
+                        byte_counter <= 0;
+                    end if;
+                end if; 
 
             WHEN transmit_fcs => 
+                write_data_to_fifo <= true;
+
                 fcs_shift_register <= (others => '1');
                 byte_counter <= byte_counter + 1;
                 fcs          <= x"ff" & fcs(fcs'left downto 8);
@@ -180,6 +190,17 @@ package body ethernet_frame_transmit_controller_pkg is
     begin
         return transmit_controller.frame_transmit_requested;
     end frame_transmit_is_requested; 
+------------------------------------------------------------------------
+    function frame_data_is_ready
+    (
+        transmit_controller : frame_transmitter_record
+    )
+    return boolean
+    is
+    begin
+        return transmit_controller.frame_transmit_requested;
+        
+    end frame_data_is_ready;
 
 ------------------------------------------------------------------------
 end package body ethernet_frame_transmit_controller_pkg; 
