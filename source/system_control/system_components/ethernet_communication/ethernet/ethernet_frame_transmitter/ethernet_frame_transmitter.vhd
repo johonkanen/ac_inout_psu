@@ -61,6 +61,8 @@ begin
 
     -- ethernet_frame_transmitter_ram_data_in <= (ram_write_control_port => ethernet_data_out.ram_write_control_port ,
     --                                            ram_read_control_port  => transmitter_ram_read_control_port);
+
+------------------------------------------------------------------------
     ethernet_frame_transmitter_ram_data_in.ram_read_control_port  <= transmitter_ram_read_control_port;
 
     ethernet_frame_ram_clocks <= (read_clock  => tx_ddr_clocks.tx_ddr_clock ,
