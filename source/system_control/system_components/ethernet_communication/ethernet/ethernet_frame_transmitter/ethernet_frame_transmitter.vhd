@@ -31,8 +31,8 @@ architecture rtl of ethernet_frame_transmitter is
     constant counter_value_at_100kHz : natural := 12500;
     signal counter_for_100kHz : natural range 0 to 2**16-1 := counter_value_at_100kHz;
 
-    constant counter_value_at_333ms : natural := 33e3/2;
-    signal counter_for_333ms : natural range 0 to 2**16-1 := counter_value_at_333ms;
+    constant counter_value_at_1600ms : natural := 33e3/2;
+    signal counter_for_1600ms : natural range 0 to 2**16-1 := counter_value_at_1600ms;
 
     signal fifo_is_not_almost_empty : boolean;
 
@@ -98,10 +98,10 @@ begin
             else
                 counter_for_100kHz <= counter_value_at_100kHz;
 
-                if counter_for_333ms > 0 then
-                    counter_for_333ms <= counter_for_333ms - 1;
+                if counter_for_1600ms > 0 then
+                    counter_for_1600ms <= counter_for_1600ms - 1;
                 else
-                    counter_for_333ms <= counter_value_at_333ms;
+                    counter_for_1600ms <= counter_value_at_1600ms;
                     testicounter <= testicounter + 1;
                     if testicounter > 101 then
                         testicounter <= 92;
