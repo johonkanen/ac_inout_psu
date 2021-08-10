@@ -34,15 +34,10 @@ architecture rtl of ethernet_frame_transmitter is
     constant counter_value_at_1600ms : natural := 33e3/2;
     signal counter_for_1600ms : natural range 0 to 2**16-1 := counter_value_at_1600ms;
 
-    signal fifo_is_not_almost_empty : boolean;
 
-    signal data_from_fifo : std_logic_vector(7 downto 0);
-    signal fcs_shift_register : std_logic_vector(31 downto 0);
-    signal transmit_counter : natural range 0 to 511;
     signal frame_transmit_controller : frame_transmitter_record := init_transmit_controller;
 
     signal testicounter : natural range 0 to 255 := 60;
-    signal transmit_is_requested : boolean;
 
     signal fifo_data_input  : fifo_input_control_group;
     signal fifo_data_output : fifo_output_control_group;
