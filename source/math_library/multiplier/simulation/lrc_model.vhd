@@ -106,27 +106,19 @@ begin
 
                 WHEN 1 => 
                     sequential_multiply(hw_multiplier, inductor_integrator_gain, input_voltage - capacitor_voltage); 
-                    process_counter <= process_counter + 1;
-
-                WHEN 2 => 
                     if multiplier_is_ready(hw_multiplier) then
                         inductor_current <= get_multiplier_result(hw_multiplier, 15) + inductor_current - inductor_current_delta;
                         process_counter <= process_counter + 1;
                     end if;
-                WHEN 3 => 
-                    multiply(hw_multiplier, load_resistance, capacitor_voltage); 
-                    process_counter <= process_counter + 1;
-
-                WHEN 4 => 
+                WHEN 2 => 
+                    sequential_multiply(hw_multiplier, load_resistance, capacitor_voltage); 
                     if multiplier_is_ready(hw_multiplier) then
                         capacitor_delta <= get_multiplier_result(hw_multiplier, 17);
                         process_counter <= process_counter + 1;
                     end if;
 
-                WHEN 5 =>
-                    multiply(hw_multiplier, capacitor_integrator_gain, inductor_current - load_current);
-                    process_counter <= process_counter + 1;
-                WHEN 6 =>
+                WHEN 3 =>
+                    sequential_multiply(hw_multiplier, capacitor_integrator_gain, inductor_current - load_current);
                     if multiplier_is_ready(hw_multiplier) then
                         capacitor_voltage <= capacitor_voltage + get_multiplier_result(hw_multiplier, 15) - capacitor_delta;
                         process_counter <= process_counter + 1;
