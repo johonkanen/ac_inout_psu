@@ -29,12 +29,17 @@ architecture sim of lrc_model is
 
     signal hw_multiplier : multiplier_record := multiplier_init_values;
 ------------------------------------------------------------------------
-    signal inductor_current : int18 := 0;
+    -- lrc model signals
+    signal inductor_current : int18  := 0;
     signal capacitor_voltage : int18 := 0;
-    signal input_voltage : int18 := 0;
-    signal capacitor_delta : int18 := 0;
+    signal input_voltage : int18     := -2500;
+    signal capacitor_delta : int18   := 0;
+
+    signal load_current : int18 := 5000;
 
     signal process_counter : natural := 0;
+
+    signal simulation_trigger_counter : natural := 0;
 begin
 
 ------------------------------------------------------------------------
@@ -69,14 +74,20 @@ begin
 
             create_multiplier(hw_multiplier); 
             simulation_counter <= simulation_counter + 1;
-            if simulation_counter = 29 then
-                simulation_counter <= 0;
+
+            simulation_trigger_counter <= simulation_trigger_counter + 1;
+            if simulation_trigger_counter = 19 then
+                simulation_trigger_counter <= 0;
                 process_counter <= 0;
+            end if;
+
+            if simulation_counter  mod 6725 = 0 then
+                load_current <= -load_current;
             end if;
 
             CASE process_counter is 
                 WHEN 0 => 
-                    multiply(hw_multiplier, 8000, 25000 - capacitor_voltage); 
+                    multiply(hw_multiplier, 25000, input_voltage - capacitor_voltage); 
                     process_counter <= process_counter + 1;
 
                 WHEN 1 => 
@@ -86,7 +97,7 @@ begin
                     end if;
 
                 WHEN 2 => 
-                    multiply(hw_multiplier, 2500, capacitor_voltage); 
+                    multiply(hw_multiplier, 3500, capacitor_voltage); 
                     process_counter <= process_counter + 1;
 
                 WHEN 3 => 
@@ -96,7 +107,9 @@ begin
                     end if;
 
                 WHEN 4 =>
-                    sequential_multiply(hw_multiplier, 400, inductor_current);
+                    multiply(hw_multiplier, 4000, inductor_current - load_current);
+                    process_counter <= process_counter + 1;
+                WHEN 5 =>
                     if multiplier_is_ready(hw_multiplier) then
                         capacitor_voltage <= capacitor_voltage + get_multiplier_result(hw_multiplier, 15) - capacitor_delta;
                         process_counter <= process_counter + 1;
