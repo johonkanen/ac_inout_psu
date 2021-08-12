@@ -105,7 +105,7 @@ begin
                     end if;
 
                 WHEN 1 => 
-                    multiply(hw_multiplier, inductor_integrator_gain, input_voltage - capacitor_voltage); 
+                    sequential_multiply(hw_multiplier, inductor_integrator_gain, input_voltage - capacitor_voltage); 
                     process_counter <= process_counter + 1;
 
                 WHEN 2 => 

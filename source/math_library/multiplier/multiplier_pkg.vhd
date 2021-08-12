@@ -74,6 +74,8 @@ package body multiplier_pkg is
         multiplier_is_requested_with_1 <= '0';
         shift_register <= shift_register(shift_register'left-1 downto 0) & multiplier_is_requested_with_1;
 
+        multiplier_is_busy <= shift_register /= "000";
+
     end create_multiplier;
 
 ------------------------------------------------------------------------
@@ -179,7 +181,7 @@ package body multiplier_pkg is
     is
     begin
         
-        return multiplier.shift_register = "000";
+        return multiplier.shift_register = "000" and (multiplier.multiplier_is_requested_with_1 = '0');
     end multiplier_is_not_busy;
 
 
