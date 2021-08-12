@@ -29,6 +29,7 @@ architecture sim of lrc_model is
 
     signal hw_multiplier : multiplier_record := multiplier_init_values;
 ------------------------------------------------------------------------
+    signal shift_register : std_logic_vector(2 downto 0);
 
     signal signal_multiplier_is_ready : boolean := false;
     -- lrc model signals
@@ -142,7 +143,8 @@ begin
 
     process(hw_multiplier)
     begin
-        signal_multiplier_is_ready <= multiplier_is_not_busy(hw_multiplier);
+        signal_multiplier_is_ready <= hw_multiplier.multiplier_is_busy;
+        shift_register <= hw_multiplier.shift_register;
     end process;
 ------------------------------------------------------------------------
 end sim;

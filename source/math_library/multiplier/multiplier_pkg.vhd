@@ -73,10 +73,7 @@ package body multiplier_pkg is
         signed_36_bit_result <= multiplier.signed_36_bit_buffer;
         multiplier_is_requested_with_1 <= '0';
         shift_register <= shift_register(shift_register'left-1 downto 0) & multiplier_is_requested_with_1;
-        multiplier_is_busy <= false;
-        if shift_register /= "000" then
-            multiplier_is_busy <= true;
-        end if;
+
     end create_multiplier;
 
 ------------------------------------------------------------------------
@@ -181,7 +178,8 @@ package body multiplier_pkg is
     return boolean
     is
     begin
-        return not multiplier.multiplier_is_busy;
+        
+        return multiplier.shift_register = "000";
     end multiplier_is_not_busy;
 
 
