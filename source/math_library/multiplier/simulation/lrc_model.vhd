@@ -20,7 +20,7 @@ architecture sim of lrc_model is
     signal clocked_reset : std_logic;
     constant clock_per : time := 8.4 ns;
     constant clock_half_per : time := 4.2 ns;
-    constant simtime_in_clocks : integer := 50e3;
+    constant simtime_in_clocks : integer := 25e3;
 
     signal simulation_counter : natural := 0;
     signal multiplier_output : signed(35 downto 0);
@@ -28,6 +28,7 @@ architecture sim of lrc_model is
     signal int18_multiplier_output : int18 := 0;
 
     signal hw_multiplier : multiplier_record := multiplier_init_values;
+    signal hw_multiplier2 : multiplier_record := multiplier_init_values;
 ------------------------------------------------------------------------
     signal shift_register : std_logic_vector(2 downto 0);
 
@@ -79,18 +80,18 @@ architecture sim of lrc_model is
 
     signal capacitor_voltage : int18 := 0;
     signal capacitor2_voltage : int18 := 0;
-    signal input_voltage : int18     := -2500;
+    signal input_voltage : int18     := 0;
     signal capacitor_delta : int18   := 0;
 
     signal inductor_current_delta : int18 := 0;
 
     signal inductor_integrator_gain : int18  := 25e3;
     signal capacitor_integrator_gain : int18 := 2000;
-    signal load_resistance : int18           := 500;
+    signal load_resistance : int18           := 10;
 
-    signal inductor_series_resistance : int18 := 15e2;
+    signal inductor_series_resistance : int18 := 500;
 
-    signal load_current : int18 := 15000;
+    signal load_current : int18 := 0;
 
     signal process_counter : natural := 0;
 
@@ -152,21 +153,23 @@ begin
             end if;
             
         end calculate_state;
+    --------------------------------------------------
 
     begin
         if rising_edge(simulator_clock) then
 
             create_multiplier(hw_multiplier); 
+            create_multiplier(hw_multiplier2); 
             simulation_counter <= simulation_counter + 1;
 
             simulation_trigger_counter <= simulation_trigger_counter + 1;
-            if simulation_trigger_counter = 40 then
+            if simulation_trigger_counter = 20 then
                 simulation_trigger_counter <= 0;
                 process_counter <= 0;
             end if;
 
-            if simulation_counter = 6725  then
-                load_current <= -load_current;
+            if simulation_counter = 2000  then
+                input_voltage <= 32e3;
             end if;
 
             CASE process_counter is 
@@ -175,32 +178,19 @@ begin
 
                 WHEN 1 => 
                     calculate_state(hw_multiplier, inductor_current, -inductor_current_delta, input_voltage - capacitor_voltage, inductor_integrator_gain);
+                    calculate_state(hw_multiplier2, inductor2_current, 0, capacitor_voltage - capacitor2_voltage, inductor_integrator_gain);
 
                 WHEN 2 => 
-                    calculate_state(hw_multiplier, inductor2_current, 0, capacitor_voltage - capacitor2_voltage, inductor_integrator_gain);
-
-                WHEN 3 => 
                     capacitor_delta <= load_resistance * capacitor_voltage;
 
-                WHEN 4 =>
-                    calculate_state(hw_multiplier, capacitor_voltage, capacitor_delta, inductor_current - inductor2_current, capacitor_integrator_gain);
-
-                WHEN 5 =>
-                    calculate_state(hw_multiplier, capacitor2_voltage, 0, inductor2_current - load_current, capacitor_integrator_gain);
+                WHEN 3 =>
+                    calculate_state(hw_multiplier, capacitor_voltage, -capacitor_delta, inductor_current - inductor2_current, capacitor_integrator_gain);
+                    calculate_state(hw_multiplier2, capacitor2_voltage, 0, inductor2_current - load_current, capacitor_integrator_gain);
                 WHEN others => -- do nothing
+
             end CASE; 
-
-            -- if multiplier_is_ready(hw_multiplier) then
-            --     report "multiplication result at simulation_counter value " & integer'image(simulation_counter)  &" : " & integer'image(inductor_current);
-            -- end if; 
-
         end if; -- rstn
     end process clocked_reset_generator;	
 
-    process(hw_multiplier)
-    begin
-        signal_multiplier_is_ready <= hw_multiplier.multiplier_is_busy;
-        shift_register <= hw_multiplier.shift_register;
-    end process;
 ------------------------------------------------------------------------
 end sim;
