@@ -1,6 +1,7 @@
 from pathlib import Path
 from os.path import join
 from vunit import VUnit
+from glob import glob
 
 # ROOT
 ROOT = Path(__file__).resolve().parent
@@ -13,6 +14,11 @@ SYSTEM_CONTROL_PATH = "system_control"
 VU = VUnit.from_argv()
 
 lib = VU.add_library("lib")
+
+## Possible single line VHDL source code detection with globbing 
+## Uncomment all subsequent lines if glob is used
+# lib.add_source_files(glob("source/**/*/*.vhd", rursive=True)) 
+
 lib.add_source_files(SRC_PATH / "*.vhd") 
 
 lib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "first_order_filter" / "*.vhd") 
