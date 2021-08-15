@@ -90,7 +90,7 @@ package body lcr_filter_model_pkg is
                     increment_counter_when_ready(hw_multiplier, process_counter);
 
                 WHEN 1 => 
-                    integrate_state(inductor_current, hw_multiplier, 15, inductor_current_state_equation); -- input_voltage - capacitor_voltage.state - inductor_current_delta);
+                    integrate_state(inductor_current, hw_multiplier, 15, inductor_current_state_equation - inductor_current_delta); -- input_voltage - capacitor_voltage.state - inductor_current_delta);
                     increment_counter_when_ready(hw_multiplier, process_counter);
 
                 WHEN 2 => 
@@ -98,7 +98,7 @@ package body lcr_filter_model_pkg is
                     increment_counter_when_ready(hw_multiplier, process_counter);
 
                 WHEN 3 =>
-                    integrate_state(capacitor_voltage, hw_multiplier, 15, capacitor_voltage_state_equation); -- inductor_current.state - load_current - capacitor_delta);
+                    integrate_state(capacitor_voltage, hw_multiplier, 15, capacitor_voltage_state_equation - capacitor_delta); -- inductor_current.state - load_current - capacitor_delta);
                     increment_counter_when_ready(hw_multiplier, process_counter);
                 WHEN others => -- do nothing
 

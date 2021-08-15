@@ -31,14 +31,14 @@ architecture sim of tb_lcr_filter is
     signal simulation_trigger_counter : natural := 0;
 ------------------------------------------------------------------------
     -- lrc model signals
-    signal input_voltage   : int18 := 32e3;
+    signal input_voltage   : int18 := 3000;
     signal load_resistance : int18 := 10;
-    signal load_current    : int18 := 0;
+    signal load_current    : int18 := 3000;
 
     signal lcr_filter : lcr_model_record := init_lcr_model_integrator_gains(25e3, 2e3);
 
-    signal int18_inductor_current  : int18;
-    signal int18_capacitor_voltage : int18;
+    signal int18_inductor_current  : int18 := 0;
+    signal int18_capacitor_voltage : int18 := 0;
 begin
 
 ------------------------------------------------------------------------
@@ -72,12 +72,13 @@ begin
         return int18
         is
         begin
-            sequential_multiply(hw_multiplier, left, right);
+            sequential_multiply(hw_multiplier2, left, right);
             return get_multiplier_result(hw_multiplier, 15);
         end "*";
     --------------------------------------------------
         alias inductor_current is lcr_filter.inductor_current.state;
         alias capacitor_voltage is lcr_filter.capacitor_voltage.state;
+        variable load_resistor_current : int18;
 
     begin
         if rising_edge(simulator_clock) then
@@ -94,10 +95,11 @@ begin
                 calculate_lcr_filter(lcr_filter);
             end if;
 
-            input_voltage <= 32e2;
-            if simulation_counter = 17000  then
-                load_resistance <= 65e3;
+            input_voltage <= 3e3;
+            if simulation_counter mod 6000 = 0  then
+                load_current <= -load_current;
             end if;
+            -- load_resistor_current := 
 
             int18_inductor_current <= inductor_current;
             int18_capacitor_voltage <= capacitor_voltage;
