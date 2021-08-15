@@ -27,6 +27,7 @@ architecture sim of tb_lcr_filter is
 
     signal hw_multiplier : multiplier_record := multiplier_init_values;
     signal hw_multiplier2 : multiplier_record := multiplier_init_values;
+    signal hw_multiplier3 : multiplier_record := multiplier_init_values;
 ------------------------------------------------------------------------
     signal simulation_trigger_counter : natural := 0;
 ------------------------------------------------------------------------
@@ -36,6 +37,8 @@ architecture sim of tb_lcr_filter is
     signal load_current    : int18 := 3000;
 
     signal lcr_filter : lcr_model_record := init_lcr_model_integrator_gains(25e3, 2e3);
+    signal lcr_filter2 : lcr_model_record := init_lcr_model_integrator_gains(25e3, 2e3);
+    signal lcr_filter3 : lcr_model_record := init_lcr_model_integrator_gains(25e3, 2e3);
 
     signal int18_inductor_current  : int18 := 0;
     signal int18_capacitor_voltage : int18 := 0;
@@ -85,7 +88,11 @@ begin
 
             create_multiplier(hw_multiplier); 
             create_multiplier(hw_multiplier2); 
-            create_lcr_filter(lcr_filter, hw_multiplier, load_resistance, load_current, input_voltage - capacitor_voltage, inductor_current - load_current);
+            create_multiplier(hw_multiplier3); 
+
+            create_lcr_filter(lcr_filter  , hw_multiplier  , input_voltage - capacitor_voltage                                         , inductor_current - lcr_filter2.inductor_current.state);
+            create_lcr_filter(lcr_filter2 , hw_multiplier2 , capacitor_voltage - lcr_filter2.capacitor_voltage.state                   , lcr_filter2.inductor_current.state - lcr_filter3.inductor_current.state);
+            create_lcr_filter(lcr_filter3 , hw_multiplier3 , lcr_filter2.capacitor_voltage.state - lcr_filter3.capacitor_voltage.state , lcr_filter3.inductor_current.state - load_current);
 
             simulation_counter <= simulation_counter + 1;
 
@@ -93,16 +100,17 @@ begin
             if simulation_trigger_counter = 19 then
                 simulation_trigger_counter <= 0;
                 calculate_lcr_filter(lcr_filter);
+                calculate_lcr_filter(lcr_filter2);
+                calculate_lcr_filter(lcr_filter3);
             end if;
 
             input_voltage <= 3e3;
             if simulation_counter mod 6000 = 0  then
                 load_current <= -load_current;
             end if;
-            -- load_resistor_current := 
 
-            int18_inductor_current <= inductor_current;
-            int18_capacitor_voltage <= capacitor_voltage;
+            int18_inductor_current <= lcr_filter3.inductor_current.state;
+            int18_capacitor_voltage <= lcr_filter3.capacitor_voltage.state;
 
         end if; -- rstn
     end process clocked_reset_generator;	

@@ -37,8 +37,6 @@ package lcr_filter_model_pkg is
     procedure create_lcr_filter (
         signal lcr_filter : inout lcr_model_record;
         signal multiplier : inout multiplier_record;
-        load_resistance   : int18;
-        load_current      : int18;
         inductor_current_state_equation : int18;
         capacitor_voltage_state_equation : int18 );
 ------------------------------------------------------------------------
@@ -61,8 +59,6 @@ package body lcr_filter_model_pkg is
     (
         signal lcr_filter : inout lcr_model_record;
         signal multiplier : inout multiplier_record;
-        load_resistance   : int18;
-        load_current      : int18;
         inductor_current_state_equation : int18;
         capacitor_voltage_state_equation : int18
 
@@ -93,12 +89,8 @@ package body lcr_filter_model_pkg is
                     integrate_state(inductor_current, hw_multiplier, 15, inductor_current_state_equation - inductor_current_delta); -- input_voltage - capacitor_voltage.state - inductor_current_delta);
                     increment_counter_when_ready(hw_multiplier, process_counter);
 
-                WHEN 2 => 
-                    capacitor_delta <= load_resistance * capacitor_voltage.state;
-                    increment_counter_when_ready(hw_multiplier, process_counter);
-
-                WHEN 3 =>
-                    integrate_state(capacitor_voltage, hw_multiplier, 15, capacitor_voltage_state_equation - capacitor_delta); -- inductor_current.state - load_current - capacitor_delta);
+                WHEN 2 =>
+                    integrate_state(capacitor_voltage, hw_multiplier, 15, capacitor_voltage_state_equation - capacitor_delta);
                     increment_counter_when_ready(hw_multiplier, process_counter);
                 WHEN others => -- do nothing
 
