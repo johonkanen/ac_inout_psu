@@ -165,7 +165,7 @@ architecture rtl of system_components is
 
     signal lc_filter_process_counter  : natural range 0 to 7;
     signal hw_multiplier              : multiplier_record := multiplier_init_values;
-    signal hw_multiplier2             : multiplier_record := multiplier_init_values;
+    -- signal hw_multiplier2             : multiplier_record := multiplier_init_values;
     signal load_current               : int18             := 3000;
     signal input_voltage              : int18             := 5e3;
 
@@ -188,6 +188,15 @@ begin
 
 --------------------------------------------------
     test_with_uart : process(clock)
+    --------------------------------------------------
+        impure function "*" ( left, right : int18)
+        return int18
+        is
+        begin
+            sequential_multiply(hw_multiplier, left, right);
+            return get_multiplier_result(hw_multiplier, 15);
+        end "*";
+    --------------------------------------------------
 
         --------------------------------------------------
         function get_square_wave_from_counter
@@ -302,16 +311,20 @@ begin
             end CASE;
             -------------------------------------------------- 
             create_multiplier(hw_multiplier); 
-            create_multiplier(hw_multiplier2); 
             CASE lc_filter_process_counter is 
                 WHEN 0 => 
-                    multiply_and_get_result(multiplier => hw_multiplier, result => inductor_current_delta, radix =>15, left => inductor_series_resistance, right => inductor_current.state);
-                    integrate_state(inductor_current, hw_multiplier2, 18, input_voltage - capacitor_voltage.state - inductor_current_delta);
+                    inductor_current_delta <= inductor_series_resistance * inductor_current.state;
                     increment_counter_when_ready(hw_multiplier, lc_filter_process_counter);
 
                 WHEN 1 => 
-                    multiply_and_get_result(multiplier => hw_multiplier, result => capacitor_delta, radix =>16, left => load_resistance, right => capacitor_voltage.state);
-                    integrate_state(capacitor_voltage, hw_multiplier2, 18, inductor_current.state - load_current - capacitor_delta);
+                    integrate_state(inductor_current, hw_multiplier, 18, input_voltage - capacitor_voltage.state - inductor_current_delta);
+                    increment_counter_when_ready(hw_multiplier, lc_filter_process_counter);
+                WHEN 2 => 
+
+                    capacitor_delta <= load_resistance * capacitor_voltage.state;
+                    increment_counter_when_ready(hw_multiplier, lc_filter_process_counter);
+                WHEN 3 => 
+                    integrate_state(capacitor_voltage, hw_multiplier, 18, inductor_current.state - load_current - capacitor_delta);
                     increment_counter_when_ready(hw_multiplier, lc_filter_process_counter);
                 WHEN others => -- do nothing
 
