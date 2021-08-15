@@ -17,7 +17,7 @@ library work;
 library math_library;
     use math_library.multiplier_pkg.all;
     use math_library.first_order_filter_pkg.all;
-    use math_library.state_variable_pkg.all;
+    use math_library.lcr_filter_model_pkg.all;
 
 entity system_components is
     port (
@@ -163,23 +163,15 @@ architecture rtl of system_components is
 
     signal ram_address_offset : natural range 0 to 2**11-1;
 
-    signal lc_filter_process_counter  : natural range 0 to 7;
     signal hw_multiplier              : multiplier_record := multiplier_init_values;
-    -- signal hw_multiplier2             : multiplier_record := multiplier_init_values;
+    signal hw_multiplier2             : multiplier_record := multiplier_init_values;
+    signal hw_multiplier3             : multiplier_record := multiplier_init_values;
     signal load_current               : int18             := 3000;
     signal input_voltage              : int18             := 5e3;
 
-    signal inductor_current_delta    : int18 := 0;
-    signal inductor_integrator_gain  : int18 := 25e3;
-    signal capacitor_integrator_gain : int18 := 2000;
-    signal load_resistance           : int18 := 10; 
-    signal inductor_series_resistance : int18 := 950;
-
-    signal inductor_current   : state_variable_record := init_state_variable_gain(inductor_integrator_gain);
-    signal capacitor_voltage  : state_variable_record := init_state_variable_gain(capacitor_integrator_gain);
-    signal capacitor_delta : int18   := 0;
-    signal inductor2_current  : state_variable_record := init_state_variable_gain(inductor_integrator_gain);
-    signal capacitor2_voltage : state_variable_record := init_state_variable_gain(capacitor_integrator_gain);
+    signal lcr_filter : lcr_model_record  := init_lcr_model_integrator_gains(25e3, 2e3);
+    signal lcr_filter2 : lcr_model_record := init_lcr_model_integrator_gains(25e3, 2e3);
+    signal lcr_filter3 : lcr_model_record := init_lcr_model_integrator_gains(25e3, 2e3);
 
 --------------------------------------------------
 begin
@@ -235,7 +227,9 @@ begin
             end if; 
 
             if ad_conversion_is_ready(spi_sar_adc_data_out) then
-                lc_filter_process_counter <= 0;
+                calculate_lcr_filter(lcr_filter);
+                calculate_lcr_filter(lcr_filter2);
+                calculate_lcr_filter(lcr_filter3);
 
                 CASE uart_rx_data is
                     WHEN 10 => transmit_16_bit_word_with_uart(uart_data_in, get_filter_output(bandpass_filter.low_pass_filter) );
@@ -244,8 +238,8 @@ begin
                     WHEN 13 => transmit_16_bit_word_with_uart(uart_data_in, bandpass_filter.low_pass_filter.filter_input - get_filter_output(bandpass_filter));
                     WHEN 14 => transmit_16_bit_word_with_uart(uart_data_in, get_adc_data(spi_sar_adc_data_out));
                     WHEN 15 => transmit_16_bit_word_with_uart(uart_data_in, uart_rx_data);
-                    WHEN 16 => transmit_16_bit_word_with_uart(uart_data_in, inductor_current.state + 32768);
-                    WHEN 17 => transmit_16_bit_word_with_uart(uart_data_in, capacitor_voltage.state+ 32768);
+                    WHEN 16 => transmit_16_bit_word_with_uart(uart_data_in, lcr_filter3.inductor_current.state + 32768);
+                    WHEN 17 => transmit_16_bit_word_with_uart(uart_data_in, lcr_filter3.capacitor_voltage.state+ 32768);
                     WHEN others => -- get data from MDIO
                         register_counter := register_counter + 1;
                         if test_counter = 4600 then
@@ -262,11 +256,11 @@ begin
                 end if;
 
                 if test_counter = 65536/2 then
-                    load_resistance <= 65e3;
+                    input_voltage <= -input_voltage;
                 end if;
-                if test_counter = 65535 then
-                    load_resistance <= 5e3;
-                end if;
+                -- if test_counter = 65535 then
+                --     load_resistance <= 5e3;
+                -- end if;
             end if;
 
             if mdio_data_read_is_ready(mdio_driver_data_out) then
@@ -311,24 +305,13 @@ begin
             end CASE;
             -------------------------------------------------- 
             create_multiplier(hw_multiplier); 
-            CASE lc_filter_process_counter is 
-                WHEN 0 => 
-                    inductor_current_delta <= inductor_series_resistance * inductor_current.state;
-                    increment_counter_when_ready(hw_multiplier, lc_filter_process_counter);
+            create_multiplier(hw_multiplier2); 
+            create_multiplier(hw_multiplier3); 
 
-                WHEN 1 => 
-                    integrate_state(inductor_current, hw_multiplier, 18, input_voltage - capacitor_voltage.state - inductor_current_delta);
-                    increment_counter_when_ready(hw_multiplier, lc_filter_process_counter);
-                WHEN 2 => 
+            create_lcr_filter(lcr_filter  , hw_multiplier  , input_voltage - lcr_filter.capacitor_voltage.state                        , lcr_filter.inductor_current.state - lcr_filter2.inductor_current.state);
+            create_lcr_filter(lcr_filter2 , hw_multiplier2 , lcr_filter.capacitor_voltage.state - lcr_filter2.capacitor_voltage.state  , lcr_filter2.inductor_current.state - lcr_filter3.inductor_current.state);
+            create_lcr_filter(lcr_filter3 , hw_multiplier3 , lcr_filter2.capacitor_voltage.state - lcr_filter3.capacitor_voltage.state , lcr_filter3.inductor_current.state - load_current);
 
-                    capacitor_delta <= load_resistance * capacitor_voltage.state;
-                    increment_counter_when_ready(hw_multiplier, lc_filter_process_counter);
-                WHEN 3 => 
-                    integrate_state(capacitor_voltage, hw_multiplier, 18, inductor_current.state - load_current - capacitor_delta);
-                    increment_counter_when_ready(hw_multiplier, lc_filter_process_counter);
-                WHEN others => -- do nothing
-
-            end CASE; 
 
         end if; --rising_edge
     end process test_with_uart;	

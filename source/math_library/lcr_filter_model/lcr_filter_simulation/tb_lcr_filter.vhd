@@ -79,9 +79,6 @@ begin
             return get_multiplier_result(hw_multiplier, 15);
         end "*";
     --------------------------------------------------
-        alias inductor_current is lcr_filter.inductor_current.state;
-        alias capacitor_voltage is lcr_filter.capacitor_voltage.state;
-        variable load_resistor_current : int18;
 
     begin
         if rising_edge(simulator_clock) then
@@ -90,8 +87,8 @@ begin
             create_multiplier(hw_multiplier2); 
             create_multiplier(hw_multiplier3); 
 
-            create_lcr_filter(lcr_filter  , hw_multiplier  , input_voltage - capacitor_voltage                                         , inductor_current - lcr_filter2.inductor_current.state);
-            create_lcr_filter(lcr_filter2 , hw_multiplier2 , capacitor_voltage - lcr_filter2.capacitor_voltage.state                   , lcr_filter2.inductor_current.state - lcr_filter3.inductor_current.state);
+            create_lcr_filter(lcr_filter  , hw_multiplier  , input_voltage - lcr_filter.capacitor_voltage.state                        , lcr_filter.inductor_current.state - lcr_filter2.inductor_current.state);
+            create_lcr_filter(lcr_filter2 , hw_multiplier2 , lcr_filter.capacitor_voltage.state - lcr_filter2.capacitor_voltage.state  , lcr_filter2.inductor_current.state - lcr_filter3.inductor_current.state);
             create_lcr_filter(lcr_filter3 , hw_multiplier3 , lcr_filter2.capacitor_voltage.state - lcr_filter3.capacitor_voltage.state , lcr_filter3.inductor_current.state - load_current);
 
             simulation_counter <= simulation_counter + 1;
