@@ -114,21 +114,19 @@ begin
 
             CASE process_counter is 
                 WHEN 0 => 
-                    inductor_current_delta <= inductor_series_resistance * inductor_current.state;
+                    multiply_and_get_result(hw_multiplier, inductor_current_delta, inductor_series_resistance, inductor_current.state);
                     increment_counter_when_ready(hw_multiplier, process_counter);
 
                 WHEN 1 => 
                     integrate_state(inductor_current, hw_multiplier, input_voltage - capacitor_voltage.state - inductor_current_delta);
-                    integrate_state(inductor2_current, hw_multiplier2, capacitor_voltage.state - capacitor2_voltage.state);
                     increment_counter_when_ready(hw_multiplier, process_counter);
 
                 WHEN 2 => 
-                    capacitor_delta <= load_resistance * capacitor2_voltage.state;
+                    multiply_and_get_result(hw_multiplier, capacitor_delta, load_resistance, capacitor_voltage.state);
                     increment_counter_when_ready(hw_multiplier, process_counter);
 
                 WHEN 3 =>
-                    integrate_state(capacitor_voltage, hw_multiplier, inductor_current.state - inductor2_current.state );
-                    integrate_state(capacitor2_voltage, hw_multiplier2, inductor2_current.state - load_current - capacitor_delta);
+                    integrate_state(capacitor_voltage, hw_multiplier, inductor_current.state - load_current - capacitor_delta);
                     increment_counter_when_ready(hw_multiplier, process_counter);
                 WHEN others => -- do nothing
 
