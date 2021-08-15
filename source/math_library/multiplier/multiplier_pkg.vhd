@@ -17,18 +17,12 @@ package multiplier_pkg is
         shift_register       : std_logic_vector(2 downto 0);
         multiplier_is_busy   : boolean;
         multiplier_is_requested_with_1 : std_logic;
-        radix_for_multiply_and_get_result : natural range 0 to 17;
     end record;
 
-    constant multiplier_init_values : multiplier_record := ( (others => '0'),(others => '0'),(others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), false, '0', 15);
+    constant multiplier_init_values : multiplier_record := ( (others => '0'),(others => '0'),(others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), false, '0');
 ------------------------------------------------------------------------
     procedure create_multiplier (
         signal multiplier : inout multiplier_record);
-------------------------------------------------------------------------
-    procedure multiply_and_get_result (
-        signal multiplier : inout multiplier_record;
-        signal result : out int18; 
-        left, right : int18); 
 ------------------------------------------------------------------------
     procedure multiply_and_get_result (
         signal multiplier : inout multiplier_record;
@@ -209,23 +203,6 @@ package body multiplier_pkg is
             counter <= counter + 1;
         end if;
     end increment_counter_when_ready;
-------------------------------------------------------------------------
-    procedure multiply_and_get_result
-    (
-        signal multiplier : inout multiplier_record;
-        signal result : out int18;
-        left, right : int18
-    ) 
-    is
-    begin
-
-        sequential_multiply(multiplier, left, right);
-        if multiplier_is_ready(multiplier) then
-            result <= get_multiplier_result(multiplier, multiplier.radix_for_multiply_and_get_result);
-        end if; 
-        
-    end multiply_and_get_result;
-
 ------------------------------------------------------------------------
     procedure multiply_and_get_result
     (

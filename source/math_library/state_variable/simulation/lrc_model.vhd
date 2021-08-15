@@ -37,8 +37,7 @@ architecture sim of lrc_model is
     signal input_voltage : int18     := 0;
     signal capacitor_delta : int18   := 0;
 
-    signal inductor_current_delta : int18 := 0;
-
+    signal inductor_current_delta : int18 := 0; 
     signal inductor_integrator_gain : int18  := 25e3;
     signal capacitor_integrator_gain : int18 := 2000;
     signal load_resistance : int18           := 10;
@@ -85,6 +84,7 @@ begin
 ------------------------------------------------------------------------
 
     clocked_reset_generator : process(simulator_clock)
+    --------------------------------------------------
         impure function "*" ( left, right : int18)
         return int18
         is
@@ -92,6 +92,7 @@ begin
             sequential_multiply(hw_multiplier, left, right);
             return get_multiplier_result(hw_multiplier, 15);
         end "*";
+    --------------------------------------------------
 
     begin
         if rising_edge(simulator_clock) then
@@ -114,19 +115,19 @@ begin
 
             CASE process_counter is 
                 WHEN 0 => 
-                    multiply_and_get_result(multiplier => hw_multiplier, result => inductor_current_delta, left => inductor_series_resistance, right => inductor_current.state);
+                    multiply_and_get_result(multiplier => hw_multiplier, radix =>15, result => inductor_current_delta, left => inductor_series_resistance, right => inductor_current.state);
                     increment_counter_when_ready(hw_multiplier, process_counter);
 
                 WHEN 1 => 
-                    integrate_state(inductor_current, hw_multiplier, input_voltage - capacitor_voltage.state - inductor_current_delta);
+                    integrate_state(inductor_current, hw_multiplier, 15, input_voltage - capacitor_voltage.state - inductor_current_delta);
                     increment_counter_when_ready(hw_multiplier, process_counter);
 
                 WHEN 2 => 
-                    multiply_and_get_result(multiplier => hw_multiplier, result => capacitor_delta, left => load_resistance, right => capacitor_voltage.state);
+                    multiply_and_get_result(multiplier => hw_multiplier, radix =>15, result => capacitor_delta, left => load_resistance, right => capacitor_voltage.state);
                     increment_counter_when_ready(hw_multiplier, process_counter);
 
                 WHEN 3 =>
-                    integrate_state(capacitor_voltage, hw_multiplier, inductor_current.state - load_current - capacitor_delta);
+                    integrate_state(capacitor_voltage, hw_multiplier, 15, inductor_current.state - load_current - capacitor_delta);
                     increment_counter_when_ready(hw_multiplier, process_counter);
                 WHEN others => -- do nothing
 

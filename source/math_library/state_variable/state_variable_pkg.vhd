@@ -25,6 +25,7 @@ package state_variable_pkg is
     procedure integrate_state (
         signal state_variable : inout state_variable_record;
         signal multiplier : inout multiplier_record;
+        constant radix : in natural;
         state_equation : in int18);
 
 end package state_variable_pkg;
@@ -59,13 +60,14 @@ package body state_variable_pkg is
     (
         signal state_variable : inout state_variable_record;
         signal multiplier : inout multiplier_record;
+        constant radix : in natural;
         state_equation : in int18
     ) is
         alias integrator_gain is state_variable.integrator_gain;
     begin
         sequential_multiply(multiplier, integrator_gain, state_equation); 
         if multiplier_is_ready(multiplier) then
-            state_variable.state <= get_multiplier_result(multiplier, 15) + state_variable.state;
+            state_variable.state <= get_multiplier_result(multiplier, radix) + state_variable.state;
         end if;
         
     end integrate_state;

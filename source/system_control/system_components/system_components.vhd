@@ -17,6 +17,7 @@ library work;
 library math_library;
     use math_library.multiplier_pkg.all;
     use math_library.first_order_filter_pkg.all;
+    use math_library.state_variable_pkg.all;
 
 entity system_components is
     port (
@@ -162,6 +163,23 @@ architecture rtl of system_components is
 
     signal ram_address_offset : natural range 0 to 2**11-1;
 
+    signal lc_filter_process_counter : natural range 0 to 7;
+    signal hw_multiplier : multiplier_record  := multiplier_init_values;
+    signal hw_multiplier2 : multiplier_record := multiplier_init_values;
+    signal inductor_current_delta : int18     := 0;
+    signal inductor_integrator_gain : int18   := 1000*5;
+    signal capacitor_integrator_gain : int18  := 800*5;
+    signal load_resistance : int18            := 10;
+    signal inductor_series_resistance : int18 := 1950;
+    signal load_current : int18               := 3000;
+    signal input_voltage : int18              := 5e3;
+
+    signal inductor_current   : state_variable_record := init_state_variable_gain(inductor_integrator_gain);
+    signal capacitor_voltage  : state_variable_record := init_state_variable_gain(capacitor_integrator_gain);
+    signal capacitor_delta : int18   := 0;
+    signal inductor2_current  : state_variable_record := init_state_variable_gain(inductor_integrator_gain);
+    signal capacitor2_voltage : state_variable_record := init_state_variable_gain(capacitor_integrator_gain);
+
 --------------------------------------------------
 begin
 
@@ -207,6 +225,7 @@ begin
             end if; 
 
             if ad_conversion_is_ready(spi_sar_adc_data_out) then
+                lc_filter_process_counter <= 0;
 
                 CASE uart_rx_data is
                     WHEN 10 => transmit_16_bit_word_with_uart(uart_data_in, get_filter_output(bandpass_filter.low_pass_filter) );
@@ -215,6 +234,8 @@ begin
                     WHEN 13 => transmit_16_bit_word_with_uart(uart_data_in, bandpass_filter.low_pass_filter.filter_input - get_filter_output(bandpass_filter));
                     WHEN 14 => transmit_16_bit_word_with_uart(uart_data_in, get_adc_data(spi_sar_adc_data_out));
                     WHEN 15 => transmit_16_bit_word_with_uart(uart_data_in, uart_rx_data);
+                    WHEN 16 => transmit_16_bit_word_with_uart(uart_data_in, inductor_current.state + 32768);
+                    WHEN 17 => transmit_16_bit_word_with_uart(uart_data_in, capacitor_voltage.state+ 32768);
                     WHEN others => -- get data from MDIO
                         register_counter := register_counter + 1;
                         if test_counter = 4600 then
@@ -228,6 +249,10 @@ begin
                 test_counter <= test_counter + 1; 
                 if test_counter = 65535 then
                     test_counter <= 0;
+                end if;
+
+                if test_counter = 65536/2 then
+                    input_voltage <= -input_voltage;
                 end if;
             end if;
 
@@ -272,6 +297,21 @@ begin
                 WHEN others => -- hang here and wait for counter being set to zero
             end CASE;
             -------------------------------------------------- 
+            create_multiplier(hw_multiplier); 
+            create_multiplier(hw_multiplier2); 
+            CASE lc_filter_process_counter is 
+                WHEN 0 => 
+                    multiply_and_get_result(multiplier => hw_multiplier, result => inductor_current_delta, radix =>15, left => inductor_series_resistance, right => inductor_current.state);
+                    integrate_state(inductor_current, hw_multiplier2, 18, input_voltage - capacitor_voltage.state - inductor_current_delta);
+                    increment_counter_when_ready(hw_multiplier, lc_filter_process_counter);
+
+                WHEN 1 => 
+                    multiply_and_get_result(multiplier => hw_multiplier, result => capacitor_delta, radix =>16, left => load_resistance, right => capacitor_voltage.state);
+                    integrate_state(capacitor_voltage, hw_multiplier2, 18, inductor_current.state - load_current - capacitor_delta);
+                    increment_counter_when_ready(hw_multiplier, lc_filter_process_counter);
+                WHEN others => -- do nothing
+
+            end CASE; 
 
         end if; --rising_edge
     end process test_with_uart;	

@@ -4,6 +4,7 @@ proc get_vhdl_sources {void}\
     { 
         /math_library/multiplier/multiplier_pkg.vhd
         /math_library/first_order_filter/first_order_filter_pkg.vhd
+        /math_library/state_variable/state_variable_pkg.vhd
 
         /system_clocks_pkg.vhd
 
