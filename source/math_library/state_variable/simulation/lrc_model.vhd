@@ -37,10 +37,10 @@ architecture sim of lrc_model is
     signal input_voltage : int18     := 0;
     signal capacitor_delta : int18   := 0;
 
-    signal inductor_current_delta : int18 := 0; 
-    signal inductor_integrator_gain : int18  := 25e3;
+    signal inductor_current_delta    : int18 := 0;
+    signal inductor_integrator_gain  : int18 := 25e3;
     signal capacitor_integrator_gain : int18 := 2000;
-    signal load_resistance : int18           := 10;
+    signal load_resistance           : int18 := 10;
 
     signal inductor_series_resistance : int18 := 950;
 

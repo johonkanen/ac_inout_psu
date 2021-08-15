@@ -163,16 +163,17 @@ architecture rtl of system_components is
 
     signal ram_address_offset : natural range 0 to 2**11-1;
 
-    signal lc_filter_process_counter : natural range 0 to 7;
-    signal hw_multiplier : multiplier_record  := multiplier_init_values;
-    signal hw_multiplier2 : multiplier_record := multiplier_init_values;
-    signal inductor_current_delta : int18     := 0;
-    signal inductor_integrator_gain : int18   := 1000*5;
-    signal capacitor_integrator_gain : int18  := 800*5;
-    signal load_resistance : int18            := 10;
-    signal inductor_series_resistance : int18 := 1950;
-    signal load_current : int18               := 3000;
-    signal input_voltage : int18              := 5e3;
+    signal lc_filter_process_counter  : natural range 0 to 7;
+    signal hw_multiplier              : multiplier_record := multiplier_init_values;
+    signal hw_multiplier2             : multiplier_record := multiplier_init_values;
+    signal load_current               : int18             := 3000;
+    signal input_voltage              : int18             := 5e3;
+
+    signal inductor_current_delta    : int18 := 0;
+    signal inductor_integrator_gain  : int18 := 25e3;
+    signal capacitor_integrator_gain : int18 := 2000;
+    signal load_resistance           : int18 := 10; 
+    signal inductor_series_resistance : int18 := 950;
 
     signal inductor_current   : state_variable_record := init_state_variable_gain(inductor_integrator_gain);
     signal capacitor_voltage  : state_variable_record := init_state_variable_gain(capacitor_integrator_gain);
@@ -252,7 +253,10 @@ begin
                 end if;
 
                 if test_counter = 65536/2 then
-                    input_voltage <= -input_voltage;
+                    load_resistance <= 65e3;
+                end if;
+                if test_counter = 65535 then
+                    load_resistance <= 5e3;
                 end if;
             end if;
 
