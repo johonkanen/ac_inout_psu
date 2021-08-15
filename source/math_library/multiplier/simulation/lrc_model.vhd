@@ -140,15 +140,14 @@ begin
         (
             signal multiplier : inout multiplier_record;
             signal state      : inout int18;
-            state_delta       : int18;
-            state_equation    : int18;
-            integrator_gain   : int18
+            integrator_gain   : int18;
+            state_equation    : int18
             
         ) is
         begin
             sequential_multiply(multiplier, integrator_gain, state_equation); 
             if multiplier_is_ready(multiplier) then
-                state <= get_multiplier_result(multiplier, 15) + state + state_delta;
+                state <= get_multiplier_result(multiplier, 15) + state;
                 process_counter <= process_counter + 1;
             end if;
             
@@ -177,15 +176,15 @@ begin
                     inductor_current_delta <= inductor_series_resistance * inductor_current;
 
                 WHEN 1 => 
-                    calculate_state(hw_multiplier, inductor_current, -inductor_current_delta, input_voltage - capacitor_voltage, inductor_integrator_gain);
-                    calculate_state(hw_multiplier2, inductor2_current, 0, capacitor_voltage - capacitor2_voltage, inductor_integrator_gain);
+                    calculate_state(hw_multiplier, inductor_current, inductor_integrator_gain, input_voltage - capacitor_voltage - inductor_current_delta);
+                    calculate_state(hw_multiplier2, inductor2_current, inductor_integrator_gain, capacitor_voltage - capacitor2_voltage);
 
                 WHEN 2 => 
                     capacitor_delta <= load_resistance * capacitor_voltage;
 
                 WHEN 3 =>
-                    calculate_state(hw_multiplier, capacitor_voltage, -capacitor_delta, inductor_current - inductor2_current, capacitor_integrator_gain);
-                    calculate_state(hw_multiplier2, capacitor2_voltage, 0, inductor2_current - load_current, capacitor_integrator_gain);
+                    calculate_state(hw_multiplier, capacitor_voltage, capacitor_integrator_gain, inductor_current - inductor2_current - capacitor_delta);
+                    calculate_state(hw_multiplier2, capacitor2_voltage, capacitor_integrator_gain, inductor2_current - load_current);
                 WHEN others => -- do nothing
 
             end CASE; 
