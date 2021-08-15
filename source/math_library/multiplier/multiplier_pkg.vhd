@@ -47,7 +47,12 @@ package multiplier_pkg is
         signal multiplier : inout multiplier_record;
         data_a : in int18;
         data_b : in int18);
+------------------------------------------------------------------------
+    procedure increment_counter_when_ready (
+        multiplier : multiplier_record;
+        signal counter : inout natural);
 
+------------------------------------------------------------------------
 end package multiplier_pkg;
 
 package body multiplier_pkg is
@@ -183,6 +188,17 @@ package body multiplier_pkg is
         
         return multiplier.shift_register = "000" and (multiplier.multiplier_is_requested_with_1 = '0');
     end multiplier_is_not_busy;
+------------------------------------------------------------------------
+    procedure increment_counter_when_ready
+    (
+        multiplier : multiplier_record;
+        signal counter : inout natural
+    ) is
+    begin
+        if multiplier_is_ready(multiplier) then
+            counter <= counter + 1;
+        end if;
+    end increment_counter_when_ready;
 
 
 ------------------------------------------------------------------------

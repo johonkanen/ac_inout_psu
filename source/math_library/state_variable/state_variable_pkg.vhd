@@ -13,6 +13,9 @@ package state_variable_pkg is
         integrator_gain : int18;
     end record;
 
+    function init_state_variable_gain ( integrator_gain : int18)
+        return state_variable_record;
+
     constant init_state_variable : state_variable_record := (0, 0);
 
     procedure create_state_variable (
@@ -22,13 +25,24 @@ package state_variable_pkg is
     procedure integrate_state (
         signal state_variable : inout state_variable_record;
         signal multiplier : inout multiplier_record;
-        signal process_counter : inout natural;
         state_equation : in int18);
 
 end package state_variable_pkg;
 
 ------------------------------------------------------------------------
 package body state_variable_pkg is
+
+    function init_state_variable_gain
+    (
+        integrator_gain : int18
+    )
+    return state_variable_record
+    is
+        variable state_variable : state_variable_record;
+    begin
+        state_variable := (state => 0, integrator_gain => integrator_gain);
+        return state_variable;
+    end init_state_variable_gain;
 
     procedure create_state_variable
     (
@@ -45,7 +59,6 @@ package body state_variable_pkg is
     (
         signal state_variable : inout state_variable_record;
         signal multiplier : inout multiplier_record;
-        signal process_counter : inout natural;
         state_equation : in int18
     ) is
         alias integrator_gain is state_variable.integrator_gain;
@@ -53,7 +66,6 @@ package body state_variable_pkg is
         sequential_multiply(multiplier, integrator_gain, state_equation); 
         if multiplier_is_ready(multiplier) then
             state_variable.state <= get_multiplier_result(multiplier, 15) + state_variable.state;
-            process_counter <= process_counter + 1;
         end if;
         
     end integrate_state;

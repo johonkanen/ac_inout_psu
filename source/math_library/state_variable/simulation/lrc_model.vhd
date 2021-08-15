@@ -31,18 +31,9 @@ architecture sim of lrc_model is
     signal hw_multiplier : multiplier_record := multiplier_init_values;
     signal hw_multiplier2 : multiplier_record := multiplier_init_values;
 ------------------------------------------------------------------------
-    signal shift_register : std_logic_vector(2 downto 0);
-
-    signal signal_multiplier_is_ready : boolean := false;
-
+    signal simulation_trigger_counter : natural := 0;
 ------------------------------------------------------------------------
     -- lrc model signals
-    signal inductor_current : state_variable_record  := init_state_variable;
-    signal int18_inductor_current : int18;
-    signal inductor2_current : int18  := 0;
-
-    signal capacitor_voltage : int18 := 0;
-    signal capacitor2_voltage : int18 := 0;
     signal input_voltage : int18     := 0;
     signal capacitor_delta : int18   := 0;
 
@@ -58,7 +49,14 @@ architecture sim of lrc_model is
 
     signal process_counter : natural := 0;
 
-    signal simulation_trigger_counter : natural := 0;
+
+    signal inductor_current   : state_variable_record := init_state_variable_gain(inductor_integrator_gain);
+    signal capacitor_voltage  : state_variable_record := init_state_variable_gain(capacitor_integrator_gain);
+    signal inductor2_current  : state_variable_record := init_state_variable_gain(inductor_integrator_gain);
+    signal capacitor2_voltage : state_variable_record := init_state_variable_gain(capacitor_integrator_gain);
+
+    signal int18_inductor_current  : int18;
+    signal int18_capacitor_voltage : int18;
 begin
 
 ------------------------------------------------------------------------
@@ -92,38 +90,15 @@ begin
         is
         begin
             sequential_multiply(hw_multiplier, left, right);
-            if multiplier_is_ready(hw_multiplier) then
-                process_counter <= process_counter + 1;
-            end if;
             return get_multiplier_result(hw_multiplier, 15);
         end "*";
-
-    --------------------------------------------------
-        procedure calculate_state
-        (
-            signal multiplier : inout multiplier_record;
-            signal state      : inout int18;
-            integrator_gain   : int18;
-            state_equation    : int18
-            
-        ) is
-        begin
-            sequential_multiply(multiplier, integrator_gain, state_equation); 
-            if multiplier_is_ready(multiplier) then
-                state <= get_multiplier_result(multiplier, 15) + state;
-                process_counter <= process_counter + 1;
-            end if;
-            
-        end calculate_state;
-    --------------------------------------------------
 
     begin
         if rising_edge(simulator_clock) then
 
             create_multiplier(hw_multiplier); 
             create_multiplier(hw_multiplier2); 
-            create_state_variable(inductor_current, inductor_integrator_gain);
-            create_multiplier(hw_multiplier); 
+
             simulation_counter <= simulation_counter + 1;
 
             simulation_trigger_counter <= simulation_trigger_counter + 1;
@@ -140,17 +115,21 @@ begin
             CASE process_counter is 
                 WHEN 0 => 
                     inductor_current_delta <= inductor_series_resistance * inductor_current.state;
+                    increment_counter_when_ready(hw_multiplier, process_counter);
 
                 WHEN 1 => 
-                    integrate_state(inductor_current, hw_multiplier, process_counter, input_voltage - capacitor_voltage - inductor_current_delta);
-                    calculate_state(hw_multiplier2, inductor2_current, inductor_integrator_gain, capacitor_voltage - capacitor2_voltage);
+                    integrate_state(inductor_current, hw_multiplier, input_voltage - capacitor_voltage.state - inductor_current_delta);
+                    integrate_state(inductor2_current, hw_multiplier2, capacitor_voltage.state - capacitor2_voltage.state);
+                    increment_counter_when_ready(hw_multiplier, process_counter);
 
                 WHEN 2 => 
-                    capacitor_delta <= load_resistance * capacitor2_voltage;
+                    capacitor_delta <= load_resistance * capacitor2_voltage.state;
+                    increment_counter_when_ready(hw_multiplier, process_counter);
 
                 WHEN 3 =>
-                    calculate_state(hw_multiplier, capacitor_voltage, capacitor_integrator_gain, inductor_current.state - inductor2_current );
-                    calculate_state(hw_multiplier2, capacitor2_voltage, capacitor_integrator_gain, inductor2_current - load_current - capacitor_delta);
+                    integrate_state(capacitor_voltage, hw_multiplier, inductor_current.state - inductor2_current.state );
+                    integrate_state(capacitor2_voltage, hw_multiplier2, inductor2_current.state - load_current - capacitor_delta);
+                    increment_counter_when_ready(hw_multiplier, process_counter);
                 WHEN others => -- do nothing
 
             end CASE; 
@@ -158,6 +137,7 @@ begin
     end process clocked_reset_generator;	
 
     int18_inductor_current <= inductor_current.state;
+    int18_capacitor_voltage <= capacitor_voltage.state;
 
 ------------------------------------------------------------------------
 end sim;
