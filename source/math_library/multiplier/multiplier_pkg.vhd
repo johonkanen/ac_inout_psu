@@ -17,9 +17,10 @@ package multiplier_pkg is
         shift_register       : std_logic_vector(2 downto 0);
         multiplier_is_busy   : boolean;
         multiplier_is_requested_with_1 : std_logic;
+        radix_for_multiply_and_get_result : natural range 0 to 17;
     end record;
 
-    constant multiplier_init_values : multiplier_record := ( (others => '0'),(others => '0'),(others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), false, '0');
+    constant multiplier_init_values : multiplier_record := ( (others => '0'),(others => '0'),(others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), false, '0', 15);
 ------------------------------------------------------------------------
     procedure create_multiplier (
         signal multiplier : inout multiplier_record);
@@ -28,7 +29,12 @@ package multiplier_pkg is
         signal multiplier : inout multiplier_record;
         signal result : out int18; 
         left, right : int18); 
-
+------------------------------------------------------------------------
+    procedure multiply_and_get_result (
+        signal multiplier : inout multiplier_record;
+        radix : natural range 0 to 17;
+        signal result : out int18;
+        left, right : int18) ; 
 ------------------------------------------------------------------------
     procedure multiply (
         signal multiplier : inout multiplier_record;
@@ -215,11 +221,28 @@ package body multiplier_pkg is
 
         sequential_multiply(multiplier, left, right);
         if multiplier_is_ready(multiplier) then
-            result <= get_multiplier_result(multiplier, 15);
+            result <= get_multiplier_result(multiplier, multiplier.radix_for_multiply_and_get_result);
         end if; 
         
     end multiply_and_get_result;
 
+------------------------------------------------------------------------
+    procedure multiply_and_get_result
+    (
+        signal multiplier : inout multiplier_record;
+        radix : natural range 0 to 17;
+        signal result : out int18;
+        left, right : int18
+    ) 
+    is
+    begin
+
+        sequential_multiply(multiplier, left, right);
+        if multiplier_is_ready(multiplier) then
+            result <= get_multiplier_result(multiplier, radix);
+        end if; 
+        
+    end multiply_and_get_result;
 
 ------------------------------------------------------------------------
 end package body multiplier_pkg; 

@@ -114,7 +114,7 @@ begin
 
             CASE process_counter is 
                 WHEN 0 => 
-                    multiply_and_get_result(hw_multiplier, inductor_current_delta, inductor_series_resistance, inductor_current.state);
+                    multiply_and_get_result(multiplier => hw_multiplier, result => inductor_current_delta, left => inductor_series_resistance, right => inductor_current.state);
                     increment_counter_when_ready(hw_multiplier, process_counter);
 
                 WHEN 1 => 
@@ -122,7 +122,7 @@ begin
                     increment_counter_when_ready(hw_multiplier, process_counter);
 
                 WHEN 2 => 
-                    multiply_and_get_result(hw_multiplier, capacitor_delta, load_resistance, capacitor_voltage.state);
+                    multiply_and_get_result(multiplier => hw_multiplier, result => capacitor_delta, left => load_resistance, right => capacitor_voltage.state);
                     increment_counter_when_ready(hw_multiplier, process_counter);
 
                 WHEN 3 =>
