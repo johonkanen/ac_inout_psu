@@ -167,8 +167,9 @@ begin
                 process_counter <= 0;
             end if;
 
-            if simulation_counter = 2000  then
-                input_voltage <= 32e3;
+            input_voltage <= 32e2;
+            if simulation_counter = 12000  then
+                load_resistance <= 65e3;
             end if;
 
             CASE process_counter is 
@@ -180,11 +181,11 @@ begin
                     calculate_state(hw_multiplier2, inductor2_current, inductor_integrator_gain, capacitor_voltage - capacitor2_voltage);
 
                 WHEN 2 => 
-                    capacitor_delta <= load_resistance * capacitor_voltage;
+                    capacitor_delta <= load_resistance * capacitor2_voltage;
 
                 WHEN 3 =>
-                    calculate_state(hw_multiplier, capacitor_voltage, capacitor_integrator_gain, inductor_current - inductor2_current - capacitor_delta);
-                    calculate_state(hw_multiplier2, capacitor2_voltage, capacitor_integrator_gain, inductor2_current - load_current);
+                    calculate_state(hw_multiplier, capacitor_voltage, capacitor_integrator_gain, inductor_current - inductor2_current );
+                    calculate_state(hw_multiplier2, capacitor2_voltage, capacitor_integrator_gain, inductor2_current - load_current - capacitor_delta);
                 WHEN others => -- do nothing
 
             end CASE; 
