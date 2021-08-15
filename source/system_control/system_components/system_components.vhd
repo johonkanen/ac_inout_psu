@@ -163,15 +163,19 @@ architecture rtl of system_components is
 
     signal ram_address_offset : natural range 0 to 2**11-1;
 
-    signal hw_multiplier              : multiplier_record := multiplier_init_values;
+    signal hw_multiplier1             : multiplier_record := multiplier_init_values;
     signal hw_multiplier2             : multiplier_record := multiplier_init_values;
     signal hw_multiplier3             : multiplier_record := multiplier_init_values;
+    signal hw_multiplier4             : multiplier_record := multiplier_init_values;
+    signal hw_multiplier5             : multiplier_record := multiplier_init_values;
     signal load_current               : int18             := 3000;
-    signal input_voltage              : int18             := 5e3;
+    signal input_voltage              : int18             := 2e3;
 
-    signal lcr_filter : lcr_model_record  := init_lcr_model_integrator_gains(25e3, 2e3);
+    signal lcr_filter1 : lcr_model_record := init_lcr_model_integrator_gains(25e3, 2e3);
     signal lcr_filter2 : lcr_model_record := init_lcr_model_integrator_gains(25e3, 2e3);
     signal lcr_filter3 : lcr_model_record := init_lcr_model_integrator_gains(25e3, 2e3);
+    signal lcr_filter4 : lcr_model_record := init_lcr_model_integrator_gains(25e3, 2e3);
+    signal lcr_filter5 : lcr_model_record := init_lcr_model_integrator_gains(25e3, 2e3);
 
 --------------------------------------------------
 begin
@@ -181,15 +185,6 @@ begin
 --------------------------------------------------
     test_with_uart : process(clock)
     --------------------------------------------------
-        impure function "*" ( left, right : int18)
-        return int18
-        is
-        begin
-            sequential_multiply(hw_multiplier, left, right);
-            return get_multiplier_result(hw_multiplier, 15);
-        end "*";
-    --------------------------------------------------
-
         --------------------------------------------------
         function get_square_wave_from_counter
         (
@@ -227,9 +222,11 @@ begin
             end if; 
 
             if ad_conversion_is_ready(spi_sar_adc_data_out) then
-                calculate_lcr_filter(lcr_filter);
+                calculate_lcr_filter(lcr_filter1);
                 calculate_lcr_filter(lcr_filter2);
                 calculate_lcr_filter(lcr_filter3);
+                calculate_lcr_filter(lcr_filter4);
+                calculate_lcr_filter(lcr_filter5);
 
                 CASE uart_rx_data is
                     WHEN 10 => transmit_16_bit_word_with_uart(uart_data_in, get_filter_output(bandpass_filter.low_pass_filter) );
@@ -238,8 +235,8 @@ begin
                     WHEN 13 => transmit_16_bit_word_with_uart(uart_data_in, bandpass_filter.low_pass_filter.filter_input - get_filter_output(bandpass_filter));
                     WHEN 14 => transmit_16_bit_word_with_uart(uart_data_in, get_adc_data(spi_sar_adc_data_out));
                     WHEN 15 => transmit_16_bit_word_with_uart(uart_data_in, uart_rx_data);
-                    WHEN 16 => transmit_16_bit_word_with_uart(uart_data_in, lcr_filter3.inductor_current.state + 32768);
-                    WHEN 17 => transmit_16_bit_word_with_uart(uart_data_in, lcr_filter3.capacitor_voltage.state+ 32768);
+                    WHEN 16 => transmit_16_bit_word_with_uart(uart_data_in, lcr_filter5.inductor_current.state + 32768);
+                    WHEN 17 => transmit_16_bit_word_with_uart(uart_data_in, lcr_filter5.capacitor_voltage.state+ 32768);
                     WHEN others => -- get data from MDIO
                         register_counter := register_counter + 1;
                         if test_counter = 4600 then
@@ -304,13 +301,17 @@ begin
                 WHEN others => -- hang here and wait for counter being set to zero
             end CASE;
             -------------------------------------------------- 
-            create_multiplier(hw_multiplier); 
+            create_multiplier(hw_multiplier1); 
             create_multiplier(hw_multiplier2); 
             create_multiplier(hw_multiplier3); 
+            create_multiplier(hw_multiplier4); 
+            create_multiplier(hw_multiplier5); 
 
-            create_lcr_filter(lcr_filter  , hw_multiplier  , input_voltage - lcr_filter.capacitor_voltage.state                        , lcr_filter.inductor_current.state - lcr_filter2.inductor_current.state);
-            create_lcr_filter(lcr_filter2 , hw_multiplier2 , lcr_filter.capacitor_voltage.state - lcr_filter2.capacitor_voltage.state  , lcr_filter2.inductor_current.state - lcr_filter3.inductor_current.state);
-            create_lcr_filter(lcr_filter3 , hw_multiplier3 , lcr_filter2.capacitor_voltage.state - lcr_filter3.capacitor_voltage.state , lcr_filter3.inductor_current.state - load_current);
+            create_lcr_filter(lcr_filter1 , hw_multiplier1 , input_voltage                       - lcr_filter1.capacitor_voltage.state , lcr_filter1.inductor_current.state - lcr_filter2.inductor_current.state);
+            create_lcr_filter(lcr_filter2 , hw_multiplier2 , lcr_filter1.capacitor_voltage.state - lcr_filter2.capacitor_voltage.state , lcr_filter2.inductor_current.state - lcr_filter3.inductor_current.state);
+            create_lcr_filter(lcr_filter3 , hw_multiplier3 , lcr_filter2.capacitor_voltage.state - lcr_filter3.capacitor_voltage.state , lcr_filter3.inductor_current.state - lcr_filter4.inductor_current.state);
+            create_lcr_filter(lcr_filter4 , hw_multiplier4 , lcr_filter3.capacitor_voltage.state - lcr_filter4.capacitor_voltage.state , lcr_filter4.inductor_current.state - lcr_filter5.inductor_current.state);
+            create_lcr_filter(lcr_filter5 , hw_multiplier5 , lcr_filter4.capacitor_voltage.state - lcr_filter5.capacitor_voltage.state , lcr_filter5.inductor_current.state - load_current);
 
 
         end if; --rising_edge
