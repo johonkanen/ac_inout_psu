@@ -43,7 +43,7 @@ architecture sim of lrc_model is
     signal capacitor_integrator_gain : int18 := 2000;
     signal load_resistance : int18           := 10;
 
-    signal inductor_series_resistance : int18 := 500;
+    signal inductor_series_resistance : int18 := 950;
 
     signal load_current : int18 := 0;
 
@@ -102,13 +102,13 @@ begin
             simulation_counter <= simulation_counter + 1;
 
             simulation_trigger_counter <= simulation_trigger_counter + 1;
-            if simulation_trigger_counter = 40 then
+            if simulation_trigger_counter = 19 then
                 simulation_trigger_counter <= 0;
                 process_counter <= 0;
             end if;
 
             input_voltage <= 32e2;
-            if simulation_counter = 12000  then
+            if simulation_counter = 17000  then
                 load_resistance <= 65e3;
             end if;
 
