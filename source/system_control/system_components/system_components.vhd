@@ -255,9 +255,9 @@ begin
                 if test_counter = 65536/2 then
                     input_voltage <= -input_voltage;
                 end if;
-                -- if test_counter = 65535 then
-                --     load_resistance <= 5e3;
-                -- end if;
+                if test_counter = 65535 then
+                    load_current <= -load_current;
+                end if;
             end if;
 
             if mdio_data_read_is_ready(mdio_driver_data_out) then

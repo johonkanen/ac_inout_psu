@@ -15,10 +15,6 @@ package lcr_filter_model_pkg is
         process_counter   : natural range 0 to 7;
 
         inductor_current_delta     : int18;
-        inductor_integrator_gain   : int18;
-        capacitor_delta            : int18;
-        capacitor_integrator_gain  : int18;
-        load_resistance            : int18;
         inductor_series_resistance : int18;
     end record;
 
@@ -27,11 +23,7 @@ package lcr_filter_model_pkg is
             capacitor_voltage          => (0, 0) ,
             process_counter            => 4      ,
             inductor_current_delta     => 0      ,
-            inductor_integrator_gain   => 25e3   ,
-            capacitor_integrator_gain  => 2000   ,
-            load_resistance            => 10     ,
-            capacitor_delta            => 10     ,
-            inductor_series_resistance => 950);
+            inductor_series_resistance => 200);
 
 ------------------------------------------------------------------------
     procedure create_lcr_filter (
@@ -69,7 +61,6 @@ package body lcr_filter_model_pkg is
         alias inductor_series_resistance is lcr_filter.inductor_series_resistance;
         alias inductor_current is lcr_filter.inductor_current;
         alias capacitor_voltage is lcr_filter.capacitor_voltage;
-        alias capacitor_delta is lcr_filter.capacitor_delta;
     --------------------------------------------------
         impure function "*" ( left, right : int18)
         return int18
@@ -90,7 +81,7 @@ package body lcr_filter_model_pkg is
                     increment_counter_when_ready(hw_multiplier, process_counter);
 
                 WHEN 2 =>
-                    integrate_state(capacitor_voltage, hw_multiplier, 15, capacitor_voltage_state_equation - capacitor_delta);
+                    integrate_state(capacitor_voltage, hw_multiplier, 15, capacitor_voltage_state_equation);
                     increment_counter_when_ready(hw_multiplier, process_counter);
                 WHEN others => -- do nothing
 
