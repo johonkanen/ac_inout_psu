@@ -21,7 +21,7 @@ architecture sim of tb_pi_controller is
     signal clocked_reset : std_logic;
     constant clock_per : time := 1 ns;
     constant clock_half_per : time := 0.5 ns;
-    constant simtime_in_clocks : integer := 5000;
+    constant simtime_in_clocks : integer := 15000;
 ------------------------------------------------------------------------
     signal simulation_counter : natural := 0;
 
@@ -31,12 +31,12 @@ architecture sim of tb_pi_controller is
     signal process_counter : natural :=0;
 
     constant kp : natural := 1e5;
-    constant ki : natural := 1e3;
+    constant ki : natural := 1e4;
 
     signal pi_out : int18 := 0;
     signal integrator : int18 := 0;
 
-    signal dc_link_voltege : state_variable_record := init_state_variable_gain(200);
+    signal dc_link_voltege : state_variable_record := (3000, 200);
     signal voltage : int18 := 0;
 
     signal state_counter : natural := 0;
@@ -71,6 +71,7 @@ begin
     clocked_reset_generator : process(simulator_clock, rstn)
         variable pi_error : int18 := 0;
         variable voltage_reference : int18 := 3000;
+        variable load_current : int18 := -7000;
     begin
         if rising_edge(simulator_clock) then
 
@@ -78,15 +79,16 @@ begin
             create_multiplier(hw_multiplier);
             create_multiplier(state_variable_multiplier);
 
-            CASE state_counter is
-                WHEN 0 =>
-                    integrate_state(dc_link_voltege, state_variable_multiplier, 15, pi_out);
-                    increment_counter_when_ready(state_variable_multiplier, state_counter);
-                WHEN others => -- wait for 0
-            end CASE;
+            if state_counter = 0 then
+                integrate_state(dc_link_voltege, state_variable_multiplier, 15, pi_out - load_current);
+                increment_counter_when_ready(state_variable_multiplier, state_counter);
+            end if;
 
+            if (simulation_counter + 1250) mod 2500 = 0 then
+                load_current := -load_current;
+            end if;
             if simulation_counter mod 2500 = 0 then
-                voltage_reference := -voltage_reference;
+                -- voltage_reference := -voltage_reference;
             end if;
 
             if simulation_counter mod 10 = 0 then
@@ -106,29 +108,29 @@ begin
 
                     if multiplier_is_ready(hw_multiplier) then
                         process_counter <= process_counter + 1;
-                        pi_out <= integrator + get_multiplier_result(hw_multiplier, 15);
-                        if pi_out + get_multiplier_result(hw_multiplier, 15) > 10e3 then
-                            pi_out <= 10e3;
-                            integrator <= 10e3 - pi_out;
+                        pi_out <= integrator + get_multiplier_result(hw_multiplier, 13);
+                        if integrator + get_multiplier_result(hw_multiplier, 13) >= 10e3 then
+                            pi_out          <= 10e3;
+                            integrator      <= 10e3 - get_multiplier_result(hw_multiplier, 13);
                             process_counter <= process_counter + 2;
                         end if;
 
-                        if pi_out + get_multiplier_result(hw_multiplier, 15) < -10e3 then
-                            pi_out <= -10e3;
-                            integrator <= -10e3 - pi_out;
+                        if integrator + get_multiplier_result(hw_multiplier, 13) <= -10e3 then
+                            pi_out          <= -10e3;
+                            integrator      <= -10e3 - get_multiplier_result(hw_multiplier, 13);
                             process_counter <= process_counter + 2;
                         end if;
                     end if;
                 WHEN 3 =>
-                    integrator <= integrator + get_multiplier_result(hw_multiplier, 15);
+                    integrator <= integrator + get_multiplier_result(hw_multiplier, 13);
                     process_counter <= process_counter + 1;
                 WHEN others => -- wait for restart
             end CASE;
+            voltage <=pi_error;
 
     
         end if; -- rstn
     end process clocked_reset_generator;	
 ------------------------------------------------------------------------
-    voltage <= dc_link_voltege.state;
 
 end sim;
