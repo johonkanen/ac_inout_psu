@@ -30,13 +30,13 @@ architecture sim of tb_pi_controller is
 
     signal process_counter : natural :=0;
 
-    constant kp : natural := 1e4;
+    constant kp : natural := 1e5;
     constant ki : natural := 1e3;
 
     signal pi_out : int18 := 0;
     signal integrator : int18 := 0;
 
-    signal dc_link_voltege : state_variable_record := init_state_variable_gain(20000);
+    signal dc_link_voltege : state_variable_record := init_state_variable_gain(200);
     signal voltage : int18 := 0;
 
     signal state_counter : natural := 0;
@@ -69,7 +69,8 @@ begin
 ------------------------------------------------------------------------
 
     clocked_reset_generator : process(simulator_clock, rstn)
-        variable pi_error : int18 := 500;
+        variable pi_error : int18 := 0;
+        variable voltage_reference : int18 := 3000;
     begin
         if rising_edge(simulator_clock) then
 
@@ -84,13 +85,16 @@ begin
                 WHEN others => -- wait for 0
             end CASE;
 
+            if simulation_counter mod 2500 = 0 then
+                voltage_reference := -voltage_reference;
+            end if;
 
             if simulation_counter mod 10 = 0 then
                 process_counter <= 0;
                 state_counter <= 0;
             end if; 
 
-            pi_error := 2500 - dc_link_voltege.state;
+            pi_error := voltage_reference - dc_link_voltege.state;
             CASE process_counter is
                 WHEN 0 =>
                     multiply(hw_multiplier, kp , pi_error);
@@ -111,7 +115,7 @@ begin
 
                         if pi_out + get_multiplier_result(hw_multiplier, 15) < -10e3 then
                             pi_out <= -10e3;
-                            integrator <= 10e3 - pi_out;
+                            integrator <= -10e3 - pi_out;
                             process_counter <= process_counter + 2;
                         end if;
                     end if;
