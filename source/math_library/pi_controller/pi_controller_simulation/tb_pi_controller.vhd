@@ -32,6 +32,7 @@ architecture sim of tb_pi_controller is
 
     constant kp : natural := 1e5;
     constant ki : natural := 1e4;
+    constant pi_controller_radix : natural := 10;
 
     signal pi_out : int18 := 0;
     signal integrator : int18 := 0;
@@ -71,7 +72,7 @@ begin
     clocked_reset_generator : process(simulator_clock, rstn)
         variable pi_error : int18 := 0;
         variable voltage_reference : int18 := 3000;
-        variable load_current : int18 := -8500;
+        variable load_current : int18 := -9500;
     begin
         if rising_edge(simulator_clock) then
 
@@ -108,21 +109,21 @@ begin
 
                     if multiplier_is_ready(hw_multiplier) then
                         process_counter <= process_counter + 1;
-                        pi_out <= integrator + get_multiplier_result(hw_multiplier, 13);
-                        if integrator + get_multiplier_result(hw_multiplier, 13) >= 10e3 then
+                        pi_out <= integrator + get_multiplier_result(hw_multiplier, pi_controller_radix);
+                        if integrator + get_multiplier_result(hw_multiplier, pi_controller_radix) >= 10e3 then
                             pi_out          <= 10e3;
-                            integrator      <= 10e3 - get_multiplier_result(hw_multiplier, 13);
+                            integrator      <= 10e3 - get_multiplier_result(hw_multiplier, pi_controller_radix);
                             process_counter <= process_counter + 2;
                         end if;
 
-                        if integrator + get_multiplier_result(hw_multiplier, 13) <= -10e3 then
+                        if integrator + get_multiplier_result(hw_multiplier, pi_controller_radix) <= -10e3 then
                             pi_out          <= -10e3;
-                            integrator      <= -10e3 - get_multiplier_result(hw_multiplier, 13);
+                            integrator      <= -10e3 - get_multiplier_result(hw_multiplier, pi_controller_radix);
                             process_counter <= process_counter + 2;
                         end if;
                     end if;
                 WHEN 3 =>
-                    integrator <= integrator + get_multiplier_result(hw_multiplier, 13);
+                    integrator <= integrator + get_multiplier_result(hw_multiplier, pi_controller_radix);
                     process_counter <= process_counter + 1;
                 WHEN others => -- wait for restart
             end CASE;
