@@ -32,12 +32,13 @@ architecture sim of tb_pi_controller is
 
     constant kp : natural := 1e5;
     constant ki : natural := 1e4;
-    constant pi_controller_radix : natural := 10;
+    constant pi_controller_radix : natural := 12;
+    constant pi_controller_limit : natural := 10e3;
 
     signal pi_out : int18 := 0;
     signal integrator : int18 := 0;
 
-    signal dc_link_voltege : state_variable_record := (3000, 200);
+    signal dc_link_voltege : state_variable_record := (0000, 200);
     signal voltage : int18 := 0;
 
     signal state_counter : natural := 0;
@@ -71,8 +72,8 @@ begin
 
     clocked_reset_generator : process(simulator_clock, rstn)
         variable pi_error : int18 := 0;
-        variable voltage_reference : int18 := 3000;
-        variable load_current : int18 := -9500;
+        variable voltage_reference : int18 := 1000;
+        variable load_current : int18 := -8555;
     begin
         if rising_edge(simulator_clock) then
 
@@ -110,15 +111,15 @@ begin
                     if multiplier_is_ready(hw_multiplier) then
                         process_counter <= process_counter + 1;
                         pi_out <= integrator + get_multiplier_result(hw_multiplier, pi_controller_radix);
-                        if integrator + get_multiplier_result(hw_multiplier, pi_controller_radix) >= 10e3 then
-                            pi_out          <= 10e3;
-                            integrator      <= 10e3 - get_multiplier_result(hw_multiplier, pi_controller_radix);
+                        if integrator + get_multiplier_result(hw_multiplier, pi_controller_radix) >= pi_controller_limit then
+                            pi_out          <= pi_controller_limit;
+                            integrator      <= pi_controller_limit - get_multiplier_result(hw_multiplier, pi_controller_radix);
                             process_counter <= process_counter + 2;
                         end if;
 
-                        if integrator + get_multiplier_result(hw_multiplier, pi_controller_radix) <= -10e3 then
-                            pi_out          <= -10e3;
-                            integrator      <= -10e3 - get_multiplier_result(hw_multiplier, pi_controller_radix);
+                        if integrator + get_multiplier_result(hw_multiplier, pi_controller_radix) <= -pi_controller_limit then
+                            pi_out          <= -pi_controller_limit;
+                            integrator      <= -pi_controller_limit - get_multiplier_result(hw_multiplier, pi_controller_radix);
                             process_counter <= process_counter + 2;
                         end if;
                     end if;
