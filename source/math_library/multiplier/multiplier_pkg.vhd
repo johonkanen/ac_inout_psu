@@ -20,10 +20,15 @@ package multiplier_pkg is
     end record;
 
     constant multiplier_init_values : multiplier_record := ( (others => '0'),(others => '0'),(others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), false, '0');
-
 ------------------------------------------------------------------------
     procedure create_multiplier (
         signal multiplier : inout multiplier_record);
+------------------------------------------------------------------------
+    procedure multiply_and_get_result (
+        signal multiplier : inout multiplier_record;
+        radix : natural range 0 to 17;
+        signal result : out int18;
+        left, right : int18) ; 
 ------------------------------------------------------------------------
     procedure multiply (
         signal multiplier : inout multiplier_record;
@@ -47,7 +52,12 @@ package multiplier_pkg is
         signal multiplier : inout multiplier_record;
         data_a : in int18;
         data_b : in int18);
+------------------------------------------------------------------------
+    procedure increment_counter_when_ready (
+        multiplier : multiplier_record;
+        signal counter : inout natural);
 
+------------------------------------------------------------------------
 end package multiplier_pkg;
 
 package body multiplier_pkg is
@@ -73,10 +83,9 @@ package body multiplier_pkg is
         signed_36_bit_result <= multiplier.signed_36_bit_buffer;
         multiplier_is_requested_with_1 <= '0';
         shift_register <= shift_register(shift_register'left-1 downto 0) & multiplier_is_requested_with_1;
-        multiplier_is_busy <= false;
-        if shift_register /= "000" then
-            multiplier_is_busy <= true;
-        end if;
+
+        multiplier_is_busy <= shift_register /= "000";
+
     end create_multiplier;
 
 ------------------------------------------------------------------------
@@ -107,7 +116,6 @@ package body multiplier_pkg is
         end if;
         
     end sequential_multiply;
-
 
 ------------------------------------------------------------------------
     function multiplier_is_ready
@@ -181,9 +189,37 @@ package body multiplier_pkg is
     return boolean
     is
     begin
-        return not multiplier.multiplier_is_busy;
+        
+        return multiplier.shift_register = "000" and (multiplier.multiplier_is_requested_with_1 = '0');
     end multiplier_is_not_busy;
+------------------------------------------------------------------------
+    procedure increment_counter_when_ready
+    (
+        multiplier : multiplier_record;
+        signal counter : inout natural
+    ) is
+    begin
+        if multiplier_is_ready(multiplier) then
+            counter <= counter + 1;
+        end if;
+    end increment_counter_when_ready;
+------------------------------------------------------------------------
+    procedure multiply_and_get_result
+    (
+        signal multiplier : inout multiplier_record;
+        radix : natural range 0 to 17;
+        signal result : out int18;
+        left, right : int18
+    ) 
+    is
+    begin
 
+        sequential_multiply(multiplier, left, right);
+        if multiplier_is_ready(multiplier) then
+            result <= get_multiplier_result(multiplier, radix);
+        end if; 
+        
+    end multiply_and_get_result;
 
 ------------------------------------------------------------------------
 end package body multiplier_pkg; 

@@ -3,6 +3,8 @@ set source=source/
 
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/multiplier/multiplier_pkg.vhd
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/first_order_filter/first_order_filter_pkg.vhd
+ghdl -a --ieee=synopsys --work=math_library %source%/math_library/state_variable/state_variable_pkg.vhd
+ghdl -a --ieee=synopsys --work=math_library %source%/math_library/lcr_filter_model/lcr_filter_model_pkg.vhd
 
 ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet_communication/ethernet/ethernet_clocks_pkg.vhd 
 ghdl -a --ieee=synopsys %source%/system_clocks_pkg.vhd

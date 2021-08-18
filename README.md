@@ -5,6 +5,8 @@ Hardware test code currently developed in source/system_control/system_component
 A companion website with some descriptions on the project can be found at
 https://hardwaredescriptions.com
 
+The steps to produce the uart console programs for testing the VHDL are found in https://hardwaredescriptions.com/?page_id=912
+
 system sources are in ./get_vhdl_sources.tcl file in reverse order compared to the code architecture. This is done to ease maintaining ghdl_compile.bat which is used for syntax checking and simulation
 
 Currently compiled with quartus software and for cyclone 10lp025. Build can be started with call to quartus shell and the top level tcl script is in /cyclone_10/tcl/build_project.tcl
