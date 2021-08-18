@@ -13,17 +13,26 @@ SYSTEM_CONTROL_PATH = "system_control"
 
 VU = VUnit.from_argv()
 
+mathlib = VU.add_library("math_library")
+
 lib = VU.add_library("lib")
 
 ## Possible single line VHDL source code detection with globbing 
 ## Uncomment all subsequent lines if glob is used
 # lib.add_source_files(glob("source/**/*/*.vhd", rursive=True)) 
 
+
+
 lib.add_source_files(SRC_PATH / "*.vhd") 
 
-lib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "first_order_filter" / "*.vhd") 
-lib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "multiplier" / "*.vhd") 
-lib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "multiplier" /  "simulation" /"*.vhd") 
+mathlib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "first_order_filter" / "*.vhd") 
+mathlib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "multiplier" / "*.vhd") 
+mathlib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "multiplier" /  "simulation" / "*.vhd") 
+mathlib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "lcr_filter_model" / "*.vhd") 
+mathlib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "state_variable" / "*.vhd") 
+
+lib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "lcr_filter_model" / "lcr_filter_simulation" / "*.vhd") 
+lib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "state_variable" / "simulation" / "*.vhd") 
 
 lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "*.vhd")
 lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "*.vhd")
@@ -50,6 +59,9 @@ lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "eth
 lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "ethernet_communication" / "ethernet" / "ethernet_frame_transmitter" / "*.vhd")
 lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "ethernet_communication" / "ethernet" / "ethernet_frame_transmitter" / "ethernet_frame_transmitter_simulation" / "*.vhd")
 lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "ethernet_communication" / "ethernet" / "ethernet_frame_transmitter" / "ethernet_tx_ddio" / "*.vhd")
+
+lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "ethernet_communication" / "ethernet" / "mdio_driver" / "*.vhd")
+lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "ethernet_communication" / "ethernet" / "mdio_driver" / "mdio_three_state_io_driver" / "*.vhd")
 
 lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "ethernet_communication" / "ethernet_common" / "*.vhd")
 lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "ethernet_communication" / "ethernet_common" / "dual_port_ethernet_ram" / "*.vhd")
