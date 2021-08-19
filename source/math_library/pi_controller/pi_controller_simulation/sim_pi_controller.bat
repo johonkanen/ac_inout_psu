@@ -8,6 +8,7 @@ SET project_root=%%F
 SET source=%project_root%/source
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/multiplier/multiplier_pkg.vhd
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/state_variable/state_variable_pkg.vhd 
+ghdl -a --ieee=synopsys --work=math_library %source%/math_library/pi_controller/pi_controller_pkg.vhd
 
     ghdl -a --ieee=synopsys tb_pi_controller.vhd
     ghdl -e --ieee=synopsys tb_pi_controller

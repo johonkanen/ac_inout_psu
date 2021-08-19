@@ -1,0 +1,82 @@
+library ieee;
+    use ieee.std_logic_1164.all;
+    use ieee.numeric_std.all;
+
+library math_library;
+    use math_library.multiplier_pkg.all;
+
+package pi_controller_pkg is
+
+------------------------------------------------------------------------
+    type pi_controller_record is record
+        integrator : int18;
+        pi_out     : int18;
+        pi_control_process_counter : natural range 0 to 7;
+        pi_error : int18;
+    end record;
+
+------------------------------------------------------------------------
+    procedure create_pi_controller (
+        signal hw_multiplier : inout multiplier_record;
+        signal pi_controller : inout pi_controller_record;
+        proportional_gain    : in uint17;
+        integrator_gain      : in uint17); 
+
+------------------------------------------------------------------------
+end package pi_controller_pkg;
+
+
+package body pi_controller_pkg is
+
+------------------------------------------------------------------------
+    procedure create_pi_controller
+    (
+        signal hw_multiplier : inout multiplier_record;
+        signal pi_controller : inout pi_controller_record;
+        proportional_gain    : in uint17;
+        integrator_gain      : in uint17
+    ) is
+        alias pi_control_process_counter is pi_controller.pi_control_process_counter;
+        alias kp is proportional_gain;
+        alias ki is integrator_gain;
+        alias pi_error is pi_controller.pi_error;
+        alias pi_out is pi_controller.pi_out;
+        alias integrator is pi_controller.integrator;
+        constant pi_controller_radix : natural := 12;
+        constant pi_controller_limit : natural := 2**14;
+    begin
+        CASE pi_control_process_counter is
+            WHEN 0 =>
+                multiply(hw_multiplier, kp , pi_error);
+                pi_control_process_counter <= pi_control_process_counter + 1;
+            WHEN 1 =>
+                multiply(hw_multiplier, ki , pi_error);
+                pi_control_process_counter <= pi_control_process_counter + 1;
+            WHEN 2 => 
+
+                if multiplier_is_ready(hw_multiplier) then
+                    pi_control_process_counter <= pi_control_process_counter + 1;
+                    pi_out <= integrator + get_multiplier_result(hw_multiplier, pi_controller_radix);
+                    if integrator + get_multiplier_result(hw_multiplier, pi_controller_radix) >= pi_controller_limit then
+                        pi_out          <= pi_controller_limit;
+                        integrator      <= pi_controller_limit - get_multiplier_result(hw_multiplier, pi_controller_radix);
+                        pi_control_process_counter <= pi_control_process_counter + 2;
+                    end if;
+
+                    if integrator + get_multiplier_result(hw_multiplier, pi_controller_radix) <= -pi_controller_limit then
+                        pi_out          <= -pi_controller_limit;
+                        integrator      <= -pi_controller_limit - get_multiplier_result(hw_multiplier, pi_controller_radix);
+                        pi_control_process_counter <= pi_control_process_counter + 2;
+                    end if;
+                end if;
+            WHEN 3 =>
+                integrator <= integrator + get_multiplier_result(hw_multiplier, pi_controller_radix);
+                pi_control_process_counter <= pi_control_process_counter + 1;
+            WHEN others => -- wait for restart
+        end CASE;
+        
+    end create_pi_controller;
+------------------------------------------------------------------------
+
+end package body pi_controller_pkg;
+

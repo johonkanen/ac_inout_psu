@@ -6,6 +6,7 @@ package multiplier_pkg is
 
     subtype signed_36_bit is signed(35 downto 0);
     subtype int18 is integer range -2**17 to 2**17-1;
+    subtype uint17 is integer range 0 to 2**17-1;
 
     type multiplier_record is record
         signed_data_a        : signed(17 downto 0);

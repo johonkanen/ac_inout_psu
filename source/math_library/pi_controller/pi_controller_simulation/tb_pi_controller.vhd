@@ -9,6 +9,7 @@ LIBRARY std  ;
 library math_library;
     use math_library.multiplier_pkg.all;
     use math_library.state_variable_pkg.all;
+    use math_library.pi_controller_pkg.all;
 
 entity tb_pi_controller is
 end;
