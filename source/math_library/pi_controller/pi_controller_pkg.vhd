@@ -14,6 +14,7 @@ package pi_controller_pkg is
         pi_control_process_counter : natural range 0 to 7;
         pi_error : int18;
     end record;
+    constant pi_controller_init : pi_controller_record := (0, 0, 7, 0);
 
 ------------------------------------------------------------------------
     procedure create_pi_controller (
@@ -21,6 +22,10 @@ package pi_controller_pkg is
         signal pi_controller : inout pi_controller_record;
         proportional_gain    : in uint17;
         integrator_gain      : in uint17); 
+------------------------------------------------------------------------
+    procedure calculate_pi_control (
+        signal pi_controller : out pi_controller_record;
+        pi_control_input : in int18);
 
 ------------------------------------------------------------------------
 end package pi_controller_pkg;
@@ -77,6 +82,17 @@ package body pi_controller_pkg is
         
     end create_pi_controller;
 ------------------------------------------------------------------------
+    procedure calculate_pi_control
+    (
+        signal pi_controller : out pi_controller_record;
+        pi_control_input : in int18
+    ) is
+    begin
+
+        pi_controller.pi_control_process_counter <= 0;
+        pi_controller.pi_error <= pi_control_input;
+        
+    end calculate_pi_control;
 
 end package body pi_controller_pkg;
 

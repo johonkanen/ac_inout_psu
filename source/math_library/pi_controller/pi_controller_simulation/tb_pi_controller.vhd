@@ -36,13 +36,12 @@ architecture sim of tb_pi_controller is
     constant pi_controller_radix : natural := 12;
     constant pi_controller_limit : natural := 10e3;
 
-    signal pi_out : int18 := 0;
-    signal integrator : int18 := 0;
-
     signal dc_link_voltege : state_variable_record := (0000, 200);
     signal voltage : int18 := 0;
 
     signal state_counter : natural := 0;
+
+    signal pi_control : pi_controller_record := pi_controller_init;
 
 begin
 
@@ -81,9 +80,10 @@ begin
             simulation_counter <= simulation_counter + 1;
             create_multiplier(hw_multiplier);
             create_multiplier(state_variable_multiplier);
+            create_pi_controller(hw_multiplier, pi_control, kp, ki);
 
             if state_counter = 0 then
-                integrate_state(dc_link_voltege, state_variable_multiplier, 15, pi_out - load_current);
+                integrate_state(dc_link_voltege, state_variable_multiplier, 15, pi_control.pi_out - load_current);
                 increment_counter_when_ready(state_variable_multiplier, state_counter);
             end if;
 
@@ -95,45 +95,13 @@ begin
             end if;
 
             if simulation_counter mod 10 = 0 then
-                pi_control_process_counter <= 0;
                 state_counter <= 0;
+                calculate_pi_control(pi_control, voltage_reference - dc_link_voltege.state);
             end if; 
 
-            pi_error := voltage_reference - dc_link_voltege.state;
-            CASE pi_control_process_counter is
-                WHEN 0 =>
-                    multiply(hw_multiplier, kp , pi_error);
-                    pi_control_process_counter <= pi_control_process_counter + 1;
-                WHEN 1 =>
-                    multiply(hw_multiplier, ki , pi_error);
-                    pi_control_process_counter <= pi_control_process_counter + 1;
-                WHEN 2 => 
-
-                    if multiplier_is_ready(hw_multiplier) then
-                        pi_control_process_counter <= pi_control_process_counter + 1;
-                        pi_out <= integrator + get_multiplier_result(hw_multiplier, pi_controller_radix);
-                        if integrator + get_multiplier_result(hw_multiplier, pi_controller_radix) >= pi_controller_limit then
-                            pi_out          <= pi_controller_limit;
-                            integrator      <= pi_controller_limit - get_multiplier_result(hw_multiplier, pi_controller_radix);
-                            pi_control_process_counter <= pi_control_process_counter + 2;
-                        end if;
-
-                        if integrator + get_multiplier_result(hw_multiplier, pi_controller_radix) <= -pi_controller_limit then
-                            pi_out          <= -pi_controller_limit;
-                            integrator      <= -pi_controller_limit - get_multiplier_result(hw_multiplier, pi_controller_radix);
-                            pi_control_process_counter <= pi_control_process_counter + 2;
-                        end if;
-                    end if;
-                WHEN 3 =>
-                    integrator <= integrator + get_multiplier_result(hw_multiplier, pi_controller_radix);
-                    pi_control_process_counter <= pi_control_process_counter + 1;
-                WHEN others => -- wait for restart
-            end CASE;
-            voltage <=pi_error;
-
-    
         end if; -- rstn
     end process clocked_reset_generator;	
 ------------------------------------------------------------------------
+            voltage <=pi_control.pi_error;
 
 end sim;
