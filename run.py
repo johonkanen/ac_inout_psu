@@ -51,6 +51,7 @@ lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "uar
 
 lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "ethernet_communication" / "*.vhd")
 lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "ethernet_communication" / "ethernet" / "*.vhd")
+lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "ethernet_communication" / "ethernet_common" / "*.vhd")
 lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "ethernet_communication" / "ethernet" / "ethernet_frame_receiver" / "*.vhd")
 lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "ethernet_communication" / "ethernet" / "ethernet_frame_receiver" / "ethernet_frame_receiver_simulation"/ "*.vhd")
 lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "ethernet_communication" / "ethernet" / "ethernet_frame_receiver" / "ethernet_rx_ddio" / "*.vhd")
@@ -72,6 +73,8 @@ lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "eth
 
 lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "power_supply_control" / "*.vhd")
 lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "power_supply_control" / "gate_drive_power" / "*.vhd")
+
+
 
 lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "*.vhd")
 
