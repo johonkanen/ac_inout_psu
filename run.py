@@ -27,10 +27,12 @@ lib.add_source_files(SRC_PATH / "*.vhd")
 
 mathlib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "first_order_filter" / "*.vhd") 
 mathlib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "multiplier" / "*.vhd") 
-mathlib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "multiplier" /  "simulation" / "*.vhd") 
 mathlib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "lcr_filter_model" / "*.vhd") 
 mathlib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "state_variable" / "*.vhd") 
+mathlib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "pi_controller" / "*.vhd") 
 
+lib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "pi_controller" / "pi_controller_simulation" / "*.vhd") 
+lib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "multiplier" /  "simulation" / "*.vhd") 
 lib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "lcr_filter_model" / "lcr_filter_simulation" / "*.vhd") 
 lib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "state_variable" / "simulation" / "*.vhd") 
 
@@ -57,9 +59,11 @@ lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "eth
 lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "ethernet_communication" / "ethernet" / "ethernet_frame_receiver" / "ethernet_rx_ddio" / "*.vhd")
 lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "ethernet_communication" / "ethernet" / "ethernet_frame_receiver" / "*.vhd")
 
-lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "ethernet_communication" / "ethernet" / "ethernet_frame_transmitter" / "*.vhd")
-lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "ethernet_communication" / "ethernet" / "ethernet_frame_transmitter" / "ethernet_frame_transmitter_simulation" / "*.vhd")
-lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "ethernet_communication" / "ethernet" / "ethernet_frame_transmitter" / "ethernet_tx_ddio" / "*.vhd")
+lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "ethernet_communication" / "ethernet" / "ethernet_frame_transmitter" / "ethernet_frame_transmit*_pkg.vhd")
+
+# lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "ethernet_communication" / "ethernet" / "ethernet_frame_transmitter" / "*.vhd")
+# lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "ethernet_communication" / "ethernet" / "ethernet_frame_transmitter" / "ethernet_frame_transmitter_simulation" / "*.vhd")
+# lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "ethernet_communication" / "ethernet" / "ethernet_frame_transmitter" / "ethernet_tx_ddio" / "*.vhd")
 
 lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "ethernet_communication" / "ethernet" / "mdio_driver" / "*.vhd")
 lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "ethernet_communication" / "ethernet" / "mdio_driver" / "mdio_three_state_io_driver" / "*.vhd")
