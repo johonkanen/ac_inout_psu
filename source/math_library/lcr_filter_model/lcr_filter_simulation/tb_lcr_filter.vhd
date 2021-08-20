@@ -106,12 +106,12 @@ begin
                 load_current <= -load_current;
             end if;
 
-            int18_inductor_current <= lcr_filter3.inductor_current.state;
-            int18_capacitor_voltage <= lcr_filter3.capacitor_voltage.state;
 
         end if; -- rstn
     end process clocked_reset_generator;	
 
+    int18_inductor_current <= lcr_filter3.inductor_current.state;
+    int18_capacitor_voltage <= lcr_filter3.capacitor_voltage.state;
 
 ------------------------------------------------------------------------
 end sim;

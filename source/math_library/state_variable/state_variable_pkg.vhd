@@ -13,26 +13,31 @@ package state_variable_pkg is
         integrator_gain : int18;
     end record;
 
+    constant init_state_variable : state_variable_record := (0, 0);
+--------------------------------------------------
     function init_state_variable_gain ( integrator_gain : int18)
         return state_variable_record;
 
-    constant init_state_variable : state_variable_record := (0, 0);
-
+--------------------------------------------------
     procedure create_state_variable (
         signal state_variable : inout state_variable_record;
         integrator_gain : int18);
 
+--------------------------------------------------
     procedure integrate_state (
         signal state_variable : inout state_variable_record;
         signal multiplier : inout multiplier_record;
         constant radix : in natural;
         state_equation : in int18);
 
+--------------------------------------------------
 end package state_variable_pkg;
 
 ------------------------------------------------------------------------
+------------------------------------------------------------------------
 package body state_variable_pkg is
 
+--------------------------------------------------
     function init_state_variable_gain
     (
         integrator_gain : int18
@@ -45,6 +50,7 @@ package body state_variable_pkg is
         return state_variable;
     end init_state_variable_gain;
 
+--------------------------------------------------
     procedure create_state_variable
     (
         signal state_variable : inout state_variable_record;
