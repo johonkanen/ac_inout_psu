@@ -34,6 +34,8 @@ architecture sim of tb_power_supply_model is
     signal load_current : int18 := 0;
     signal grid_inductor_current : state_variable_record := init_state_variable_gain(5000);
 
+    signal dc_link_voltage : state_variable_record := init_state_variable_gain(5000);
+
     type inverter_stages is (main_grid_filter  ,
                             grid_emi_filter_1  ,
                             grid_emi_filter_2  ,
@@ -60,7 +62,7 @@ architecture sim of tb_power_supply_model is
                                                                 multiplier_init_values   ,
                                                                 multiplier_init_values);
 
-    -- signal 
+    signal grid_inverter_state_counter : natural range 0 to 7;
 
 begin
 
@@ -90,6 +92,13 @@ begin
 ------------------------------------------------------------------------
 
     clocked_reset_generator : process(simulator_clock, rstn)
+        impure function "*" ( left, right : int18)
+        return int18
+        is
+        begin
+            sequential_multiply(lc_filter_multipliers(grid_inductor_multiplier), left, right);
+            return get_multiplier_result(lc_filter_multipliers(grid_inductor_multiplier), 15);
+        end "*";
     begin
         if rising_edge(simulator_clock) then
             create_multiplier(lc_filter_multipliers(main_grid_filter)); 
@@ -100,14 +109,32 @@ begin
             create_multiplier(lc_filter_multipliers(output_main_filter)); 
             create_multiplier(lc_filter_multipliers(output_emi_filter)); 
 
+            --- grid inverter model
             create_lcr_filter(grid_lc_filter(main_grid_filter   ) , lc_filter_multipliers(main_grid_filter    ) , input_voltage                                         - grid_lc_filter(main_grid_filter).capacitor_voltage  , grid_lc_filter(main_grid_filter).inductor_current   - grid_lc_filter(grid_emi_filter_1).inductor_current);
             create_lcr_filter(grid_lc_filter(grid_emi_filter_1  ) , lc_filter_multipliers(grid_emi_filter_1   ) , grid_lc_filter(output_main_filter).capacitor_voltage  - grid_lc_filter(grid_emi_filter_1).capacitor_voltage , grid_lc_filter(grid_emi_filter_1).inductor_current  - grid_lc_filter(grid_emi_filter_2).inductor_current);
             create_lcr_filter(grid_lc_filter(grid_emi_filter_2  ) , lc_filter_multipliers(grid_emi_filter_2   ) , grid_lc_filter(grid_emi_filter_1  ).capacitor_voltage - grid_lc_filter(grid_emi_filter_2).capacitor_voltage , grid_lc_filter(grid_emi_filter_2 ).inductor_current - grid_inductor_current);
 
             create_state_variable(grid_inductor_current, lc_filter_multipliers(grid_inductor_multiplier), grid_lc_filter(grid_emi_filter_2).capacitor_voltage - grid_voltage);
 
+            --- output inverter model
             create_lcr_filter(grid_lc_filter(output_main_filter ) , lc_filter_multipliers(output_main_filter  ) , grid_lc_filter(output_main_filter ).capacitor_voltage - grid_lc_filter(output_emi_filter ).capacitor_voltage , grid_lc_filter(main_grid_filter).inductor_current  - grid_lc_filter(output_emi_filter).inductor_current);
             create_lcr_filter(grid_lc_filter(output_emi_filter  ) , lc_filter_multipliers(output_emi_filter   ) , grid_lc_filter(output_emi_filter  ).capacitor_voltage - grid_voltage                                         , grid_lc_filter(output_emi_filter).inductor_current - load_current);
+            ------------------------------------------------------------------------
+            CASE grid_inverter_state_counter is
+                WHEN 0 =>
+                    input_voltage <= 500 * 16384;
+                    increment_counter_when_ready(lc_filter_multipliers(grid_inductor_multiplier), grid_inverter_state_counter);
+                WHEN 1 =>
+                    input_voltage <= 500 * 16384;
+                    increment_counter_when_ready(lc_filter_multipliers(grid_inductor_multiplier), grid_inverter_state_counter);
+                WHEN 2 =>
+                    calculate(grid_inductor_current);
+                    calculate_lcr_filter(grid_lc_filter(main_grid_filter));
+                    calculate_lcr_filter(grid_lc_filter(grid_emi_filter_1));
+                    calculate_lcr_filter(grid_lc_filter(grid_emi_filter_2)); 
+                    grid_inverter_state_counter <= grid_inverter_state_counter + 1;
+                WHEN others => -- wait for restart
+            end CASE;
     
         end if; -- rstn
     end process clocked_reset_generator;	

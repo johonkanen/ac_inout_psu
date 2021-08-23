@@ -33,6 +33,10 @@ package state_variable_pkg is
         state_equation : in int18);
 
 ------------------------------------------------------------------------
+    procedure calculate ( signal state_variable : out state_variable_record);
+
+------------------------------------------------------------------------
+------------------------------------------------------------------------
     function "-" ( left : state_variable_record; right : integer)
         return integer;
     function "-" ( left : integer ; right : state_variable_record)
@@ -46,8 +50,7 @@ package state_variable_pkg is
         return integer;
     function "+" ( left : state_variable_record ; right : state_variable_record)
         return integer;
-
---------------------------------------------------
+------------------------------------------------------------------------
 end package state_variable_pkg;
 
 ------------------------------------------------------------------------
@@ -98,6 +101,14 @@ package body state_variable_pkg is
         end if;
         
     end integrate_state;
+------------------------------------------------------------------------
+    procedure calculate
+    (
+        signal state_variable : out state_variable_record
+    ) is
+    begin
+        state_variable.state_counter <= 0;
+    end calculate;
 
 ------------------------------------------------------------------------
     function "-"
@@ -169,31 +180,6 @@ package body state_variable_pkg is
         return right.state + left.state;
         
     end "+";
-
-
-------------------------------------------------------------------------
-    function "*"
-    (
-        left : state_variable_record;
-        right : integer
-    )
-    return integer
-    is
-    begin
-        return left.state * right;
-    end "*";
-
-    function "*"
-    (
-        left : integer ;
-        right : state_variable_record
-    )
-    return integer
-    is
-    begin
-        return right * left;
-        
-    end "*";
 
 
 ------------------------------------------------------------------------
