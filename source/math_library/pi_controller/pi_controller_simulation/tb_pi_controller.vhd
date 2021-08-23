@@ -73,7 +73,7 @@ begin
     clocked_reset_generator : process(simulator_clock, rstn)
         variable pi_error : int18 := 0;
         variable voltage_reference : int18 := 1000;
-        variable load_current : int18 := -8555;
+        variable load_current : int18 := -15e3;
     begin
         if rising_edge(simulator_clock) then
 
@@ -102,6 +102,6 @@ begin
         end if; -- rstn
     end process clocked_reset_generator;	
 ------------------------------------------------------------------------
-            voltage <=pi_control.pi_error;
+            voltage <=dc_link_voltege.state;
 
 end sim;
