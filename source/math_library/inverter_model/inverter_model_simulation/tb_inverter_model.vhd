@@ -31,14 +31,13 @@ architecture sim of tb_inverter_model is
     -- inverter model signals
     signal duty_ratio : int18;
     signal input_voltage : int18 := 0;
-    signal grid_voltage : int18 := 0;
 
     signal dc_link_current : int18 := 0;
     signal dc_link_load_current : int18 := 0;
     signal load_current : int18 := 0;
     
     signal inverter_multiplier : multiplier_record     := multiplier_init_values;
-    signal inductor_current    : lcr_model_record      := init_lcr_model_integrator_gains(5000, 2000);
+    signal inverter_lc_filter    : lcr_model_record      := init_lcr_model_integrator_gains(5000, 2000);
     signal dc_link_voltage     : state_variable_record := init_state_variable_gain(500);
 
     signal grid_inverter_state_counter : natural range 0 to 7;
@@ -86,19 +85,20 @@ begin
 
             create_multiplier(inverter_multiplier);
             create_state_variable(dc_link_voltage, inverter_multiplier, dc_link_current - dc_link_load_current); 
+            create_lcr_filter(inverter_lc_filter, inverter_multiplier, input_voltage - inverter_lc_filter.capacitor_voltage, inverter_lc_filter.inductor_current - load_current);
 
             CASE grid_inverter_state_counter is
                 WHEN 0 =>
                     input_voltage <= dc_link_voltage.state * duty_ratio;
                     increment_counter_when_ready(inverter_multiplier, grid_inverter_state_counter);
                 WHEN 1 =>
-                    dc_link_current <= inductor_current.inductor_current.state * duty_ratio;
+                    dc_link_current <= inverter_lc_filter.inductor_current.state * duty_ratio;
                     increment_counter_when_ready(inverter_multiplier, grid_inverter_state_counter);
                 WHEN 2 =>
                     calculate(dc_link_voltage);
                     increment_counter_when_ready(inverter_multiplier, grid_inverter_state_counter);
                 WHEN 3 =>
-                    calculate_lcr_filter(inductor_current);
+                    calculate_lcr_filter(inverter_lc_filter);
                     grid_inverter_state_counter <= grid_inverter_state_counter + 1;
                 WHEN others => -- wait for restart
             end CASE;
