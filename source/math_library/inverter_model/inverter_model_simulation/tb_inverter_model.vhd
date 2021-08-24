@@ -24,7 +24,7 @@ architecture sim of tb_inverter_model is
     signal clocked_reset : std_logic;
     constant clock_per : time := 1 ns;
     constant clock_half_per : time := 0.5 ns;
-    constant simtime_in_clocks : integer := 50e3;
+    constant simtime_in_clocks : integer := 25e3;
 
     signal simulation_counter : natural := 0;
 
@@ -97,41 +97,29 @@ begin
             ------------------------------------------------------------------------
             simulation_counter <= simulation_counter + 1;
             if simulation_counter = 10e3 then
-                duty_ratio <= 12e3;
+                duty_ratio <= 19e3;
             end if;
 
             create_multiplier(inverter_multiplier);
             create_multiplier(inverter_multiplier2);
             create_multiplier(inverter_multiplier3);
 
-            create_inverter_model(grid_inverter, - output_inverter.dc_link_current, 0);
-            create_inverter_model(output_inverter, -grid_inverter.dc_link_current, -output_inverter_load_current);
+            create_inverter_model(grid_inverter   , output_inverter.dc_link_current , -output_inverter_load_current);
+            create_inverter_model(output_inverter , grid_inverter.dc_link_current   , 0);
 
             inverter_simulation_trigger_counter <= inverter_simulation_trigger_counter + 1;
-            if inverter_simulation_trigger_counter = 37 then
+            if inverter_simulation_trigger_counter = 24 then
                 inverter_simulation_trigger_counter <= 0;
                 request_inverter_calculation(grid_inverter, duty_ratio);
                 request_inverter_calculation(output_inverter, -duty_ratio);
-            end if;
+            end if; 
 
-
-            grid_inverter.inverter_lc_filter.capacitor_voltage.state <= 12e3;
-            -- output_inverter.dc_link_voltage.state <= 30e3;
+            output_inverter.inverter_lc_filter.capacitor_voltage.state <= -2e3;
 
             --------------------------------------------------
-            sequential_multiply(inverter_multiplier2, grid_inverter.dc_link_voltage.state, 30e3);
-            if multiplier_is_ready(inverter_multiplier2) then
-                dc_link_load_current <= get_multiplier_result(inverter_multiplier2, 15);
-            end if;
-            --------------------------------------------------
-            sequential_multiply(inverter_multiplier, output_inverter.dc_link_voltage.state, 30e3);
+            sequential_multiply(inverter_multiplier, grid_inverter.inverter_lc_filter.capacitor_voltage.state, 40e3);
             if multiplier_is_ready(inverter_multiplier) then
-                output_dc_link_load_current <= get_multiplier_result(inverter_multiplier, 15);
-            end if;
-            --------------------------------------------------
-            sequential_multiply(inverter_multiplier3, output_inverter.inverter_lc_filter.capacitor_voltage.state, 40e3);
-            if multiplier_is_ready(inverter_multiplier3) then
-                output_inverter_load_current <= get_multiplier_result(inverter_multiplier3, 15);
+                output_inverter_load_current <= get_multiplier_result(inverter_multiplier, 15);
             end if;
             --------------------------------------------------
 
