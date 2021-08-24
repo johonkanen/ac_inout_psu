@@ -70,7 +70,7 @@ package body inverter_model_pkg is
 
         CASE grid_inverter_state_counter is
             WHEN 0 =>
-                input_voltage <= 50e3 * duty_ratio;
+                input_voltage <= -dc_link_voltage.state * duty_ratio;
                 increment_counter_when_ready(inverter_multiplier, grid_inverter_state_counter);
             WHEN 1 =>
                 dc_link_current <= inverter_lc_filter.inductor_current.state * duty_ratio;
