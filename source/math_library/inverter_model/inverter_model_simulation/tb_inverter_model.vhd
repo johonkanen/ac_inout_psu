@@ -98,7 +98,7 @@ begin
             if inverter_simulation_trigger_counter = 36 then
                 inverter_simulation_trigger_counter <= 0;
                 grid_inverter_state_counter <= 0;
-                request_inverter_calculation(grid_inverter, duty_ratio);
+                request_inverter_calculation(grid_inverter, 32768/4);
             end if;
 
 
