@@ -10,17 +10,31 @@ library math_library;
 package inverter_model_pkg is
 
     type inverter_model_record is record
-        duty_ratio          : int18;
-        dc_link_current     : int18;
-        load_current        : int18;
         inverter_multiplier : multiplier_record;
         inverter_lc_filter  : lcr_model_record;
         dc_link_voltage     : state_variable_record;
+
+        duty_ratio          : int18;
+        dc_link_current     : int18;
+        load_current        : int18;
         load_resistor_current : int18;
         input_voltage : int18;
         grid_inverter_state_counter : natural range 0 to 7;
     end record;
 
+    constant init_inverter_model : inverter_model_record := (multiplier_init_values, init_lcr_model_integrator_gains(1000, 1000), init_state_variable_gain(500), 0, 0, 0, 0, 0, 4);
+
+------------------------------------------------------------------------
+    procedure create_inverter_model (
+        signal inverter_model : inout inverter_model_record;
+        dc_link_load_current : in int18;
+        load_current : in int18);
+------------------------------------------------------------------------
+    procedure request_inverter_calculation (
+        signal inverter_model : out inverter_model_record;
+        duty_ratio : in int18);
+
+------------------------------------------------------------------------
 end package inverter_model_pkg;
 
 package body inverter_model_pkg is
@@ -38,6 +52,16 @@ package body inverter_model_pkg is
         alias input_voltage is inverter_model.input_voltage;
         alias grid_inverter_state_counter is inverter_model.grid_inverter_state_counter;
         alias duty_ratio is inverter_model.duty_ratio;
+
+    --------------------------------------------------
+        impure function "*" ( left, right : int18)
+        return int18
+        is
+        begin
+            sequential_multiply(inverter_multiplier, left, right);
+            return get_multiplier_result(inverter_multiplier, 15);
+        end "*";
+    --------------------------------------------------
 
     begin
         create_multiplier(inverter_multiplier);
@@ -61,5 +85,16 @@ package body inverter_model_pkg is
         end CASE;
         
     end create_inverter_model;
+
+------------------------------------------------------------------------
+    procedure request_inverter_calculation
+    (
+        signal inverter_model : out inverter_model_record;
+        duty_ratio : in int18
+    ) is
+    begin
+        inverter_model.grid_inverter_state_counter <= 0;
+        inverter_model.duty_ratio <= duty_ratio;
+    end  request_inverter_calculation;
 
 end package body inverter_model_pkg; 

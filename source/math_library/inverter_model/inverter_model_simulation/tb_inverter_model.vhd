@@ -10,6 +10,7 @@ library math_library;
     use math_library.multiplier_pkg.all;
     use math_library.state_variable_pkg.all;
     use math_library.lcr_filter_model_pkg.all;
+    use math_library.inverter_model_pkg.all;
 
 
 entity tb_inverter_model is
@@ -35,6 +36,8 @@ architecture sim of tb_inverter_model is
     signal dc_link_current : int18 := 0;
     signal dc_link_load_current : int18 := 0;
     signal load_current : int18 := 0;
+
+    signal grid_inverter : inverter_model_record := init_inverter_model;
     
     signal inverter_multiplier : multiplier_record     := multiplier_init_values;
     signal inverter_lc_filter  : lcr_model_record      := init_lcr_model_integrator_gains(1500, 22000);
@@ -92,10 +95,13 @@ begin
             create_state_variable(dc_link_voltage, inverter_multiplier, dc_link_current - dc_link_load_current); 
             create_lcr_filter(inverter_lc_filter, inverter_multiplier, input_voltage - inverter_lc_filter.capacitor_voltage - load_resistor_current, inverter_lc_filter.inductor_current.state - load_current);
 
+            create_inverter_model(grid_inverter, 0, 0);
+
             inverter_simulation_trigger_counter <= inverter_simulation_trigger_counter + 1;
             if inverter_simulation_trigger_counter = 36 then
                 inverter_simulation_trigger_counter <= 0;
                 grid_inverter_state_counter <= 0;
+                request_inverter_calculation(grid_inverter, duty_ratio);
             end if;
 
             CASE grid_inverter_state_counter is
@@ -117,7 +123,7 @@ begin
                     grid_inverter_state_counter <= grid_inverter_state_counter + 1;
                 WHEN others => -- wait for restart
             end CASE;
-            inverter_voltage <= inverter_lc_filter.capacitor_voltage.state;
+            inverter_voltage <= grid_inverter.inverter_lc_filter.capacitor_voltage.state;
     
         end if; -- rstn
     end process clocked_reset_generator;	
