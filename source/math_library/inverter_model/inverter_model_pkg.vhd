@@ -66,7 +66,7 @@ package body inverter_model_pkg is
     begin
         create_multiplier(inverter_multiplier);
         create_state_variable(dc_link_voltage, inverter_multiplier, -dc_link_current + dc_link_load_current); 
-        create_lcr_filter(inverter_lc_filter, inverter_multiplier, input_voltage - inverter_lc_filter.capacitor_voltage, inverter_lc_filter.inductor_current.state - load_current);
+        create_lcr_filter(inverter_lc_filter, inverter_multiplier, input_voltage - inverter_lc_filter.capacitor_voltage, inverter_lc_filter.inductor_current.state + load_current);
 
         CASE grid_inverter_state_counter is
             WHEN 0 =>
