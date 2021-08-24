@@ -23,13 +23,13 @@ architecture sim of tb_inverter_model is
     signal clocked_reset : std_logic;
     constant clock_per : time := 1 ns;
     constant clock_half_per : time := 0.5 ns;
-    constant simtime_in_clocks : integer := 50;
+    constant simtime_in_clocks : integer := 25000;
 
     signal simulation_counter : natural := 0;
 
 ------------------------------------------------------------------------
     -- inverter model signals
-    signal duty_ratio : int18;
+    signal duty_ratio : int18 := 16384;
     signal input_voltage : int18 := 0;
 
     signal dc_link_current : int18 := 0;
@@ -37,10 +37,15 @@ architecture sim of tb_inverter_model is
     signal load_current : int18 := 0;
     
     signal inverter_multiplier : multiplier_record     := multiplier_init_values;
-    signal inverter_lc_filter    : lcr_model_record      := init_lcr_model_integrator_gains(5000, 2000);
+    signal inverter_lc_filter  : lcr_model_record      := init_lcr_model_integrator_gains(1500, 22000);
     signal dc_link_voltage     : state_variable_record := init_state_variable_gain(500);
 
     signal grid_inverter_state_counter : natural range 0 to 7;
+
+    signal inverter_simulation_trigger_counter : natural := 0;
+    signal inverter_voltage : int18 := 0;
+
+    signal load_resistor_current : int18 := 0;
 
 begin
 
@@ -85,11 +90,17 @@ begin
 
             create_multiplier(inverter_multiplier);
             create_state_variable(dc_link_voltage, inverter_multiplier, dc_link_current - dc_link_load_current); 
-            create_lcr_filter(inverter_lc_filter, inverter_multiplier, input_voltage - inverter_lc_filter.capacitor_voltage, inverter_lc_filter.inductor_current - load_current);
+            create_lcr_filter(inverter_lc_filter, inverter_multiplier, input_voltage - inverter_lc_filter.capacitor_voltage - load_resistor_current, inverter_lc_filter.inductor_current.state - load_current);
+
+            inverter_simulation_trigger_counter <= inverter_simulation_trigger_counter + 1;
+            if inverter_simulation_trigger_counter = 36 then
+                inverter_simulation_trigger_counter <= 0;
+                grid_inverter_state_counter <= 0;
+            end if;
 
             CASE grid_inverter_state_counter is
                 WHEN 0 =>
-                    input_voltage <= dc_link_voltage.state * duty_ratio;
+                    input_voltage <= 50e3 * duty_ratio;
                     increment_counter_when_ready(inverter_multiplier, grid_inverter_state_counter);
                 WHEN 1 =>
                     dc_link_current <= inverter_lc_filter.inductor_current.state * duty_ratio;
@@ -98,10 +109,15 @@ begin
                     calculate(dc_link_voltage);
                     increment_counter_when_ready(inverter_multiplier, grid_inverter_state_counter);
                 WHEN 3 =>
+
+                    load_resistor_current <= inverter_lc_filter.inductor_current.state * 8000;
+                    increment_counter_when_ready(inverter_multiplier, grid_inverter_state_counter);
+                WHEN 4 =>
                     calculate_lcr_filter(inverter_lc_filter);
                     grid_inverter_state_counter <= grid_inverter_state_counter + 1;
                 WHEN others => -- wait for restart
             end CASE;
+            inverter_voltage <= inverter_lc_filter.capacitor_voltage.state;
     
         end if; -- rstn
     end process clocked_reset_generator;	

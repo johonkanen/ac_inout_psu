@@ -130,7 +130,7 @@ package body state_variable_pkg is
     return integer
     is
     begin
-        return right - left;
+        return left - right.state ;
         
     end "-";
 
@@ -142,7 +142,7 @@ package body state_variable_pkg is
     return integer
     is
     begin
-        return right.state - left.state;
+        return left.state - right.state;
         
     end "-";
 ------------------------------------------------------------------------
