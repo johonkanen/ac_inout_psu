@@ -14,11 +14,11 @@ package inverter_model_pkg is
         inverter_lc_filter  : lcr_model_record;
         dc_link_voltage     : state_variable_record;
 
-        duty_ratio          : int18;
-        dc_link_current     : int18;
-        load_current        : int18;
-        load_resistor_current : int18;
-        input_voltage : int18;
+        duty_ratio                  : int18;
+        dc_link_current             : int18;
+        load_current                : int18;
+        load_resistor_current       : int18;
+        input_voltage               : int18;
         grid_inverter_state_counter : natural range 0 to 7;
     end record;
 
@@ -65,20 +65,28 @@ package body inverter_model_pkg is
 
     begin
         create_multiplier(inverter_multiplier);
-        create_state_variable(dc_link_voltage, inverter_multiplier, -dc_link_current - dc_link_load_current); 
+        create_state_variable(dc_link_voltage, inverter_multiplier, -dc_link_current + dc_link_load_current); 
         create_lcr_filter(inverter_lc_filter, inverter_multiplier, input_voltage - inverter_lc_filter.capacitor_voltage, inverter_lc_filter.inductor_current.state - load_current);
 
         CASE grid_inverter_state_counter is
             WHEN 0 =>
-                input_voltage <= dc_link_voltage.state * duty_ratio;
-                increment_counter_when_ready(inverter_multiplier, grid_inverter_state_counter);
+                multiply(inverter_multiplier, dc_link_voltage.state, duty_ratio);
+                grid_inverter_state_counter <= grid_inverter_state_counter + 1;
             WHEN 1 =>
-                dc_link_current <= inverter_lc_filter.inductor_current.state * duty_ratio;
-                increment_counter_when_ready(inverter_multiplier, grid_inverter_state_counter);
+                multiply(inverter_multiplier, inverter_lc_filter.inductor_current.state, duty_ratio);
+                grid_inverter_state_counter <= grid_inverter_state_counter + 1;
             WHEN 2 =>
+                if multiplier_is_ready(inverter_multiplier) then
+                    input_voltage <= get_multiplier_result(inverter_multiplier, 15);
+                    grid_inverter_state_counter <= grid_inverter_state_counter + 1;
+                end if;
+            WHEN 3 =>
+                dc_link_current <= get_multiplier_result(inverter_multiplier, 15);
+                grid_inverter_state_counter <= grid_inverter_state_counter + 1;
+            WHEN 4 =>
                 calculate(dc_link_voltage);
                 increment_counter_when_ready(inverter_multiplier, grid_inverter_state_counter);
-            WHEN 3 =>
+            WHEN 5 =>
                 calculate_lcr_filter(inverter_lc_filter);
                 grid_inverter_state_counter <= grid_inverter_state_counter + 1;
             WHEN others => -- wait for restart

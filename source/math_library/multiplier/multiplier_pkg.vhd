@@ -110,7 +110,7 @@ package body multiplier_pkg is
         data_b : in int18
     ) is
     begin
-        if multiplier_is_not_busy(multiplier) then
+        if multiplier_is_not_busy(multiplier) and not multiplier_is_ready(multiplier) then
             multiplier.signed_data_a <= to_signed(data_a, 18);
             multiplier.signed_data_b <= to_signed(data_b, 18);
             multiplier.multiplier_is_requested_with_1 <= '1';
