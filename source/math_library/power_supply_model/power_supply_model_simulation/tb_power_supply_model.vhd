@@ -31,7 +31,7 @@ architecture sim of tb_power_supply_model is
 
 ------------------------------------------------------------------------
     -- inverter model signals
-    signal duty_ratio : int18 := 19e3;
+    signal duty_ratio : int18 := 15e3;
     signal input_voltage : int18 := 0;
     signal dc_link_voltage : int18 := 0;
 
@@ -115,7 +115,7 @@ begin
         if rising_edge(simulator_clock) then
             ------------------------------------------------------------------------
             simulation_counter <= simulation_counter + 1;
-            if simulation_counter = 30e3 then
+            if simulation_counter = 20e3 then
                 -- duty_ratio <= 19e3;
                 output_resistance <= 10e3;
             end if;
