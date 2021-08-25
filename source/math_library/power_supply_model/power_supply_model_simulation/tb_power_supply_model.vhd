@@ -123,21 +123,21 @@ begin
             create_multiplier(hw_multiplier1); 
             create_multiplier(hw_multiplier2); 
 
-            create_inverter_model(grid_inverter   , - dab_pi_controller.pi_out , -lcr_filter1.inductor_current.state);
-            create_lcr_filter(lcr_filter1 , hw_multiplier1 , grid_inverter.inverter_lc_filter.capacitor_voltage - lcr_filter1.capacitor_voltage.state , lcr_filter1.inductor_current.state - lcr_filter2.inductor_current.state); 
-            create_lcr_filter(lcr_filter2 , hw_multiplier2 , lcr_filter1.capacitor_voltage.state - lcr_filter2.capacitor_voltage.state , lcr_filter2.inductor_current.state - output_inverter_load_current);
+            create_inverter_model(grid_inverter , - dab_pi_controller.pi_out , -lcr_filter1.inductor_current.state);
+            create_lcr_filter(lcr_filter1       , hw_multiplier1             , grid_inverter.inverter_lc_filter.capacitor_voltage - lcr_filter1.capacitor_voltage.state , lcr_filter1.inductor_current.state - lcr_filter2.inductor_current.state);
+            create_lcr_filter(lcr_filter2       , hw_multiplier2             , lcr_filter1.capacitor_voltage.state - lcr_filter2.capacitor_voltage.state                , lcr_filter2.inductor_current.state - output_inverter_load_current);
 
 
             create_multiplier(hw_multiplier3); 
             create_multiplier(hw_multiplier4); 
-            create_inverter_model(output_inverter , dab_pi_controller.pi_out   , -lcr_filter3.inductor_current.state); 
-            create_lcr_filter(lcr_filter3 , hw_multiplier3 , output_inverter.inverter_lc_filter.capacitor_voltage - lcr_filter3.capacitor_voltage, lcr_filter3.inductor_current.state - lcr_filter4.inductor_current.state); 
-            create_lcr_filter(lcr_filter4 , hw_multiplier4 , lcr_filter3.capacitor_voltage.state - lcr_filter4.capacitor_voltage.state , lcr_filter4.inductor_current.state - 2000);
+            create_inverter_model(output_inverter , dab_pi_controller.pi_out , -lcr_filter3.inductor_current.state);
+            create_lcr_filter(lcr_filter3         , hw_multiplier3           , output_inverter.inverter_lc_filter.capacitor_voltage - lcr_filter3.capacitor_voltage , lcr_filter3.inductor_current.state - lcr_filter4.inductor_current.state);
+            create_lcr_filter(lcr_filter4         , hw_multiplier4           , lcr_filter3.capacitor_voltage.state - lcr_filter4.capacitor_voltage.state            , lcr_filter4.inductor_current.state);
 
 
             --------------------------------------------------
-            output_inverter.inverter_lc_filter.capacitor_voltage.state <= 8e3;
-            -- lcr_filter4.capacitor_voltage.state <= -8e3;
+            -- output_inverter.inverter_lc_filter.capacitor_voltage.state <= 8e3;
+            lcr_filter4.capacitor_voltage.state <= 8e3;
 
             create_multiplier(inverter_multiplier);
 
@@ -150,7 +150,7 @@ begin
             if inverter_simulation_trigger_counter = 24 then
                 inverter_simulation_trigger_counter <= 0;
                 request_inverter_calculation(grid_inverter, duty_ratio);
-                request_inverter_calculation(output_inverter, -duty_ratio);
+                request_inverter_calculation(output_inverter, duty_ratio);
                 calculate_lcr_filter(lcr_filter1);
                 calculate_lcr_filter(lcr_filter2);
                 calculate_lcr_filter(lcr_filter3);
