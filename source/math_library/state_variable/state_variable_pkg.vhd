@@ -11,9 +11,10 @@ package state_variable_pkg is
     type state_variable_record is record
         state           : int18;
         integrator_gain : int18;
+        state_counter : natural range 0 to 1;
     end record;
 
-    constant init_state_variable : state_variable_record := (0, 0);
+    constant init_state_variable : state_variable_record := (0, 0, 1);
 --------------------------------------------------
     function init_state_variable_gain ( integrator_gain : int18)
         return state_variable_record;
@@ -21,7 +22,8 @@ package state_variable_pkg is
 --------------------------------------------------
     procedure create_state_variable (
         signal state_variable : inout state_variable_record;
-        integrator_gain : int18);
+        signal hw_multiplier : inout multiplier_record;
+        state_equation : int18);
 
 --------------------------------------------------
     procedure integrate_state (
@@ -30,7 +32,25 @@ package state_variable_pkg is
         constant radix : in natural;
         state_equation : in int18);
 
---------------------------------------------------
+------------------------------------------------------------------------
+    procedure calculate ( signal state_variable : out state_variable_record);
+
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+    function "-" ( left : state_variable_record; right : integer)
+        return integer;
+    function "-" ( left : integer ; right : state_variable_record)
+        return integer;
+    function "-" ( left : state_variable_record ; right : state_variable_record)
+        return integer;
+------------------------------------------------------------------------
+    function "+" ( left : state_variable_record; right : integer)
+        return integer;
+    function "+" ( left : integer ; right : state_variable_record)
+        return integer;
+    function "+" ( left : state_variable_record ; right : state_variable_record)
+        return integer;
+------------------------------------------------------------------------
 end package state_variable_pkg;
 
 ------------------------------------------------------------------------
@@ -46,7 +66,7 @@ package body state_variable_pkg is
     is
         variable state_variable : state_variable_record;
     begin
-        state_variable := (state => 0, integrator_gain => integrator_gain);
+        state_variable := (state => 0, integrator_gain => integrator_gain, state_counter => 1);
         return state_variable;
     end init_state_variable_gain;
 
@@ -54,10 +74,14 @@ package body state_variable_pkg is
     procedure create_state_variable
     (
         signal state_variable : inout state_variable_record;
-        integrator_gain : int18
+        signal hw_multiplier : inout multiplier_record;
+        state_equation : int18
     ) is
     begin 
-        state_variable.integrator_gain <= integrator_gain;
+        if state_variable.state_counter = 0 then
+            integrate_state(state_variable, hw_multiplier, 15, state_equation);
+            increment_counter_when_ready(hw_multiplier, state_variable.state_counter);
+        end if;
 
     end create_state_variable;
 
@@ -77,6 +101,86 @@ package body state_variable_pkg is
         end if;
         
     end integrate_state;
+------------------------------------------------------------------------
+    procedure calculate
+    (
+        signal state_variable : out state_variable_record
+    ) is
+    begin
+        state_variable.state_counter <= 0;
+    end calculate;
+
+------------------------------------------------------------------------
+    function "-"
+    (
+        left : state_variable_record;
+        right : integer
+    )
+    return integer
+    is
+    begin
+        return left.state - right;
+    end "-";
+
+    function "-"
+    (
+        left : integer ;
+        right : state_variable_record
+    )
+    return integer
+    is
+    begin
+        return left - right.state ;
+        
+    end "-";
+
+    function "-"
+    (
+        left : state_variable_record ;
+        right : state_variable_record
+    )
+    return integer
+    is
+    begin
+        return left.state - right.state;
+        
+    end "-";
+------------------------------------------------------------------------
+    function "+"
+    (
+        left : state_variable_record;
+        right : integer
+    )
+    return integer
+    is
+    begin
+        return left.state + right;
+    end "+";
+
+    function "+"
+    (
+        left : integer ;
+        right : state_variable_record
+    )
+    return integer
+    is
+    begin
+        return right + left;
+        
+    end "+";
+
+    function "+"
+    (
+        left : state_variable_record ;
+        right : state_variable_record
+    )
+    return integer
+    is
+    begin
+        return right.state + left.state;
+        
+    end "+";
+
 
 ------------------------------------------------------------------------
 end package body state_variable_pkg;

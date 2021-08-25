@@ -19,10 +19,10 @@ package lcr_filter_model_pkg is
     end record;
 
     constant init_lcr_filter : lcr_model_record := 
-            (inductor_current          => (0, 0) ,
-            capacitor_voltage          => (0, 0) ,
-            process_counter            => 4      ,
-            inductor_current_delta     => 0      ,
+            (inductor_current          => (0 , 0 , 1) ,
+            capacitor_voltage          => (0 , 0 , 1) ,
+            process_counter            => 4  ,
+            inductor_current_delta     => 0  ,
             inductor_series_resistance => 200);
 
 ------------------------------------------------------------------------
@@ -31,6 +31,13 @@ package lcr_filter_model_pkg is
         signal multiplier : inout multiplier_record;
         inductor_current_state_equation : int18;
         capacitor_voltage_state_equation : int18 );
+
+    procedure create_lcr_filter (
+        signal lcr_filter : inout lcr_model_record;
+        signal multiplier : inout multiplier_record;
+        inductor_current_state_equation : int18;
+        capacitor_voltage_state_equation : state_variable_record );
+------------------------------------------------------------------------
 ------------------------------------------------------------------------
     procedure calculate_lcr_filter (
         signal lcr_filter : inout lcr_model_record);
@@ -87,6 +94,19 @@ package body lcr_filter_model_pkg is
 
             end CASE; 
     end create_lcr_filter;
+
+    procedure create_lcr_filter
+    (
+        signal lcr_filter : inout lcr_model_record;
+        signal multiplier : inout multiplier_record;
+        inductor_current_state_equation : int18;
+        capacitor_voltage_state_equation : state_variable_record
+
+    ) is
+    begin
+        create_lcr_filter( lcr_filter, multiplier, inductor_current_state_equation, capacitor_voltage_state_equation.state);
+    end create_lcr_filter; 
+
 
 ------------------------------------------------------------------------
     procedure calculate_lcr_filter

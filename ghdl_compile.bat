@@ -6,6 +6,7 @@ ghdl -a --ieee=synopsys --work=math_library %source%/math_library/first_order_fi
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/state_variable/state_variable_pkg.vhd
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/lcr_filter_model/lcr_filter_model_pkg.vhd
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/pi_controller/pi_controller_pkg.vhd
+ghdl -a --ieee=synopsys --work=math_library %source%/math_library/inverter_model/inverter_model_pkg.vhd
 
 ghdl -a --ieee=synopsys %source%/system_control/system_components/ethernet_communication/ethernet/ethernet_clocks_pkg.vhd 
 ghdl -a --ieee=synopsys %source%/system_clocks_pkg.vhd
