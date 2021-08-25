@@ -47,7 +47,34 @@ architecture sim of tb_power_supply_model is
     --------------------------------------------------
     signal grid_inverter : inverter_model_record := init_inverter_model;
     signal output_inverter : inverter_model_record := init_inverter_model;
+
+------------------------------------------------------------------------
+    type grid_inverter_record is record
+        grid_inverter : inverter_model_record;
+        multiplier1 : multiplier_record;
+        multiplier2 : multiplier_record;
+        grid_emi_filter_1 : lcr_model_record;
+        grid_emi_filter_2 : lcr_model_record;
+    end record;
+
+    constant grid_inverter_init : grid_inverter_record := (init_inverter_model, multiplier_init_values, multiplier_init_values,init_lcr_model_integrator_gains(25e3, 2e3), init_lcr_model_integrator_gains(25e3, 2e3));
+------------------------------------------------------------------------
+    procedure create_grid_inverter
+    (
+        signal grid_inverter : inout grid_inverter_record;
+        ac_load_current : in int18;
+        dc_link_current : in int18 
+    ) is
+    begin
+        create_multiplier(grid_inverter.multiplier1);
+        create_multiplier(grid_inverter.multiplier2);
+        create_inverter_model(grid_inverter.grid_inverter, 0, 0);
+        create_lcr_filter(grid_inverter.grid_emi_filter_1 , grid_inverter.multiplier1 , 0, 0);
+        create_lcr_filter(grid_inverter.grid_emi_filter_2 , grid_inverter.multiplier2 , 0, 0);
+
+    end create_grid_inverter;
     
+------------------------------------------------------------------------
     signal hw_multiplier1             : multiplier_record := multiplier_init_values;
     signal hw_multiplier2             : multiplier_record := multiplier_init_values;
     signal hw_multiplier3             : multiplier_record := multiplier_init_values;
@@ -102,14 +129,6 @@ begin
 ------------------------------------------------------------------------
 
     clocked_reset_generator : process(simulator_clock, rstn)
-    --------------------------------------------------
-        impure function "*" ( left, right : int18)
-        return int18
-        is
-        begin
-            sequential_multiply(inverter_multiplier, left, right);
-            return get_multiplier_result(inverter_multiplier, 15);
-        end "*";
     --------------------------------------------------
     begin
         if rising_edge(simulator_clock) then
