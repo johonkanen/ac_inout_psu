@@ -11,12 +11,13 @@ library math_library;
     use math_library.state_variable_pkg.all;
     use math_library.lcr_filter_model_pkg.all;
     use math_library.inverter_model_pkg.all;
+    use math_library.pi_controller_pkg.all;
 
 
-entity tb_inverter_model is
+entity tb_power_supply_model is
 end;
 
-architecture sim of tb_inverter_model is
+architecture sim of tb_power_supply_model is
     signal rstn : std_logic;
 
     signal simulation_running : boolean;
@@ -24,7 +25,7 @@ architecture sim of tb_inverter_model is
     signal clocked_reset : std_logic;
     constant clock_per : time := 1 ns;
     constant clock_half_per : time := 0.5 ns;
-    constant simtime_in_clocks : integer := 25e3;
+    constant simtime_in_clocks : integer := 50e3;
 
     signal simulation_counter : natural := 0;
 
@@ -43,8 +44,22 @@ architecture sim of tb_inverter_model is
     signal output_dc_link_voltage : int18 := 0;
     signal output_dc_link_current : int18 := 0;
 
+    --------------------------------------------------
     signal grid_inverter : inverter_model_record := init_inverter_model;
     signal output_inverter : inverter_model_record := init_inverter_model;
+    
+    signal hw_multiplier1             : multiplier_record := multiplier_init_values;
+    signal hw_multiplier2             : multiplier_record := multiplier_init_values;
+    signal hw_multiplier3             : multiplier_record := multiplier_init_values;
+    signal hw_multiplier4             : multiplier_record := multiplier_init_values;
+    signal hw_multiplier5             : multiplier_record := multiplier_init_values;
+
+    signal lcr_filter1 : lcr_model_record := init_lcr_model_integrator_gains(25e3, 2e3);
+    signal lcr_filter2 : lcr_model_record := init_lcr_model_integrator_gains(25e3, 2e3);
+    signal lcr_filter3 : lcr_model_record := init_lcr_model_integrator_gains(25e3, 2e3);
+    signal lcr_filter4 : lcr_model_record := init_lcr_model_integrator_gains(25e3, 2e3);
+    signal lcr_filter5 : lcr_model_record := init_lcr_model_integrator_gains(25e3, 2e3);
+    --------------------------------------------------
     
     signal inverter_multiplier  : multiplier_record := multiplier_init_values;
     signal inverter_multiplier2 : multiplier_record := multiplier_init_values;
@@ -54,6 +69,8 @@ architecture sim of tb_inverter_model is
     signal inverter_voltage : int18 := 0;
 
     signal load_resistor_current : int18 := 0;
+
+    signal dab_pi_controller : pi_controller_record := pi_controller_init;
 
 begin
 
@@ -104,22 +121,42 @@ begin
             create_multiplier(inverter_multiplier2);
             create_multiplier(inverter_multiplier3);
 
-            create_inverter_model(grid_inverter   , output_inverter.dc_link_current , -output_inverter_load_current);
-            create_inverter_model(output_inverter , grid_inverter.dc_link_current   , 0);
+            create_pi_controller(inverter_multiplier2, dab_pi_controller, 10e3, 1e3); 
+            create_inverter_model(grid_inverter   , - dab_pi_controller.pi_out , -lcr_filter1.inductor_current.state);
+            create_inverter_model(output_inverter , dab_pi_controller.pi_out   , 0);
 
+            create_multiplier(hw_multiplier1); 
+            create_multiplier(hw_multiplier2); 
+            create_multiplier(hw_multiplier3); 
+            create_multiplier(hw_multiplier4); 
+            create_multiplier(hw_multiplier5); 
+
+            create_lcr_filter(lcr_filter1 , hw_multiplier1 , grid_inverter.inverter_lc_filter.capacitor_voltage - lcr_filter1.capacitor_voltage.state , lcr_filter1.inductor_current.state - lcr_filter2.inductor_current.state);
+            create_lcr_filter(lcr_filter2 , hw_multiplier2 , lcr_filter1.capacitor_voltage.state - lcr_filter2.capacitor_voltage.state , lcr_filter2.inductor_current.state - lcr_filter3.inductor_current.state);
+
+            create_lcr_filter(lcr_filter3 , hw_multiplier3 , lcr_filter2.capacitor_voltage.state - lcr_filter3.capacitor_voltage.state , lcr_filter3.inductor_current.state - lcr_filter4.inductor_current.state);
+            create_lcr_filter(lcr_filter4 , hw_multiplier4 , lcr_filter3.capacitor_voltage.state - lcr_filter4.capacitor_voltage.state , lcr_filter4.inductor_current.state - lcr_filter5.inductor_current.state);
+            create_lcr_filter(lcr_filter5 , hw_multiplier5 , lcr_filter4.capacitor_voltage.state - lcr_filter5.capacitor_voltage.state , lcr_filter5.inductor_current.state - output_inverter_load_current);
 
             --------------------------------------------------
-            output_inverter.inverter_lc_filter.capacitor_voltage.state <= -2e3;
+            output_inverter.inverter_lc_filter.capacitor_voltage.state <= -8e3;
 
             inverter_simulation_trigger_counter <= inverter_simulation_trigger_counter + 1;
             if inverter_simulation_trigger_counter = 24 then
                 inverter_simulation_trigger_counter <= 0;
                 request_inverter_calculation(grid_inverter, duty_ratio);
                 request_inverter_calculation(output_inverter, -duty_ratio);
+                calculate_lcr_filter(lcr_filter1);
+                calculate_lcr_filter(lcr_filter2);
+                calculate_lcr_filter(lcr_filter3);
+                calculate_lcr_filter(lcr_filter4);
+                calculate_lcr_filter(lcr_filter5);
+                calculate_pi_control(dab_pi_controller, output_inverter.dc_link_voltage - grid_inverter.dc_link_voltage);
+
             end if; 
 
             --------------------------------------------------
-            sequential_multiply(inverter_multiplier, grid_inverter.inverter_lc_filter.capacitor_voltage.state, 40e3);
+            sequential_multiply(inverter_multiplier, lcr_filter5.capacitor_voltage.state, 10e3);
             if multiplier_is_ready(inverter_multiplier) then
                 output_inverter_load_current <= get_multiplier_result(inverter_multiplier, 15);
             end if;
@@ -128,7 +165,7 @@ begin
             dc_link_voltage        <= grid_inverter.dc_link_voltage.state;
             output_dc_link_voltage <= output_inverter.dc_link_voltage.state;
             output_dc_link_current <= output_inverter.dc_link_current;
-            output_voltage         <= output_inverter.inverter_lc_filter.capacitor_voltage.state;
+            output_voltage         <= lcr_filter5.capacitor_voltage.state;
     
         end if; -- rstn
     end process clocked_reset_generator;	
