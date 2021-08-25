@@ -43,6 +43,8 @@ package state_variable_pkg is
         return integer;
     function "-" ( left : state_variable_record ; right : state_variable_record)
         return integer;
+    function "-" ( system_state : state_variable_record)
+        return int18;
 ------------------------------------------------------------------------
     function "+" ( left : state_variable_record; right : integer)
         return integer;
@@ -144,6 +146,16 @@ package body state_variable_pkg is
     begin
         return left.state - right.state;
         
+    end "-";
+
+    function "-"
+    (
+        system_state : state_variable_record
+    )
+    return int18
+    is
+    begin
+        return -system_state.state;
     end "-";
 ------------------------------------------------------------------------
     function "+"
