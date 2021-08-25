@@ -206,14 +206,33 @@ begin
     begin
         if rising_edge(clock) then
 
+            -------------------------------------------------- 
             create_bandpass_filter(bandpass_filter);
 
+            -------------------------------------------------- 
             init_mdio_driver(mdio_driver_data_in);
 
+            -------------------------------------------------- 
             idle_adc(spi_sar_adc_data_in);
+
+            -------------------------------------------------- 
             init_uart(uart_data_in);
             receive_data_from_uart(uart_data_out, uart_rx_data);
             system_components_FPGA_out.test_ad_mux <= integer_to_std(number_to_be_converted => uart_rx_data, bits_in_word => 3);
+            -------------------------------------------------- 
+            create_multiplier(hw_multiplier1); 
+            create_multiplier(hw_multiplier2); 
+            create_multiplier(hw_multiplier3); 
+            create_multiplier(hw_multiplier4); 
+            create_multiplier(hw_multiplier5); 
+
+            create_lcr_filter(lcr_filter1 , hw_multiplier1 , input_voltage                       - lcr_filter1.capacitor_voltage.state , lcr_filter1.inductor_current.state - lcr_filter2.inductor_current.state);
+            create_lcr_filter(lcr_filter2 , hw_multiplier2 , lcr_filter1.capacitor_voltage.state - lcr_filter2.capacitor_voltage.state , lcr_filter2.inductor_current.state - lcr_filter3.inductor_current.state);
+            create_lcr_filter(lcr_filter3 , hw_multiplier3 , lcr_filter2.capacitor_voltage.state - lcr_filter3.capacitor_voltage.state , lcr_filter3.inductor_current.state - lcr_filter4.inductor_current.state);
+            create_lcr_filter(lcr_filter4 , hw_multiplier4 , lcr_filter3.capacitor_voltage.state - lcr_filter4.capacitor_voltage.state , lcr_filter4.inductor_current.state - lcr_filter5.inductor_current.state);
+            create_lcr_filter(lcr_filter5 , hw_multiplier5 , lcr_filter4.capacitor_voltage.state - lcr_filter5.capacitor_voltage.state , lcr_filter5.inductor_current.state - load_current);
+            -------------------------------------------------- 
+
 
             uart_transmit_counter <= uart_transmit_counter - 1; 
             if uart_transmit_counter = 0 then
@@ -300,18 +319,6 @@ begin
 
                 WHEN others => -- hang here and wait for counter being set to zero
             end CASE;
-            -------------------------------------------------- 
-            create_multiplier(hw_multiplier1); 
-            create_multiplier(hw_multiplier2); 
-            create_multiplier(hw_multiplier3); 
-            create_multiplier(hw_multiplier4); 
-            create_multiplier(hw_multiplier5); 
-
-            create_lcr_filter(lcr_filter1 , hw_multiplier1 , input_voltage                       - lcr_filter1.capacitor_voltage.state , lcr_filter1.inductor_current.state - lcr_filter2.inductor_current.state);
-            create_lcr_filter(lcr_filter2 , hw_multiplier2 , lcr_filter1.capacitor_voltage.state - lcr_filter2.capacitor_voltage.state , lcr_filter2.inductor_current.state - lcr_filter3.inductor_current.state);
-            create_lcr_filter(lcr_filter3 , hw_multiplier3 , lcr_filter2.capacitor_voltage.state - lcr_filter3.capacitor_voltage.state , lcr_filter3.inductor_current.state - lcr_filter4.inductor_current.state);
-            create_lcr_filter(lcr_filter4 , hw_multiplier4 , lcr_filter3.capacitor_voltage.state - lcr_filter4.capacitor_voltage.state , lcr_filter4.inductor_current.state - lcr_filter5.inductor_current.state);
-            create_lcr_filter(lcr_filter5 , hw_multiplier5 , lcr_filter4.capacitor_voltage.state - lcr_filter5.capacitor_voltage.state , lcr_filter5.inductor_current.state - load_current);
 
 
         end if; --rising_edge
