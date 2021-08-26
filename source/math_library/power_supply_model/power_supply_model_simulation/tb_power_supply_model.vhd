@@ -43,33 +43,19 @@ architecture sim of tb_power_supply_model is
     signal output_dc_link_voltage : int18 := 0;
     signal output_dc_link_current : int18 := 0;
 
-    --------------------------------------------------
-    -- signal grid_inverter : inverter_model_record := init_inverter_model;
-
 ------------------------------------------------------------------------
-    signal hw_multiplier3             : multiplier_record := multiplier_init_values;
-    signal hw_multiplier4             : multiplier_record := multiplier_init_values;
-    signal hw_multiplier5             : multiplier_record := multiplier_init_values;
-
-    -- signal lcr_filter1 : lcr_model_record := init_lcr_model_integrator_gains(25e3, 2e3);
-    -- signal lcr_filter2 : lcr_model_record := init_lcr_model_integrator_gains(25e3, 2e3);
-    --------------------------------------------------
-    
     signal inverter_multiplier  : multiplier_record := multiplier_init_values;
     signal inverter_multiplier2 : multiplier_record := multiplier_init_values;
     signal inverter_multiplier3 : multiplier_record := multiplier_init_values;
 
     signal inverter_simulation_trigger_counter : natural := 0;
-    signal inverter_voltage : int18 := 0;
 
-    signal load_resistor_current : int18 := 0;
-
-    signal dab_pi_controller : pi_controller_record := pi_controller_init;
     signal output_resistance : natural  :=50e3;
     signal output_current : integer := 0;
     signal dab_pi_output : int18 := 0;
     signal dab_pi_error : int18 := 0;
 
+    signal dab_pi_controller : pi_controller_record := pi_controller_init;
     signal grid_inverter_simulation : grid_inverter_record := grid_inverter_init;
     signal output_inverter_simulation : output_inverter_record := output_inverter_init;
 
@@ -114,7 +100,6 @@ begin
             create_grid_inverter(grid_inverter_simulation, -dab_pi_controller.pi_out, 0);
             create_output_inverter(output_inverter_simulation, dab_pi_controller.pi_out, output_inverter_load_current);
             --------------------------------------------------
-            create_multiplier(hw_multiplier3); 
 
             --------------------------------------------------
             grid_inverter_simulation.grid_inverter.inverter_lc_filter.capacitor_voltage.state <= -8e3;
