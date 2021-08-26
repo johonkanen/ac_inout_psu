@@ -264,14 +264,14 @@ begin
                 end if;
 
                 CASE test_counter is
-                    WHEN 5000          => output_duty_ratio   <= 20e3;
-                    WHEN 16384         => grid_duty_ratio     <= 15e3;
-                    WHEN 32768 - 5000  => output_resistance   <= 40e3;
-                    WHEN 32768         => output_load_current <= -output_load_current;
-                    WHEN 5000  + 32768 => output_duty_ratio   <= 15e3;
-                    WHEN 16384 + 32768 => grid_duty_ratio     <= 20e3;
-                    WHEN 65535 - 5000  => output_resistance   <= 30e3;
-                    WHEN 65535         => output_load_current <= -output_load_current;
+                    WHEN 0     => output_duty_ratio   <= 20e3;
+                    WHEN 8192  => grid_duty_ratio     <= 15e3;
+                    WHEN 16384 => output_resistance   <= 40e3;
+                    WHEN 24576 => output_load_current <= -output_load_current;
+                    WHEN 32768 => output_duty_ratio   <= 15e3;
+                    WHEN 40960 => grid_duty_ratio     <= 20e3;
+                    WHEN 49152 => output_resistance   <= 30e3;
+                    WHEN 57344 => output_load_current <= -output_load_current;
                     
                     WHEN others => -- do nothing
                 end CASE;
