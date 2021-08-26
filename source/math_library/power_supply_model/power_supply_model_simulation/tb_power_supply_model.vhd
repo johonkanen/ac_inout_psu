@@ -95,9 +95,7 @@ begin
             end if;
 
             --------------------------------------------------
-            create_multiplier(grid_inductor_model_multiplier);
-            create_state_variable(grid_inductor_model, grid_inductor_model_multiplier, power_supply_simulation.grid_inverter_simulation.grid_emi_filter_2.capacitor_voltage.state + 8e3);
-            create_power_supply_simulation_model(power_supply_simulation, grid_inductor_model.state, output_inverter_load_current); 
+            create_power_supply_simulation_model(power_supply_simulation, 8e3, output_inverter_load_current); 
 
             inverter_simulation_trigger_counter <= inverter_simulation_trigger_counter + 1;
             if inverter_simulation_trigger_counter = 24 then

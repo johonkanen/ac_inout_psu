@@ -170,8 +170,6 @@ architecture rtl of system_components is
     signal output_inverter_load_current : int18             := 0;
 
     signal power_supply_simulation : power_supply_model_record := power_supply_model_init;
-    signal grid_inductor_model_multiplier : multiplier_record := multiplier_init_values;
-    signal grid_inductor_model : state_variable_record := init_state_variable_gain(35e3);
 
     signal grid_duty_ratio : int18 := 15e3;
     signal output_duty_ratio : int18 := 15e3;
@@ -219,9 +217,7 @@ begin
             receive_data_from_uart(uart_data_out, uart_rx_data);
             system_components_FPGA_out.test_ad_mux <= integer_to_std(number_to_be_converted => uart_rx_data, bits_in_word => 3);
             -------------------------------------------------- 
-            create_multiplier(grid_inductor_model_multiplier);
-            create_state_variable(grid_inductor_model, grid_inductor_model_multiplier, power_supply_simulation.grid_inverter_simulation.grid_emi_filter_2.capacitor_voltage.state + 8e3);
-            create_power_supply_simulation_model(power_supply_simulation, grid_inductor_model.state, output_inverter_load_current + output_load_current);
+            create_power_supply_simulation_model(power_supply_simulation, 8e3, output_inverter_load_current + output_load_current);
 
             -------------------------------------------------- 
             create_multiplier(hw_multiplier); 
@@ -239,7 +235,6 @@ begin
 
             if ad_conversion_is_ready(spi_sar_adc_data_out) then
                 request_power_supply_calculation(power_supply_simulation, -grid_duty_ratio, output_duty_ratio);
-                calculate(grid_inductor_model);
 
                 CASE uart_rx_data is
                     WHEN 10 => transmit_16_bit_word_with_uart(uart_data_in, get_filter_output(bandpass_filter.low_pass_filter) );
