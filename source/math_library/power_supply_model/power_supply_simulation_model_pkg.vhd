@@ -47,6 +47,7 @@ package body power_supply_simulation_model_pkg is
         alias dab_pi_controller is power_supply_simulation.dab_pi_controller;
         alias multiplier is power_supply_simulation.multiplier;
     begin
+        create_multiplier(multiplier);
         create_pi_controller(multiplier, dab_pi_controller, 18e3, 2e3); 
         create_grid_inverter(grid_inverter_simulation, -dab_pi_controller.pi_out, 0);
         create_output_inverter(output_inverter_simulation, dab_pi_controller.pi_out, output_inverter_load_current);

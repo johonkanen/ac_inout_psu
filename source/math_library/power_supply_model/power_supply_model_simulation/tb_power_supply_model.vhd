@@ -9,8 +9,7 @@ LIBRARY std  ;
 library math_library;
     use math_library.multiplier_pkg.all;
     use math_library.state_variable_pkg.all;
-    use math_library.psu_inverter_simulation_models_pkg.all;
-    use math_library.pi_controller_pkg.all;
+    use math_library.power_supply_simulation_model_pkg.all;
 
 
 entity tb_power_supply_model is
@@ -45,8 +44,6 @@ architecture sim of tb_power_supply_model is
 
 ------------------------------------------------------------------------
     signal inverter_multiplier  : multiplier_record := multiplier_init_values;
-    signal inverter_multiplier2 : multiplier_record := multiplier_init_values;
-    signal inverter_multiplier3 : multiplier_record := multiplier_init_values;
 
     signal inverter_simulation_trigger_counter : natural := 0;
 
@@ -55,9 +52,7 @@ architecture sim of tb_power_supply_model is
     signal dab_pi_output : int18 := 0;
     signal dab_pi_error : int18 := 0;
 
-    signal dab_pi_controller : pi_controller_record := pi_controller_init;
-    signal grid_inverter_simulation : grid_inverter_record := grid_inverter_init;
-    signal output_inverter_simulation : output_inverter_record := output_inverter_init;
+    signal power_supply_simulation : power_supply_model_record := power_supply_model_init;
 
 begin
 
@@ -97,43 +92,37 @@ begin
                 output_resistance <= 12e3;
             end if;
 
-            create_grid_inverter(grid_inverter_simulation, -dab_pi_controller.pi_out, 0);
-            create_output_inverter(output_inverter_simulation, dab_pi_controller.pi_out, output_inverter_load_current);
             --------------------------------------------------
+            create_power_supply_simulation_model(power_supply_simulation, output_inverter_load_current);
+            power_supply_simulation.grid_inverter_simulation.grid_inverter.inverter_lc_filter.capacitor_voltage.state <= -8e3;
 
-            --------------------------------------------------
-            grid_inverter_simulation.grid_inverter.inverter_lc_filter.capacitor_voltage.state <= -8e3;
-
-            create_multiplier(inverter_multiplier); 
-            create_multiplier(inverter_multiplier2);
-            create_pi_controller(inverter_multiplier2, dab_pi_controller, 18e3, 2e3); 
-
-            create_multiplier(inverter_multiplier3);
 
             inverter_simulation_trigger_counter <= inverter_simulation_trigger_counter + 1;
             if inverter_simulation_trigger_counter = 24 then
                 inverter_simulation_trigger_counter <= 0; 
 
-                calculate_pi_control(dab_pi_controller, output_inverter_simulation.output_inverter.dc_link_voltage - grid_inverter_simulation.grid_inverter.dc_link_voltage); 
-                request_grid_inverter_calculation(grid_inverter_simulation, -duty_ratio + duty_ratio/4); 
-                request_output_inverter_calculation(output_inverter_simulation, duty_ratio); 
+                -- calculate_pi_control(dab_pi_controller, output_inverter_simulation.output_inverter.dc_link_voltage - grid_inverter_simulation.grid_inverter.dc_link_voltage); 
+                -- request_grid_inverter_calculation(grid_inverter_simulation, -duty_ratio + duty_ratio/4); 
+                -- request_output_inverter_calculation(output_inverter_simulation, duty_ratio); 
+                request_power_supply_calculation(power_supply_simulation, -duty_ratio + duty_ratio/4, duty_ratio);
 
             end if; 
 
             --------------------------------------------------
-            sequential_multiply(inverter_multiplier, output_inverter_simulation.output_emi_filter.capacitor_voltage.state, output_resistance);
+            create_multiplier(inverter_multiplier); 
+            sequential_multiply(inverter_multiplier, power_supply_simulation.output_inverter_simulation.output_emi_filter.capacitor_voltage.state, output_resistance);
             if multiplier_is_ready(inverter_multiplier) then
                 output_inverter_load_current <= get_multiplier_result(inverter_multiplier, 15);
             end if;
 
             -------------------------------------------------- 
-            dc_link_voltage        <= grid_inverter_simulation.grid_inverter.dc_link_voltage.state;
-            output_dc_link_voltage <= output_inverter_simulation.output_inverter.dc_link_voltage.state;
-            output_dc_link_current <= output_inverter_simulation.output_inverter.dc_link_current;
-            output_voltage         <= output_inverter_simulation.output_emi_filter.capacitor_voltage.state;
-            output_current         <= output_inverter_simulation.output_inverter.inverter_lc_filter.inductor_current.state;
-            dab_pi_output          <= dab_pi_controller.pi_out;
-            dab_pi_error           <= output_inverter_simulation.output_inverter.dc_link_voltage - grid_inverter_simulation.grid_inverter.dc_link_voltage.state;
+            dc_link_voltage        <= power_supply_simulation.grid_inverter_simulation.grid_inverter.dc_link_voltage.state;
+            output_dc_link_voltage <= power_supply_simulation.output_inverter_simulation.output_inverter.dc_link_voltage.state;
+            output_dc_link_current <= power_supply_simulation.output_inverter_simulation.output_inverter.dc_link_current;
+            output_voltage         <= power_supply_simulation.output_inverter_simulation.output_emi_filter.capacitor_voltage.state;
+            output_current         <= power_supply_simulation.output_inverter_simulation.output_inverter.inverter_lc_filter.inductor_current.state;
+            dab_pi_output          <= power_supply_simulation.dab_pi_controller.pi_out;
+            dab_pi_error           <= power_supply_simulation.output_inverter_simulation.output_inverter.dc_link_voltage - power_supply_simulation.grid_inverter_simulation.grid_inverter.dc_link_voltage.state;
     
         end if; -- rstn
     end process clocked_reset_generator;	
