@@ -164,12 +164,14 @@ architecture rtl of system_components is
 
     signal ram_address_offset : natural range 0 to 2**11-1;
 
-    signal hw_multiplier             : multiplier_record := multiplier_init_values;
-    signal output_resistance               : int18             := 12e3;
-    signal output_inverter_load_current              : int18             := 0;
+    signal hw_multiplier                : multiplier_record := multiplier_init_values;
+    signal output_resistance            : int18             := 12e3;
+    signal output_inverter_load_current : int18             := 0;
 
     signal power_supply_simulation : power_supply_model_record := power_supply_model_init;
-    signal duty_ratio : int18 := 15e3;
+    signal grid_duty_ratio : int18 := 15e3;
+    signal output_duty_ratio : int18 := 15e3;
+    signal output_load_current : int18 := 2e3;
 --------------------------------------------------
 begin
 
@@ -213,8 +215,8 @@ begin
             receive_data_from_uart(uart_data_out, uart_rx_data);
             system_components_FPGA_out.test_ad_mux <= integer_to_std(number_to_be_converted => uart_rx_data, bits_in_word => 3);
             -------------------------------------------------- 
-            create_power_supply_simulation_model(power_supply_simulation, output_inverter_load_current);
-            power_supply_simulation.grid_inverter_simulation.grid_inverter.inverter_lc_filter.capacitor_voltage.state <= -8e3;
+            create_power_supply_simulation_model(power_supply_simulation, output_inverter_load_current + output_load_current);
+            power_supply_simulation.grid_inverter_simulation.grid_emi_filter_2.capacitor_voltage.state <= -15e3;
 
             create_multiplier(hw_multiplier); 
 
@@ -224,8 +226,6 @@ begin
             end if;
             -------------------------------------------------- 
 
-
-
             uart_transmit_counter <= uart_transmit_counter - 1; 
             if uart_transmit_counter = 0 then
                 uart_transmit_counter <= counter_at_100khz;
@@ -233,7 +233,7 @@ begin
             end if; 
 
             if ad_conversion_is_ready(spi_sar_adc_data_out) then
-                request_power_supply_calculation(power_supply_simulation, -duty_ratio + duty_ratio/4, duty_ratio);
+                request_power_supply_calculation(power_supply_simulation, -grid_duty_ratio, output_duty_ratio);
 
                 CASE uart_rx_data is
                     WHEN 10 => transmit_16_bit_word_with_uart(uart_data_in, get_filter_output(bandpass_filter.low_pass_filter) );
@@ -244,6 +244,10 @@ begin
                     WHEN 15 => transmit_16_bit_word_with_uart(uart_data_in, uart_rx_data);
                     WHEN 16 => transmit_16_bit_word_with_uart(uart_data_in, power_supply_simulation.output_inverter_simulation.output_emi_filter.capacitor_voltage.state/2 + 32768);
                     WHEN 17 => transmit_16_bit_word_with_uart(uart_data_in, power_supply_simulation.output_inverter_simulation.output_emi_filter.inductor_current.state/2+ 32768);
+                    WHEN 18 => transmit_16_bit_word_with_uart(uart_data_in, power_supply_simulation.output_inverter_simulation.output_inverter.dc_link_voltage.state/2);
+                    WHEN 19 => transmit_16_bit_word_with_uart(uart_data_in, power_supply_simulation.grid_inverter_simulation.grid_emi_filter_1.capacitor_voltage.state/4 + 32768);
+                    WHEN 20 => transmit_16_bit_word_with_uart(uart_data_in, power_supply_simulation.grid_inverter_simulation.grid_emi_filter_1.inductor_current.state/4+ 32768);
+                    WHEN 21 => transmit_16_bit_word_with_uart(uart_data_in, power_supply_simulation.grid_inverter_simulation.grid_inverter.dc_link_voltage.state/2);
                     WHEN others => -- get data from MDIO
                         register_counter := register_counter + 1;
                         if test_counter = 4600 then
@@ -259,12 +263,19 @@ begin
                     test_counter <= 0;
                 end if;
 
-                if test_counter = 65536/2 then
-                    output_resistance <= 50e3;
-                end if;
-                if test_counter = 65535 then
-                    output_resistance <= 20e3;
-                end if;
+                CASE test_counter is
+                    WHEN 5000          => output_duty_ratio   <= 20e3;
+                    WHEN 16384         => grid_duty_ratio     <= 15e3;
+                    WHEN 32768 - 5000  => output_resistance   <= 40e3;
+                    WHEN 32768         => output_load_current <= -output_load_current;
+                    WHEN 5000  + 32768 => output_duty_ratio   <= 15e3;
+                    WHEN 16384 + 32768 => grid_duty_ratio     <= 20e3;
+                    WHEN 65535 - 5000  => output_resistance   <= 30e3;
+                    WHEN 65535         => output_load_current <= -output_load_current;
+                    
+                    WHEN others => -- do nothing
+                end CASE;
+
             end if;
 
             if mdio_data_read_is_ready(mdio_driver_data_out) then

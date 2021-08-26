@@ -7,7 +7,6 @@ library math_library;
     use math_library.state_variable_pkg.all;
     use math_library.lcr_filter_model_pkg.all;
     use math_library.inverter_model_pkg.all;
-    use math_library.pi_controller_pkg.all;
 
 package psu_inverter_simulation_models_pkg is
 

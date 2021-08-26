@@ -94,7 +94,7 @@ begin
 
             --------------------------------------------------
             create_power_supply_simulation_model(power_supply_simulation, output_inverter_load_current);
-            power_supply_simulation.grid_inverter_simulation.grid_inverter.inverter_lc_filter.capacitor_voltage.state <= -8e3;
+            power_supply_simulation.grid_inverter_simulation.grid_emi_filter_2.capacitor_voltage.state <= -8e3;
 
 
             inverter_simulation_trigger_counter <= inverter_simulation_trigger_counter + 1;
