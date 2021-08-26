@@ -53,6 +53,8 @@ architecture sim of tb_power_supply_model is
     signal dab_pi_error : int18 := 0;
 
     signal power_supply_simulation : power_supply_model_record := power_supply_model_init;
+    signal grid_inductor_model_multiplier : multiplier_record := multiplier_init_values;
+    signal grid_inductor_model : state_variable_record := init_state_variable_gain(35e3);
 
 begin
 
@@ -93,18 +95,16 @@ begin
             end if;
 
             --------------------------------------------------
-            create_power_supply_simulation_model(power_supply_simulation, output_inverter_load_current);
-            power_supply_simulation.grid_inverter_simulation.grid_emi_filter_2.capacitor_voltage.state <= -8e3;
-
+            create_multiplier(grid_inductor_model_multiplier);
+            create_state_variable(grid_inductor_model, grid_inductor_model_multiplier, power_supply_simulation.grid_inverter_simulation.grid_emi_filter_2.capacitor_voltage.state + 8e3);
+            create_power_supply_simulation_model(power_supply_simulation, grid_inductor_model.state, output_inverter_load_current); 
 
             inverter_simulation_trigger_counter <= inverter_simulation_trigger_counter + 1;
             if inverter_simulation_trigger_counter = 24 then
                 inverter_simulation_trigger_counter <= 0; 
 
-                -- calculate_pi_control(dab_pi_controller, output_inverter_simulation.output_inverter.dc_link_voltage - grid_inverter_simulation.grid_inverter.dc_link_voltage); 
-                -- request_grid_inverter_calculation(grid_inverter_simulation, -duty_ratio + duty_ratio/4); 
-                -- request_output_inverter_calculation(output_inverter_simulation, duty_ratio); 
-                request_power_supply_calculation(power_supply_simulation, -duty_ratio + duty_ratio/4, duty_ratio);
+                calculate(grid_inductor_model);
+                request_power_supply_calculation(power_supply_simulation, -duty_ratio, duty_ratio);
 
             end if; 
 
