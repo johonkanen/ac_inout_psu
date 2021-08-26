@@ -108,7 +108,7 @@ begin
             simulation_counter <= simulation_counter + 1;
             if simulation_counter = 30e3 then
                 -- duty_ratio <= 19e3;
-                output_resistance <= 5e3;
+                output_resistance <= 12e3;
             end if;
 
             create_grid_inverter(grid_inverter_simulation, -dab_pi_controller.pi_out, 0);
@@ -129,9 +129,8 @@ begin
             if inverter_simulation_trigger_counter = 24 then
                 inverter_simulation_trigger_counter <= 0; 
 
-                calculate_pi_control(dab_pi_controller, output_inverter_simulation.output_inverter.dc_link_voltage - grid_inverter_simulation.grid_inverter.dc_link_voltage);
-
-                request_grid_inverter_calculation(grid_inverter_simulation, -duty_ratio); 
+                calculate_pi_control(dab_pi_controller, output_inverter_simulation.output_inverter.dc_link_voltage - grid_inverter_simulation.grid_inverter.dc_link_voltage); 
+                request_grid_inverter_calculation(grid_inverter_simulation, -duty_ratio + duty_ratio/4); 
                 request_output_inverter_calculation(output_inverter_simulation, duty_ratio); 
 
             end if; 
