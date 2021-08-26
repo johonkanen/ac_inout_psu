@@ -23,6 +23,7 @@ package power_supply_simulation_model_pkg is
     --------------------------------------------------
     procedure create_power_supply_simulation_model (
         signal power_supply_simulation : inout power_supply_model_record;
+        grid_inverter_load_current : int18;
         output_inverter_load_current : int18);
     --------------------------------------------------
     procedure request_power_supply_calculation (
@@ -40,6 +41,7 @@ package body power_supply_simulation_model_pkg is
     procedure create_power_supply_simulation_model
     (
         signal power_supply_simulation : inout power_supply_model_record;
+        grid_inverter_load_current : int18;
         output_inverter_load_current : int18
     ) is
         alias grid_inverter_simulation is power_supply_simulation.grid_inverter_simulation;
@@ -49,7 +51,7 @@ package body power_supply_simulation_model_pkg is
     begin
         create_multiplier(multiplier);
         create_pi_controller(multiplier, dab_pi_controller, 18e3, 2e3); 
-        create_grid_inverter(grid_inverter_simulation, -dab_pi_controller.pi_out, 0);
+        create_grid_inverter(grid_inverter_simulation, -dab_pi_controller.pi_out, grid_inverter_load_current);
         create_output_inverter(output_inverter_simulation, dab_pi_controller.pi_out, output_inverter_load_current);
         
     end create_power_supply_simulation_model;
