@@ -18,6 +18,7 @@ library math_library;
     use math_library.multiplier_pkg.all;
     use math_library.first_order_filter_pkg.all;
     use math_library.lcr_filter_model_pkg.all;
+    use math_library.power_supply_simulation_model_pkg.all;
 
 entity system_components is
     port (
@@ -163,20 +164,12 @@ architecture rtl of system_components is
 
     signal ram_address_offset : natural range 0 to 2**11-1;
 
-    signal hw_multiplier1             : multiplier_record := multiplier_init_values;
-    signal hw_multiplier2             : multiplier_record := multiplier_init_values;
-    signal hw_multiplier3             : multiplier_record := multiplier_init_values;
-    signal hw_multiplier4             : multiplier_record := multiplier_init_values;
-    signal hw_multiplier5             : multiplier_record := multiplier_init_values;
-    signal load_current               : int18             := 3000;
-    signal input_voltage              : int18             := 2e3;
+    signal hw_multiplier             : multiplier_record := multiplier_init_values;
+    signal output_resistance               : int18             := 12e3;
+    signal output_inverter_load_current              : int18             := 0;
 
-    signal lcr_filter1 : lcr_model_record := init_lcr_model_integrator_gains(25e3, 2e3);
-    signal lcr_filter2 : lcr_model_record := init_lcr_model_integrator_gains(25e3, 2e3);
-    signal lcr_filter3 : lcr_model_record := init_lcr_model_integrator_gains(25e3, 2e3);
-    signal lcr_filter4 : lcr_model_record := init_lcr_model_integrator_gains(25e3, 2e3);
-    signal lcr_filter5 : lcr_model_record := init_lcr_model_integrator_gains(25e3, 2e3);
-
+    signal power_supply_simulation : power_supply_model_record := power_supply_model_init;
+    signal duty_ratio : int18 := 15e3;
 --------------------------------------------------
 begin
 
@@ -220,18 +213,17 @@ begin
             receive_data_from_uart(uart_data_out, uart_rx_data);
             system_components_FPGA_out.test_ad_mux <= integer_to_std(number_to_be_converted => uart_rx_data, bits_in_word => 3);
             -------------------------------------------------- 
-            create_multiplier(hw_multiplier1); 
-            create_multiplier(hw_multiplier2); 
-            create_multiplier(hw_multiplier3); 
-            create_multiplier(hw_multiplier4); 
-            create_multiplier(hw_multiplier5); 
+            create_power_supply_simulation_model(power_supply_simulation, output_inverter_load_current);
+            power_supply_simulation.grid_inverter_simulation.grid_inverter.inverter_lc_filter.capacitor_voltage.state <= -8e3;
 
-            create_lcr_filter(lcr_filter1 , hw_multiplier1 , input_voltage                       - lcr_filter1.capacitor_voltage.state , lcr_filter1.inductor_current.state - lcr_filter2.inductor_current.state);
-            create_lcr_filter(lcr_filter2 , hw_multiplier2 , lcr_filter1.capacitor_voltage.state - lcr_filter2.capacitor_voltage.state , lcr_filter2.inductor_current.state - lcr_filter3.inductor_current.state);
-            create_lcr_filter(lcr_filter3 , hw_multiplier3 , lcr_filter2.capacitor_voltage.state - lcr_filter3.capacitor_voltage.state , lcr_filter3.inductor_current.state - lcr_filter4.inductor_current.state);
-            create_lcr_filter(lcr_filter4 , hw_multiplier4 , lcr_filter3.capacitor_voltage.state - lcr_filter4.capacitor_voltage.state , lcr_filter4.inductor_current.state - lcr_filter5.inductor_current.state);
-            create_lcr_filter(lcr_filter5 , hw_multiplier5 , lcr_filter4.capacitor_voltage.state - lcr_filter5.capacitor_voltage.state , lcr_filter5.inductor_current.state - load_current);
+            create_multiplier(hw_multiplier); 
+
+            sequential_multiply(hw_multiplier, power_supply_simulation.output_inverter_simulation.output_emi_filter.capacitor_voltage.state, output_resistance);
+            if multiplier_is_ready(hw_multiplier) then
+                output_inverter_load_current <= get_multiplier_result(hw_multiplier, 15);
+            end if;
             -------------------------------------------------- 
+
 
 
             uart_transmit_counter <= uart_transmit_counter - 1; 
@@ -241,11 +233,7 @@ begin
             end if; 
 
             if ad_conversion_is_ready(spi_sar_adc_data_out) then
-                calculate_lcr_filter(lcr_filter1);
-                calculate_lcr_filter(lcr_filter2);
-                calculate_lcr_filter(lcr_filter3);
-                calculate_lcr_filter(lcr_filter4);
-                calculate_lcr_filter(lcr_filter5);
+                request_power_supply_calculation(power_supply_simulation, -duty_ratio + duty_ratio/4, duty_ratio);
 
                 CASE uart_rx_data is
                     WHEN 10 => transmit_16_bit_word_with_uart(uart_data_in, get_filter_output(bandpass_filter.low_pass_filter) );
@@ -254,8 +242,8 @@ begin
                     WHEN 13 => transmit_16_bit_word_with_uart(uart_data_in, bandpass_filter.low_pass_filter.filter_input - get_filter_output(bandpass_filter));
                     WHEN 14 => transmit_16_bit_word_with_uart(uart_data_in, get_adc_data(spi_sar_adc_data_out));
                     WHEN 15 => transmit_16_bit_word_with_uart(uart_data_in, uart_rx_data);
-                    WHEN 16 => transmit_16_bit_word_with_uart(uart_data_in, lcr_filter5.inductor_current.state + 32768);
-                    WHEN 17 => transmit_16_bit_word_with_uart(uart_data_in, lcr_filter5.capacitor_voltage.state+ 32768);
+                    WHEN 16 => transmit_16_bit_word_with_uart(uart_data_in, power_supply_simulation.output_inverter_simulation.output_emi_filter.capacitor_voltage.state/2 + 32768);
+                    WHEN 17 => transmit_16_bit_word_with_uart(uart_data_in, power_supply_simulation.output_inverter_simulation.output_emi_filter.inductor_current.state/2+ 32768);
                     WHEN others => -- get data from MDIO
                         register_counter := register_counter + 1;
                         if test_counter = 4600 then
@@ -272,10 +260,10 @@ begin
                 end if;
 
                 if test_counter = 65536/2 then
-                    input_voltage <= -input_voltage;
+                    output_resistance <= 50e3;
                 end if;
                 if test_counter = 65535 then
-                    load_current <= -load_current;
+                    output_resistance <= 20e3;
                 end if;
             end if;
 
