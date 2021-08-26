@@ -10,6 +10,7 @@ ghdl -a --ieee=synopsys --work=math_library %source%/math_library/state_variable
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/pi_controller/pi_controller_pkg.vhd
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/lcr_filter_model/lcr_filter_model_pkg.vhd
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/inverter_model/inverter_model_pkg.vhd
+ghdl -a --ieee=synopsys --work=math_library %source%/math_library/power_supply_model/psu_inverter_simulation_models_pkg.vhd
 
 ghdl -a --ieee=synopsys tb_power_supply_model.vhd
 ghdl -e --ieee=synopsys tb_power_supply_model
