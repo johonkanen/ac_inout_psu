@@ -63,14 +63,17 @@ architecture sim of tb_power_supply_model is
     (
         signal grid_inverter : inout grid_inverter_record;
         ac_load_current : in int18;
-        dc_link_current : in int18 
+        dc_link_load_current : in int18 
     ) is
+        alias emi_filter1 is grid_inverter.grid_emi_filter_1;
+        alias emi_filter2 is grid_inverter.grid_emi_filter_2;
+        alias inverter_lc is grid_inverter.grid_inverter.inverter_lc_filter;
     begin
         create_multiplier(grid_inverter.multiplier1);
         create_multiplier(grid_inverter.multiplier2);
-        create_inverter_model(grid_inverter.grid_inverter, 0, 0);
-        create_lcr_filter(grid_inverter.grid_emi_filter_1 , grid_inverter.multiplier1 , 0, 0);
-        create_lcr_filter(grid_inverter.grid_emi_filter_2 , grid_inverter.multiplier2 , 0, 0);
+        create_inverter_model(grid_inverter.grid_inverter, dc_link_load_current, -emi_filter1.inductor_current.state);
+        create_lcr_filter(grid_inverter.grid_emi_filter_1 , grid_inverter.multiplier1 , inverter_lc.capacitor_voltage - emi_filter1.capacitor_voltage, inverter_lc.inductor_current - emi_filter2.inductor_current);
+        create_lcr_filter(grid_inverter.grid_emi_filter_2 , grid_inverter.multiplier2 , emi_filter1.capacitor_voltage - emi_filter2.capacitor_voltage, emi_filter2.inductor_current - ac_load_current);
 
     end create_grid_inverter;
     
@@ -146,22 +149,20 @@ begin
 
             create_inverter_model(grid_inverter , - dab_pi_controller.pi_out , -lcr_filter1.inductor_current);
             create_lcr_filter(lcr_filter1       , hw_multiplier1             , grid_inverter.inverter_lc_filter.capacitor_voltage - lcr_filter1.capacitor_voltage, lcr_filter1.inductor_current - lcr_filter2.inductor_current);
-            create_lcr_filter(lcr_filter2       , hw_multiplier2             , lcr_filter1.capacitor_voltage- lcr_filter2.capacitor_voltage, lcr_filter2.inductor_current);
-
+            create_lcr_filter(lcr_filter2       , hw_multiplier2             , lcr_filter1.capacitor_voltage- lcr_filter2.capacitor_voltage, lcr_filter2.inductor_current); 
 
             create_multiplier(hw_multiplier3); 
             create_multiplier(hw_multiplier4); 
             create_inverter_model(output_inverter , dab_pi_controller.pi_out , -lcr_filter3.inductor_current);
-            create_lcr_filter(lcr_filter3         , hw_multiplier3           , output_inverter.inverter_lc_filter.capacitor_voltage - lcr_filter3.capacitor_voltage , lcr_filter3.inductor_current - output_inverter_load_current);
-
+            create_lcr_filter(lcr_filter3         , hw_multiplier3           , output_inverter.inverter_lc_filter.capacitor_voltage - lcr_filter3.capacitor_voltage , lcr_filter3.inductor_current - output_inverter_load_current); 
 
             --------------------------------------------------
             -- output_inverter.inverter_lc_filter.capacitor_voltage.state <= 8e3;
-            lcr_filter2.capacitor_voltage.state <= 8e3;
+            lcr_filter2.capacitor_voltage.state <= -8e3;
 
             create_multiplier(inverter_multiplier); 
             create_multiplier(inverter_multiplier2);
-            create_pi_controller(inverter_multiplier2, dab_pi_controller, 10e3, 1e3); 
+            create_pi_controller(inverter_multiplier2, dab_pi_controller, 8e3, 2e3); 
 
             create_multiplier(inverter_multiplier3);
 
@@ -169,7 +170,7 @@ begin
             if inverter_simulation_trigger_counter = 24 then
                 inverter_simulation_trigger_counter <= 0;
                 request_inverter_calculation(grid_inverter, duty_ratio);
-                request_inverter_calculation(output_inverter, duty_ratio);
+                request_inverter_calculation(output_inverter, -duty_ratio);
                 calculate_lcr_filter(lcr_filter1);
                 calculate_lcr_filter(lcr_filter2);
                 calculate_lcr_filter(lcr_filter3);
