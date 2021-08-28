@@ -107,6 +107,10 @@ begin
             create_inverter_model(grid_inverter   , output_inverter.dc_link_current , -output_inverter_load_current);
             create_inverter_model(output_inverter , grid_inverter.dc_link_current   , 0);
 
+
+            --------------------------------------------------
+            output_inverter.inverter_lc_filter.capacitor_voltage.state <= -2e3;
+
             inverter_simulation_trigger_counter <= inverter_simulation_trigger_counter + 1;
             if inverter_simulation_trigger_counter = 24 then
                 inverter_simulation_trigger_counter <= 0;
@@ -114,19 +118,17 @@ begin
                 request_inverter_calculation(output_inverter, -duty_ratio);
             end if; 
 
-            output_inverter.inverter_lc_filter.capacitor_voltage.state <= -2e3;
-
             --------------------------------------------------
             sequential_multiply(inverter_multiplier, grid_inverter.inverter_lc_filter.capacitor_voltage.state, 40e3);
             if multiplier_is_ready(inverter_multiplier) then
                 output_inverter_load_current <= get_multiplier_result(inverter_multiplier, 15);
             end if;
-            --------------------------------------------------
 
-            dc_link_voltage <= grid_inverter.dc_link_voltage.state;
+            -------------------------------------------------- 
+            dc_link_voltage        <= grid_inverter.dc_link_voltage.state;
             output_dc_link_voltage <= output_inverter.dc_link_voltage.state;
             output_dc_link_current <= output_inverter.dc_link_current;
-            output_voltage <= output_inverter.inverter_lc_filter.capacitor_voltage.state;
+            output_voltage         <= output_inverter.inverter_lc_filter.capacitor_voltage.state;
     
         end if; -- rstn
     end process clocked_reset_generator;	
