@@ -6,7 +6,10 @@ proc get_vhdl_sources {void}\
         /math_library/first_order_filter/first_order_filter_pkg.vhd
         /math_library/state_variable/state_variable_pkg.vhd
         /math_library/lcr_filter_model/lcr_filter_model_pkg.vhd
+        /math_library/pi_controller/pi_controller_pkg.vhd
         /math_library/inverter_model/inverter_model_pkg.vhd
+        /math_library/power_supply_model/psu_inverter_simulation_models_pkg.vhd
+        /math_library/power_supply_model/power_supply_simulation_model_pkg.vhd
 
         /system_clocks_pkg.vhd
 

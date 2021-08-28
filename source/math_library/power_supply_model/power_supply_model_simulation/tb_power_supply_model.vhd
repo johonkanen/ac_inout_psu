@@ -9,8 +9,7 @@ LIBRARY std  ;
 library math_library;
     use math_library.multiplier_pkg.all;
     use math_library.state_variable_pkg.all;
-    use math_library.pi_controller_pkg.all;
-    use math_library.lcr_filter_model_pkg.all;
+    use math_library.power_supply_simulation_model_pkg.all;
 
 
 entity tb_power_supply_model is
@@ -24,45 +23,38 @@ architecture sim of tb_power_supply_model is
     signal clocked_reset : std_logic;
     constant clock_per : time := 1 ns;
     constant clock_half_per : time := 0.5 ns;
-    constant simtime_in_clocks : integer := 50;
+    constant simtime_in_clocks : integer := 50e3;
 
     signal simulation_counter : natural := 0;
 
+------------------------------------------------------------------------
+    -- inverter model signals
+    signal duty_ratio : int18 := 15e3;
     signal input_voltage : int18 := 0;
-    signal grid_voltage : int18 := 0;
+    signal dc_link_voltage : int18 := 0;
 
-    signal load_current : int18 := 0;
-    signal grid_inductor_current : state_variable_record := init_state_variable_gain(5000);
+    signal dc_link_current : int18 := 0;
+    signal dc_link_load_current : int18 := 0;
+    signal output_dc_link_load_current : int18 := 0;
+    signal output_inverter_load_current : int18 := 0;
+    signal output_voltage : int18 := 0;
 
-    signal dc_link_voltage : state_variable_record := init_state_variable_gain(5000);
+    signal output_dc_link_voltage : int18 := 0;
+    signal output_dc_link_current : int18 := 0;
 
-    type inverter_stages is (main_grid_filter  ,
-                            grid_emi_filter_1  ,
-                            grid_emi_filter_2  ,
-                            output_main_filter ,
-                            output_emi_filter );
-    type grid_inverter_lc_filters is array (inverter_stages range inverter_stages'left to inverter_stages'right) of lcr_model_record; 
-    signal grid_lc_filter : grid_inverter_lc_filters := (init_lcr_model_integrator_gains(2000 , 30000)   ,
-                                                         init_lcr_model_integrator_gains(2000 , 30000)   ,
-                                                         init_lcr_model_integrator_gains(2000 , 30000)   ,
-                                                         init_lcr_model_integrator_gains(2000 , 30000)   ,
-                                                         init_lcr_model_integrator_gains(2000 , 30000));
+------------------------------------------------------------------------
+    signal inverter_multiplier  : multiplier_record := multiplier_init_values;
 
-    type multipliers is (main_grid_filter            ,
-                            grid_emi_filter_1        ,
-                            grid_emi_filter_2        ,
-                            output_main_filter       ,
-                            grid_inductor_multiplier ,
-                            output_emi_filter );
-    type lc_filter_multiplier_array is array (multipliers range multipliers'left to multipliers'right) of multiplier_record; 
-    signal lc_filter_multipliers : lc_filter_multiplier_array := (multiplier_init_values ,
-                                                                multiplier_init_values   ,
-                                                                multiplier_init_values   ,
-                                                                multiplier_init_values   ,
-                                                                multiplier_init_values   ,
-                                                                multiplier_init_values);
+    signal inverter_simulation_trigger_counter : natural := 0;
 
-    signal grid_inverter_state_counter : natural range 0 to 7;
+    signal output_resistance : natural  :=50e3;
+    signal output_current : integer := 0;
+    signal dab_pi_output : int18 := 0;
+    signal dab_pi_error : int18 := 0;
+
+    signal power_supply_simulation : power_supply_model_record := power_supply_model_init;
+    signal grid_inductor_model_multiplier : multiplier_record := multiplier_init_values;
+    signal grid_inductor_model : state_variable_record := init_state_variable_gain(35e3);
 
 begin
 
@@ -92,49 +84,43 @@ begin
 ------------------------------------------------------------------------
 
     clocked_reset_generator : process(simulator_clock, rstn)
-        impure function "*" ( left, right : int18)
-        return int18
-        is
-        begin
-            sequential_multiply(lc_filter_multipliers(grid_inductor_multiplier), left, right);
-            return get_multiplier_result(lc_filter_multipliers(grid_inductor_multiplier), 15);
-        end "*";
+    --------------------------------------------------
     begin
         if rising_edge(simulator_clock) then
-            create_multiplier(lc_filter_multipliers(main_grid_filter)); 
-            create_multiplier(lc_filter_multipliers(grid_emi_filter_1)); 
-            create_multiplier(lc_filter_multipliers(grid_emi_filter_2)); 
-            create_multiplier(lc_filter_multipliers(grid_inductor_multiplier)); 
-
-            create_multiplier(lc_filter_multipliers(output_main_filter)); 
-            create_multiplier(lc_filter_multipliers(output_emi_filter)); 
-
-            --- grid inverter model
-            create_lcr_filter(grid_lc_filter(main_grid_filter   ) , lc_filter_multipliers(main_grid_filter    ) , input_voltage                                         - grid_lc_filter(main_grid_filter).capacitor_voltage  , grid_lc_filter(main_grid_filter).inductor_current   - grid_lc_filter(grid_emi_filter_1).inductor_current);
-            create_lcr_filter(grid_lc_filter(grid_emi_filter_1  ) , lc_filter_multipliers(grid_emi_filter_1   ) , grid_lc_filter(output_main_filter).capacitor_voltage  - grid_lc_filter(grid_emi_filter_1).capacitor_voltage , grid_lc_filter(grid_emi_filter_1).inductor_current  - grid_lc_filter(grid_emi_filter_2).inductor_current);
-            create_lcr_filter(grid_lc_filter(grid_emi_filter_2  ) , lc_filter_multipliers(grid_emi_filter_2   ) , grid_lc_filter(grid_emi_filter_1  ).capacitor_voltage - grid_lc_filter(grid_emi_filter_2).capacitor_voltage , grid_lc_filter(grid_emi_filter_2 ).inductor_current - grid_inductor_current);
-
-            create_state_variable(grid_inductor_current, lc_filter_multipliers(grid_inductor_multiplier), grid_lc_filter(grid_emi_filter_2).capacitor_voltage - grid_voltage);
-
-            --- output inverter model
-            create_lcr_filter(grid_lc_filter(output_main_filter ) , lc_filter_multipliers(output_main_filter  ) , grid_lc_filter(output_main_filter ).capacitor_voltage - grid_lc_filter(output_emi_filter ).capacitor_voltage , grid_lc_filter(main_grid_filter).inductor_current  - grid_lc_filter(output_emi_filter).inductor_current);
-            create_lcr_filter(grid_lc_filter(output_emi_filter  ) , lc_filter_multipliers(output_emi_filter   ) , grid_lc_filter(output_emi_filter  ).capacitor_voltage - grid_voltage                                         , grid_lc_filter(output_emi_filter).inductor_current - load_current);
             ------------------------------------------------------------------------
-            CASE grid_inverter_state_counter is
-                WHEN 0 =>
-                    input_voltage <= 500 * 16384;
-                    increment_counter_when_ready(lc_filter_multipliers(grid_inductor_multiplier), grid_inverter_state_counter);
-                WHEN 1 =>
-                    input_voltage <= 500 * 16384;
-                    increment_counter_when_ready(lc_filter_multipliers(grid_inductor_multiplier), grid_inverter_state_counter);
-                WHEN 2 =>
-                    calculate(grid_inductor_current);
-                    calculate_lcr_filter(grid_lc_filter(main_grid_filter));
-                    calculate_lcr_filter(grid_lc_filter(grid_emi_filter_1));
-                    calculate_lcr_filter(grid_lc_filter(grid_emi_filter_2)); 
-                    grid_inverter_state_counter <= grid_inverter_state_counter + 1;
-                WHEN others => -- wait for restart
-            end CASE;
+            simulation_counter <= simulation_counter + 1;
+            if simulation_counter = 30e3 then
+                -- duty_ratio <= 19e3;
+                output_resistance <= 12e3;
+            end if;
+
+            --------------------------------------------------
+            create_power_supply_simulation_model(power_supply_simulation, 8e3, output_inverter_load_current); 
+
+            inverter_simulation_trigger_counter <= inverter_simulation_trigger_counter + 1;
+            if inverter_simulation_trigger_counter = 24 then
+                inverter_simulation_trigger_counter <= 0; 
+
+                calculate(grid_inductor_model);
+                request_power_supply_calculation(power_supply_simulation, -duty_ratio, duty_ratio);
+
+            end if; 
+
+            --------------------------------------------------
+            create_multiplier(inverter_multiplier); 
+            sequential_multiply(inverter_multiplier, power_supply_simulation.output_inverter_simulation.output_emi_filter.capacitor_voltage.state, output_resistance);
+            if multiplier_is_ready(inverter_multiplier) then
+                output_inverter_load_current <= get_multiplier_result(inverter_multiplier, 15);
+            end if;
+
+            -------------------------------------------------- 
+            dc_link_voltage        <= power_supply_simulation.grid_inverter_simulation.grid_inverter.dc_link_voltage.state;
+            output_dc_link_voltage <= power_supply_simulation.output_inverter_simulation.output_inverter.dc_link_voltage.state;
+            output_dc_link_current <= power_supply_simulation.output_inverter_simulation.output_inverter.dc_link_current;
+            output_voltage         <= power_supply_simulation.output_inverter_simulation.output_emi_filter.capacitor_voltage.state;
+            output_current         <= power_supply_simulation.output_inverter_simulation.output_inverter.inverter_lc_filter.inductor_current.state;
+            dab_pi_output          <= power_supply_simulation.dab_pi_controller.pi_out;
+            dab_pi_error           <= power_supply_simulation.output_inverter_simulation.output_inverter.dc_link_voltage - power_supply_simulation.grid_inverter_simulation.grid_inverter.dc_link_voltage.state;
     
         end if; -- rstn
     end process clocked_reset_generator;	
