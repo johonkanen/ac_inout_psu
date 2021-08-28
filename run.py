@@ -31,6 +31,7 @@ mathlib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "lcr_filter_model" / "*.
 mathlib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "state_variable" / "*.vhd") 
 mathlib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "pi_controller" / "*.vhd") 
 mathlib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "inverter_model" / "*.vhd") 
+mathlib.add_source_files(SRC_PATH / MATH_LIBRARY_PATH / "power_supply_model" / "*.vhd") 
 
 lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "*.vhd")
 lib.add_source_files(SRC_PATH / SYSTEM_CONTROL_PATH / "system_components" / "*.vhd")
