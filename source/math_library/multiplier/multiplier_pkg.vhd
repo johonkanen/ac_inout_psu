@@ -61,6 +61,16 @@ package multiplier_pkg is
 ------------------------------------------------------------------------
 end package multiplier_pkg;
 
+    --------------------------------------------------
+        -- impure function "*" ( left, right : int18)
+        -- return int18
+        -- is
+        -- begin
+        --     sequential_multiply(hw_multiplier, left, right);
+        --     return get_multiplier_result(hw_multiplier, 15);
+        -- end "*";
+    --------------------------------------------------
+
 package body multiplier_pkg is
 
 ------------------------------------------------------------------------
