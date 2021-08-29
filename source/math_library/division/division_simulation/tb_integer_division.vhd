@@ -20,18 +20,30 @@ architecture sim of tb_integer_division is
     signal clocked_reset : std_logic;
     constant clock_per : time := 1 ns;
     constant clock_half_per : time := 0.5 ns;
-    constant simtime_in_clocks : integer := 550;
+    constant simtime_in_clocks : integer := 100;
 ------------------------------------------------------------------------
     signal simulation_counter : natural := 1;
 
     signal hw_multiplier : multiplier_record := multiplier_init_values;
     signal test_multiplier : int18 := 0;
     signal division_process_counter : natural range 0 to 15 := 15;
-    constant initial_value : natural := 22175;
-    signal x : natural := initial_value;
-    signal number_to_be_reciprocated : natural := 22175;
+    signal number_to_be_reciprocated : natural := 32769;
     signal res : natural := 0;
     signal res2 : natural := 0;
+
+------------------------------------------------------------------------
+    function get_initial_value_for_division
+    (
+        divisor : natural
+    )
+    return natural
+    is
+    begin
+        return 131072-131072/4;
+    end get_initial_value_for_division;
+------------------------------------------------------------------------
+
+    signal x : natural := get_initial_value_for_division(number_to_be_reciprocated);
 
 begin
 
@@ -67,7 +79,7 @@ begin
         is
         begin
             sequential_multiply(hw_multiplier, left, right);
-            return get_multiplier_result(hw_multiplier, 15);
+            return get_multiplier_result(hw_multiplier, 16);
         end "*";
     --------------------------------------------------
     begin
@@ -85,15 +97,10 @@ begin
                     res <= number_to_be_reciprocated * x;
                     increment_counter_when_ready(hw_multiplier,division_process_counter);
                 WHEN 1 =>
-                    res2 <= x*(65536 - res);
+                    res2 <= x*(131071 - res);
                     increment_counter_when_ready(hw_multiplier,division_process_counter);
                 WHEN 2 =>
                     x <= res2;
-                    division_process_counter <= division_process_counter + 1;
-                WHEN 3 =>
-                    division_process_counter <= division_process_counter + 1;
-                WHEN 4 =>
-                    division_process_counter <= division_process_counter + 1;
                 WHEN others => -- wait for start
             end CASE;
 
