@@ -16,6 +16,7 @@ library work;
 
 library math_library;
     use math_library.multiplier_pkg.all;
+    use math_library.division_pkg.all;
     use math_library.first_order_filter_pkg.all;
     use math_library.lcr_filter_model_pkg.all;
     use math_library.power_supply_simulation_model_pkg.all;
@@ -174,6 +175,8 @@ architecture rtl of system_components is
     signal grid_duty_ratio : int18 := 15e3;
     signal output_duty_ratio : int18 := 15e3;
     signal output_load_current : int18 := 2e3;
+
+    signal test_leading_zeroes : natural range 0 to 2**17-1;
 --------------------------------------------------
 begin
 
@@ -236,6 +239,8 @@ begin
             if ad_conversion_is_ready(spi_sar_adc_data_out) then
                 request_power_supply_calculation(power_supply_simulation, -grid_duty_ratio, output_duty_ratio);
 
+                test_leading_zeroes <= test_leading_zeroes + 1;
+
                 CASE uart_rx_data is
                     WHEN 10 => transmit_16_bit_word_with_uart(uart_data_in, get_filter_output(bandpass_filter.low_pass_filter) );
                     WHEN 11 => transmit_16_bit_word_with_uart(uart_data_in, (bandpass_filter.low_pass_filter.filter_input - get_filter_output(bandpass_filter.low_pass_filter))/2+32768);
@@ -249,6 +254,7 @@ begin
                     WHEN 19 => transmit_16_bit_word_with_uart(uart_data_in, power_supply_simulation.grid_inverter_simulation.grid_emi_filter_2.capacitor_voltage.state/4 + 32768);
                     WHEN 20 => transmit_16_bit_word_with_uart(uart_data_in, power_supply_simulation.grid_inverter_simulation.grid_emi_filter_2.inductor_current.state/4+ 32768);
                     WHEN 21 => transmit_16_bit_word_with_uart(uart_data_in, power_supply_simulation.grid_inverter_simulation.grid_inverter.dc_link_voltage.state/2);
+                    WHEN 22 => transmit_16_bit_word_with_uart(uart_data_in, remove_leading_zeros(test_leading_zeroes) - 1);
                     WHEN others => -- get data from MDIO
                         register_counter := register_counter + 1;
                         if test_counter = 4600 then

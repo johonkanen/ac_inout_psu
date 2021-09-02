@@ -34,12 +34,14 @@ architecture sim of tb_integer_division is
     signal divisor_lut_index : natural := 15;
     signal number_to_be_reciprocated : natural := 32767 + divisor_lut_index*1024;
 
-    signal divider : division_record := (0, 0, 0, get_initial_value_for_division(number_to_be_reciprocated), number_to_be_reciprocated);
+    signal divider : division_record := (0, get_initial_value_for_division(number_to_be_reciprocated), number_to_be_reciprocated);
+
+------------------------------------------------------------------------ 
 
 ------------------------------------------------------------------------
-
     signal x : natural := get_initial_value_for_division(number_to_be_reciprocated);
-
+    signal test_leading_zeroes : natural := remove_leading_zeros(2**2 + 12);
+------------------------------------------------------------------------
 begin
 
 ------------------------------------------------------------------------
@@ -84,14 +86,15 @@ begin
             create_division(hw_multiplier, divider);
 
             simulation_counter <= simulation_counter + 1;
-            if simulation_counter mod 5  = 0 then
-                -- divider.division_process_counter <= 0;
+            if simulation_counter mod 10  = 0 then
+                divider.division_process_counter <= 0;
             end if; 
 
         end if; -- rstn
     end process clocked_reset_generator;	
     x <= divider.x;
     division_process_counter <= divider.division_process_counter;
+
 
 ------------------------------------------------------------------------
 end sim;

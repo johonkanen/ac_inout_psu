@@ -9,25 +9,117 @@ package division_pkg is
 --------------------------------------------------
     type division_record is record
         division_process_counter : natural range 0 to 3;
-        res : int18;
-        res2 : int18;
         x: int18;
         number_to_be_reciprocated : int18;
     end record;
 
-    constant init_division : division_record := (3, 0, 0, 0, 0);
-
+    constant init_division : division_record := (3, 0, 0);
+------------------------------------------------------------------------
     procedure create_division (
         signal hw_multiplier : inout multiplier_record;
         signal division : inout division_record);
 
+------------------------------------------------------------------------
     function get_initial_value_for_division ( divisor : natural)
         return natural;
+
+------------------------------------------------------------------------
+    procedure request_division (
+        signal division : out division_record;
+        number_to_be_reciprocated : int18);
+
+------------------------------------------------------------------------
+    function division_is_ready ( division_multiplier : multiplier_record; division : division_record)
+        return boolean;
+
+------------------------------------------------------------------------
+    function remove_leading_zeros ( number : int18)
+        return int18;
 
 end package division_pkg;
 
 
 package body division_pkg is
+
+------------------------------------------------------------------------
+    function remove_leading_zeros
+    (
+        number : int18
+    )
+    return int18
+    is
+        variable uint_17 : unsigned(16 downto 0);
+
+    begin
+        uint_17 := to_unsigned(abs(number),17);
+
+        if to_integer(uint_17(15 downto 15- 15)) = 0 then
+            return number * 2**(16-(    15- 15));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 14)) = 0 then
+            return number * 2**(16-(    15- 14));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 13)) = 0 then
+            return number * 2**(16-(    15- 13));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 12)) = 0 then
+            return number * 2**(16-(    15- 12));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 11)) = 0 then
+            return number * 2**(16-(    15- 11));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 10)) = 0 then
+            return number * 2**(16-(    15- 10));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 9)) = 0 then
+            return number * 2**(16-(    15- 9));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 8)) = 0 then
+            return number * 2**(16-(    15- 8));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 7)) = 0 then
+            return number * 2**(16-(    15- 7));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 6)) = 0 then
+            return number * 2**(16-(    15- 6));
+        end if; 
+
+        if to_integer(uint_17(15 downto 15- 5)) = 0 then
+            return number * 2**(16-(    15- 5));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 4)) = 0 then
+            return number * 2**(16-(    15- 4));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 3)) = 0 then
+            return number * 2**(16-(    15- 3));
+        end if; 
+
+        if to_integer(uint_17(15 downto 15- 2)) = 0 then
+            return number * 2**(16-(    15- 2));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 1)) = 0 then
+            return number * 2**(16-(    15- 1));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 0)) = 0 then
+            return number * 2**(16-(    15- 0));
+        end if;
+
+        return number;
+        
+    end remove_leading_zeros; 
 
 ------------------------------------------------------------------------
     function get_initial_value_for_division
@@ -70,14 +162,6 @@ package body division_pkg is
         signal division : inout division_record
     ) is
     --------------------------------------------------
-        impure function "*" ( left, right : int18)
-        return int18
-        is
-        begin
-            sequential_multiply(hw_multiplier, left, right);
-            return get_multiplier_result(hw_multiplier, 16);
-        end "*";
-    --------------------------------------------------
         function invert_bits
         (
             number : natural
@@ -91,25 +175,59 @@ package body division_pkg is
         end invert_bits;
     --------------------------------------------------
         alias division_process_counter is division.division_process_counter;
-        alias res is division.res;
-        alias res2 is division.res2;
         alias x is division.x;
         alias number_to_be_reciprocated is division.number_to_be_reciprocated; 
+        variable xa : int18;
+    --------------------------------------------------
     begin
         
         CASE division_process_counter is
             WHEN 0 =>
-                res <= number_to_be_reciprocated * x;
-                increment_counter_when_ready(hw_multiplier,division_process_counter);
+                multiply(hw_multiplier, number_to_be_reciprocated, x);
+                division_process_counter <= division_process_counter + 1;
             WHEN 1 =>
-                res2 <= x*(invert_bits(res));
+                if multiplier_is_ready(hw_multiplier) then
+                    xa := get_multiplier_result(hw_multiplier, 16);
+                    multiply(hw_multiplier, x, invert_bits(xa));
+                end if;
                 increment_counter_when_ready(hw_multiplier,division_process_counter);
             WHEN 2 =>
-                x <= res2;
+                if multiplier_is_ready(hw_multiplier) then
+                    x <= get_multiplier_result(hw_multiplier, 16);
+                end if;
+                increment_counter_when_ready(hw_multiplier,division_process_counter);
             WHEN others => -- wait for start
         end CASE;
     end create_division;
 
 ------------------------------------------------------------------------
+    procedure request_division
+    (
+        signal division : out division_record;
+        number_to_be_reciprocated : int18
+    ) is
+    begin
+        division.division_process_counter <= 0;
+        division.x <= get_initial_value_for_division(number_to_be_reciprocated);
+        division.number_to_be_reciprocated <= number_to_be_reciprocated;
+    end request_division;
 
+------------------------------------------------------------------------
+    function division_is_ready
+    (
+        division_multiplier : multiplier_record;
+        division : division_record
+    )
+    return boolean
+    is
+    begin
+        if division.division_process_counter = 2 then
+            return multiplier_is_ready(division_multiplier);
+        else
+            return false;
+        end if;
+        
+    end division_is_ready;
+
+------------------------------------------------------------------------ 
 end package body division_pkg;
