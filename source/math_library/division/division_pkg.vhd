@@ -39,6 +39,12 @@ package division_pkg is
         number_to_be_divided : int18;
         number_to_be_reciprocated : int18);
 ------------------------------------------------------------------------
+    procedure request_division (
+        signal division : out division_record;
+        number_to_be_divided : int18;
+        number_to_be_reciprocated : int18;
+        iterations : in natural range 1 to 2);
+------------------------------------------------------------------------
     function division_is_busy ( division : in division_record)
         return boolean;
 

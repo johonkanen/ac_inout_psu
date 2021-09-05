@@ -176,7 +176,7 @@ architecture rtl of system_components is
     signal output_duty_ratio : int18 := 15e3;
     signal output_load_current : int18 := 2e3;
 
-    signal test_leading_zeroes : natural range 0 to 2**17-1;
+    signal test_leading_zeroes : natural range 0 to 2**15-1;
     signal division_multiplier1 : multiplier_record := init_multiplier;
     signal divider1 : division_record := init_division;
     signal division_multiplier2 : multiplier_record := init_multiplier;
@@ -249,8 +249,8 @@ begin
                 request_power_supply_calculation(power_supply_simulation, -grid_duty_ratio, output_duty_ratio);
 
                 test_leading_zeroes <= test_leading_zeroes + 1;
-                request_division(divider1, test_leading_zeroes, 1);
-                request_division(divider2, test_leading_zeroes, 2);
+                request_division(divider1, 28559, test_leading_zeroes);
+                request_division(divider2, test_leading_zeroes, test_leading_zeroes, 2);
 
                 CASE uart_rx_data is
                     WHEN 10 => transmit_16_bit_word_with_uart(uart_data_in, get_filter_output(bandpass_filter.low_pass_filter) );
@@ -266,7 +266,7 @@ begin
                     WHEN 20 => transmit_16_bit_word_with_uart(uart_data_in, power_supply_simulation.grid_inverter_simulation.grid_emi_filter_2.inductor_current.state/4+ 32768);
                     WHEN 21 => transmit_16_bit_word_with_uart(uart_data_in, power_supply_simulation.grid_inverter_simulation.grid_inverter.dc_link_voltage.state/2);
                     WHEN 22 => transmit_16_bit_word_with_uart(uart_data_in, get_multiplier_result(division_multiplier1, 17));
-                    WHEN 23 => transmit_16_bit_word_with_uart(uart_data_in, get_multiplier_result(division_multiplier2, 17));
+                    WHEN 23 => transmit_16_bit_word_with_uart(uart_data_in, get_multiplier_result(division_multiplier2, 16));
                     WHEN others => -- get data from MDIO
                         register_counter := register_counter + 1;
                         if test_counter = 4600 then

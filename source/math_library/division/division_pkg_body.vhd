@@ -161,7 +161,7 @@ package body division_pkg is
                 increment_counter_when_ready(hw_multiplier,division_process_counter);
             WHEN 2 =>
                 if multiplier_is_ready(hw_multiplier) then
-                    x <= get_multiplier_result(hw_multiplier, 17);
+                    x <= get_multiplier_result(hw_multiplier, 16);
                     if number_of_newton_raphson_iteration /= 0 then
                         number_of_newton_raphson_iteration <= number_of_newton_raphson_iteration - 1;
                         division_process_counter <= 0;

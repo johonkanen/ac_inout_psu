@@ -88,11 +88,11 @@ begin
             simulation_counter <= simulation_counter + 1;
             -- if simulation_counter mod 20  = 0 then
             if simulation_counter = 10 then
-                request_division(divider, 6, 9);
+                request_division(divider, 32768, 20000);
             end if; 
 
             if division_is_ready(hw_multiplier, divider) then
-                division_result <= get_multiplier_result(hw_multiplier, 4);
+                division_result <= get_multiplier_result(hw_multiplier, 17);
             end if;
 
         end if; -- rstn
