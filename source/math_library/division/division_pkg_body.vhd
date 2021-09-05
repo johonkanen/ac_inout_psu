@@ -144,6 +144,7 @@ package body division_pkg is
         alias x is division.x;
         alias number_to_be_reciprocated is division.number_to_be_reciprocated; 
         alias number_of_newton_raphson_iteration is division.number_of_newton_raphson_iteration; 
+        alias dividend is division.dividend;
         variable xa : int18;
     --------------------------------------------------
     begin
@@ -166,6 +167,7 @@ package body division_pkg is
                         division_process_counter <= 0;
                     else
                         division_process_counter <= division_process_counter + 1;
+                        multiply(hw_multiplier, get_multiplier_result(hw_multiplier, 16), dividend);
                     end if;
                 end if;
             WHEN others => -- wait for start
@@ -176,6 +178,7 @@ package body division_pkg is
     procedure request_division
     (
         signal division : out division_record;
+        number_to_be_divided : int18;
         number_to_be_reciprocated : int18
     ) is
         variable abs_number_to_be_reciprocated : natural range 0 to 2**17-1;
@@ -184,17 +187,19 @@ package body division_pkg is
         division.division_process_counter <= 0;
         division.x <= get_initial_value_for_division(remove_leading_zeros(abs_number_to_be_reciprocated));
         division.number_to_be_reciprocated <= remove_leading_zeros(abs_number_to_be_reciprocated);
+        division.dividend <= number_to_be_divided;
     end request_division;
 
 ------------------------------------------------------------------------
     procedure request_division
     (
         signal division : out division_record;
+        number_to_be_divided : int18;
         number_to_be_reciprocated : int18;
         iterations : in natural range 1 to 2
     ) is
     begin
-        request_division(division, number_to_be_reciprocated);
+        request_division(division, number_to_be_divided, number_to_be_reciprocated);
         division.number_of_newton_raphson_iteration <= iterations - 1;
     end request_division;
 
@@ -208,7 +213,7 @@ package body division_pkg is
     return boolean
     is
     begin
-        if division.division_process_counter = 2 and (division.number_of_newton_raphson_iteration = 0) then
+        if division.division_process_counter = 3 then
             return multiplier_is_ready(division_multiplier);
         else
             return false;

@@ -12,9 +12,10 @@ package division_pkg is
         x: int18;
         number_to_be_reciprocated : int18;
         number_of_newton_raphson_iteration : natural range 0 to 1;
+        dividend : int18;
     end record;
 
-    constant init_division : division_record := (3, 0, 0, 0);
+    constant init_division : division_record := (3, 0, 0, 0, 0);
 ------------------------------------------------------------------------
     procedure create_division (
         signal hw_multiplier : inout multiplier_record;
@@ -23,11 +24,6 @@ package division_pkg is
 ------------------------------------------------------------------------
     function get_initial_value_for_division ( divisor : natural)
         return natural;
-
-------------------------------------------------------------------------
-    procedure request_division (
-        signal division : out division_record;
-        number_to_be_reciprocated : int18);
 
 ------------------------------------------------------------------------
     function division_is_ready ( division_multiplier : multiplier_record; division : division_record)
@@ -40,9 +36,8 @@ package division_pkg is
 ------------------------------------------------------------------------
     procedure request_division (
         signal division : out division_record;
-        number_to_be_reciprocated : int18;
-        iterations : in natural range 1 to 2);
-
+        number_to_be_divided : int18;
+        number_to_be_reciprocated : int18);
 ------------------------------------------------------------------------
     function division_is_busy ( division : in division_record)
         return boolean;

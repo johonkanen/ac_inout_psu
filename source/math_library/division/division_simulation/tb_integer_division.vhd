@@ -88,17 +88,12 @@ begin
             simulation_counter <= simulation_counter + 1;
             -- if simulation_counter mod 20  = 0 then
             if simulation_counter = 10 then
-                request_division(divider, 9, 1);
+                request_division(divider, 6, 9);
             end if; 
 
             if division_is_ready(hw_multiplier, divider) then
-                multiply(hw_multiplier1, get_multiplier_result(hw_multiplier, 16), 6); 
+                division_result <= get_multiplier_result(hw_multiplier, 4);
             end if;
-
-            if multiplier_is_ready(hw_multiplier1) then
-                division_result <= get_multiplier_result(hw_multiplier1, 4);
-            end if;
-
 
         end if; -- rstn
     end process clocked_reset_generator;	
