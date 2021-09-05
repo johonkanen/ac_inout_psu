@@ -27,21 +27,19 @@ architecture sim of tb_integer_division is
 
     signal hw_multiplier : multiplier_record := multiplier_init_values;
     signal hw_multiplier1 : multiplier_record := multiplier_init_values;
-    signal test_multiplier : int18 := 0;
     signal division_process_counter : natural range 0 to 15 := 15;
-    signal res : natural := 0;
-    signal res2 : natural := 0;
 
     signal divisor_lut_index : natural := 15;
     signal number_to_be_reciprocated : natural := 32767 + divisor_lut_index*1024;
 
-    signal divider : division_record := (0, get_initial_value_for_division(number_to_be_reciprocated), number_to_be_reciprocated,0);
+    signal divider : division_record := init_division;
 
 ------------------------------------------------------------------------ 
 
 ------------------------------------------------------------------------
-    signal x : natural := get_initial_value_for_division(number_to_be_reciprocated);
+    signal x : integer := get_initial_value_for_division(number_to_be_reciprocated);
     signal test_leading_zeroes : natural := remove_leading_zeros(2**2 + 12);
+    signal division_result : int18 := 0;
 ------------------------------------------------------------------------
 begin
 
@@ -72,13 +70,13 @@ begin
 
     clocked_reset_generator : process(simulator_clock, rstn)
     --------------------------------------------------
-        impure function "*" ( left, right : int18)
-        return int18
-        is
-        begin
-            sequential_multiply(hw_multiplier, left, right);
-            return get_multiplier_result(hw_multiplier, 16);
-        end "*";
+        -- impure function "*" ( left, right : int18)
+        -- return int18
+        -- is
+        -- begin
+        --     sequential_multiply(hw_multiplier, left, right);
+        --     return get_multiplier_result(hw_multiplier, 16);
+        -- end "*";
     --------------------------------------------------
     begin
         if rising_edge(simulator_clock) then
@@ -88,9 +86,18 @@ begin
             create_division(hw_multiplier, divider);
 
             simulation_counter <= simulation_counter + 1;
-            if not division_is_busy(divider) then
-                request_division(divider, remove_leading_zeros(9));
+            -- if simulation_counter mod 20  = 0 then
+            if simulation_counter = 10 then
+                request_division(divider, 9, 1);
             end if; 
+
+            if division_is_ready(hw_multiplier, divider) then
+                multiply(hw_multiplier1, get_multiplier_result(hw_multiplier, 17), 6); 
+            end if;
+            if multiplier_is_ready(hw_multiplier1) then
+                division_result <= get_multiplier_result(hw_multiplier1, 4);
+            end if;
+
 
         end if; -- rstn
     end process clocked_reset_generator;	

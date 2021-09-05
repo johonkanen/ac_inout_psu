@@ -7,10 +7,17 @@ package body division_pkg is
     )
     return int18
     is
+        variable uint_18 : unsigned(17 downto 0);
         variable uint_17 : unsigned(16 downto 0);
 
     begin
-        uint_17 := to_unsigned(abs(number),17);
+        uint_18 := to_unsigned(abs(number),18);
+        if uint_18(16) = '1' then
+            uint_17 := uint_18(17 downto 1);
+        else
+            uint_17 := uint_18(16 downto 0);
+        end if;
+
 
         if to_integer(uint_17(15 downto 15- 15)) = 0 then
             return number * 2**(16-(    15- 15));
@@ -45,7 +52,7 @@ package body division_pkg is
         end if;
 
         if to_integer(uint_17(15 downto 15- 7)) = 0 then
-           return number * 2**(16-(    15- 7));
+           return number * 2**(16-(     15- 7));
         end if;
 
         if to_integer(uint_17(15 downto 15- 6)) = 0 then
@@ -153,7 +160,7 @@ package body division_pkg is
                 increment_counter_when_ready(hw_multiplier,division_process_counter);
             WHEN 2 =>
                 if multiplier_is_ready(hw_multiplier) then
-                    x <= get_multiplier_result(hw_multiplier, 16);
+                    x <= get_multiplier_result(hw_multiplier, 17);
                     if number_of_newton_raphson_iteration /= 0 then
                         number_of_newton_raphson_iteration <= number_of_newton_raphson_iteration - 1;
                         division_process_counter <= 0;
@@ -173,8 +180,8 @@ package body division_pkg is
     ) is
     begin
         division.division_process_counter <= 0;
-        division.x <= get_initial_value_for_division(number_to_be_reciprocated);
-        division.number_to_be_reciprocated <= number_to_be_reciprocated;
+        division.x <= get_initial_value_for_division(remove_leading_zeros(abs(number_to_be_reciprocated)));
+        division.number_to_be_reciprocated <= abs(number_to_be_reciprocated);
     end request_division;
 
 ------------------------------------------------------------------------
@@ -199,7 +206,7 @@ package body division_pkg is
     return boolean
     is
     begin
-        if division.division_process_counter = 2 then
+        if division.division_process_counter = 2 and (division.number_of_newton_raphson_iteration = 0) then
             return multiplier_is_ready(division_multiplier);
         else
             return false;

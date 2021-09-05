@@ -46,4 +46,6 @@ package division_pkg is
 ------------------------------------------------------------------------
     function division_is_busy ( division : in division_record)
         return boolean;
+
+------------------------------------------------------------------------
 end package division_pkg;
