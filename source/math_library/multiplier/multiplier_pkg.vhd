@@ -21,6 +21,7 @@ package multiplier_pkg is
     end record;
 
     constant multiplier_init_values : multiplier_record := ( (others => '0'),(others => '0'),(others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), false, '0');
+    constant init_multiplier : multiplier_record := multiplier_init_values;
 ------------------------------------------------------------------------
     procedure create_multiplier (
         signal multiplier : inout multiplier_record);

@@ -176,7 +176,11 @@ architecture rtl of system_components is
     signal output_duty_ratio : int18 := 15e3;
     signal output_load_current : int18 := 2e3;
 
-    signal test_leading_zeroes : natural range 0 to 2**17-1;
+    signal test_leading_zeroes : natural range 0 to 2**16-1;
+    signal division_multiplier1 : multiplier_record := init_multiplier;
+    signal divider1 : division_record := init_division;
+    signal division_multiplier2 : multiplier_record := init_multiplier;
+    signal divider2 : division_record := init_division;
 --------------------------------------------------
 begin
 
@@ -229,6 +233,11 @@ begin
                 output_inverter_load_current <= get_multiplier_result(hw_multiplier, 15);
             end if;
             -------------------------------------------------- 
+                create_multiplier(division_multiplier1);
+                create_division(division_multiplier1, divider1);
+                create_multiplier(division_multiplier2);
+                create_division(division_multiplier2, divider2);
+            -------------------------------------------------- 
 
             uart_transmit_counter <= uart_transmit_counter - 1; 
             if uart_transmit_counter = 0 then
@@ -240,6 +249,8 @@ begin
                 request_power_supply_calculation(power_supply_simulation, -grid_duty_ratio, output_duty_ratio);
 
                 test_leading_zeroes <= test_leading_zeroes + 1;
+                request_division(divider1, remove_leading_zeros(test_leading_zeroes), 1);
+                request_division(divider2, remove_leading_zeros(test_leading_zeroes), 2);
 
                 CASE uart_rx_data is
                     WHEN 10 => transmit_16_bit_word_with_uart(uart_data_in, get_filter_output(bandpass_filter.low_pass_filter) );
@@ -254,7 +265,8 @@ begin
                     WHEN 19 => transmit_16_bit_word_with_uart(uart_data_in, power_supply_simulation.grid_inverter_simulation.grid_emi_filter_2.capacitor_voltage.state/4 + 32768);
                     WHEN 20 => transmit_16_bit_word_with_uart(uart_data_in, power_supply_simulation.grid_inverter_simulation.grid_emi_filter_2.inductor_current.state/4+ 32768);
                     WHEN 21 => transmit_16_bit_word_with_uart(uart_data_in, power_supply_simulation.grid_inverter_simulation.grid_inverter.dc_link_voltage.state/2);
-                    WHEN 22 => transmit_16_bit_word_with_uart(uart_data_in, remove_leading_zeros(test_leading_zeroes) - 1);
+                    WHEN 22 => transmit_16_bit_word_with_uart(uart_data_in, get_multiplier_result(division_multiplier1, 17));
+                    WHEN 23 => transmit_16_bit_word_with_uart(uart_data_in, get_multiplier_result(division_multiplier2, 17));
                     WHEN others => -- get data from MDIO
                         register_counter := register_counter + 1;
                         if test_counter = 4600 then

@@ -26,6 +26,7 @@ architecture sim of tb_integer_division is
     signal simulation_counter : natural := 1;
 
     signal hw_multiplier : multiplier_record := multiplier_init_values;
+    signal hw_multiplier1 : multiplier_record := multiplier_init_values;
     signal test_multiplier : int18 := 0;
     signal division_process_counter : natural range 0 to 15 := 15;
     signal res : natural := 0;
@@ -34,7 +35,7 @@ architecture sim of tb_integer_division is
     signal divisor_lut_index : natural := 15;
     signal number_to_be_reciprocated : natural := 32767 + divisor_lut_index*1024;
 
-    signal divider : division_record := (0, get_initial_value_for_division(number_to_be_reciprocated), number_to_be_reciprocated);
+    signal divider : division_record := (0, get_initial_value_for_division(number_to_be_reciprocated), number_to_be_reciprocated,0);
 
 ------------------------------------------------------------------------ 
 
@@ -83,11 +84,12 @@ begin
         if rising_edge(simulator_clock) then
 
             create_multiplier(hw_multiplier);
+            create_multiplier(hw_multiplier1);
             create_division(hw_multiplier, divider);
 
             simulation_counter <= simulation_counter + 1;
-            if simulation_counter mod 10  = 0 then
-                divider.division_process_counter <= 0;
+            if not division_is_busy(divider) then
+                request_division(divider, remove_leading_zeros(9));
             end if; 
 
         end if; -- rstn
