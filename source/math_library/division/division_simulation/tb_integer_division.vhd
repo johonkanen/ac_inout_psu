@@ -92,8 +92,9 @@ begin
             end if; 
 
             if division_is_ready(hw_multiplier, divider) then
-                multiply(hw_multiplier1, get_multiplier_result(hw_multiplier, 17), 6); 
+                multiply(hw_multiplier1, get_multiplier_result(hw_multiplier, 16), 6); 
             end if;
+
             if multiplier_is_ready(hw_multiplier1) then
                 division_result <= get_multiplier_result(hw_multiplier1, 4);
             end if;

@@ -178,10 +178,12 @@ package body division_pkg is
         signal division : out division_record;
         number_to_be_reciprocated : int18
     ) is
+        variable abs_number_to_be_reciprocated : natural range 0 to 2**17-1;
     begin
+        abs_number_to_be_reciprocated := abs(number_to_be_reciprocated);
         division.division_process_counter <= 0;
-        division.x <= get_initial_value_for_division(remove_leading_zeros(abs(number_to_be_reciprocated)));
-        division.number_to_be_reciprocated <= abs(number_to_be_reciprocated);
+        division.x <= get_initial_value_for_division(remove_leading_zeros(abs_number_to_be_reciprocated));
+        division.number_to_be_reciprocated <= remove_leading_zeros(abs_number_to_be_reciprocated);
     end request_division;
 
 ------------------------------------------------------------------------
