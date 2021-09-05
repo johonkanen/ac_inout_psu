@@ -1,93 +1,6 @@
 package body division_pkg is
 
 ------------------------------------------------------------------------
-    function remove_leading_zeros
-    (
-        number : int18
-    )
-    return int18
-    is
-        variable uint_18 : unsigned(17 downto 0);
-        variable uint_17 : unsigned(16 downto 0);
-
-    begin
-        uint_18 := to_unsigned(abs(number),18);
-        if uint_18(16) = '1' then
-            uint_17 := uint_18(17 downto 1);
-        else
-            uint_17 := uint_18(16 downto 0);
-        end if;
-
-
-        if to_integer(uint_17(15 downto 15- 15)) = 0 then
-            return number * 2**(16-(    15- 15));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 14)) = 0 then
-            return number * 2**(16-(    15- 14));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 13)) = 0 then
-            return number * 2**(16-(    15- 13));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 12)) = 0 then
-            return number * 2**(16-(    15- 12));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 11)) = 0 then
-            return number * 2**(16-(    15- 11));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 10)) = 0 then
-            return number * 2**(16-(    15- 10));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 9)) = 0 then
-            return number * 2**(16-(    15- 9));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 8)) = 0 then
-            return number * 2**(16-(    15- 8));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 7)) = 0 then
-           return number * 2**(16-(     15- 7));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 6)) = 0 then
-            return number * 2**(16-(    15- 6));
-        end if; 
-
-        if to_integer(uint_17(15 downto 15- 5)) = 0 then
-            return number * 2**(16-(    15- 5));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 4)) = 0 then
-            return number * 2**(16-(    15- 4));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 3)) = 0 then
-            return number * 2**(16-(    15- 3));
-        end if; 
-
-        if to_integer(uint_17(15 downto 15- 2)) = 0 then
-            return number * 2**(16-(    15- 2));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 1)) = 0 then
-            return number * 2**(16-(    15- 1));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 0)) = 0 then
-            return number * 2**(16-(    15- 0));
-        end if;
-
-        return number;
-        
-    end remove_leading_zeros; 
-
-------------------------------------------------------------------------
     function get_initial_value_for_division
     (
         divisor : natural
@@ -184,10 +97,10 @@ package body division_pkg is
         variable abs_number_to_be_reciprocated : natural range 0 to 2**17-1;
     begin
         abs_number_to_be_reciprocated := abs(number_to_be_reciprocated);
-        division.division_process_counter <= 0;
-        division.x <= get_initial_value_for_division(remove_leading_zeros(abs_number_to_be_reciprocated));
+        division.division_process_counter  <= 0;
+        division.x                         <= get_initial_value_for_division(remove_leading_zeros(abs_number_to_be_reciprocated));
         division.number_to_be_reciprocated <= remove_leading_zeros(abs_number_to_be_reciprocated);
-        division.dividend <= number_to_be_divided;
+        division.dividend                  <= number_to_be_divided;
     end request_division;
 
 ------------------------------------------------------------------------
@@ -231,4 +144,171 @@ package body division_pkg is
     begin
         return division.division_process_counter /= 3;
     end division_is_busy;
+------------------------------------------------------------------------
+    function remove_leading_zeros
+    (
+        number : int18
+    )
+    return int18
+    is
+        variable uint_18 : unsigned(17 downto 0);
+        variable uint_17 : unsigned(16 downto 0);
+
+    begin
+        -- TODO, fix this currently does not work for number > 65536
+        uint_18 := to_unsigned(abs(number),18);
+        if uint_18(16) = '1' then
+            uint_17 := uint_18(17 downto 1);
+        else
+            uint_17 := uint_18(16 downto 0);
+        end if;
+
+
+        if to_integer(uint_17(15 downto 15- 15)) = 0 then
+            return number * 2**(16-(    15- 15));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 14)) = 0 then
+            return number * 2**(16-(    15- 14));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 13)) = 0 then
+            return number * 2**(16-(    15- 13));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 12)) = 0 then
+            return number * 2**(16-(    15- 12));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 11)) = 0 then
+            return number * 2**(16-(    15- 11));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 10)) = 0 then
+            return number * 2**(16-(    15- 10));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 9)) = 0 then
+            return number * 2**(16-(    15- 9));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 8)) = 0 then
+            return number * 2**(16-(    15- 8));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 7)) = 0 then
+           return number * 2**(16-(     15- 7));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 6)) = 0 then
+            return number * 2**(16-(    15- 6));
+        end if; 
+
+        if to_integer(uint_17(15 downto 15- 5)) = 0 then
+            return number * 2**(16-(    15- 5));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 4)) = 0 then
+            return number * 2**(16-(    15- 4));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 3)) = 0 then
+            return number * 2**(16-(    15- 3));
+        end if; 
+
+        if to_integer(uint_17(15 downto 15- 2)) = 0 then
+            return number * 2**(16-(    15- 2));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 1)) = 0 then
+            return number * 2**(16-(    15- 1));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 0)) = 0 then
+            return number * 2**(16-(    15- 0));
+        end if;
+
+        return number;
+        
+    end remove_leading_zeros; 
+------------------------------------------------------------------------
+        function get_division_result
+        (
+            division_result : int18
+        )
+        return natural
+        is
+            variable uint_17 : unsigned(16 downto 0);
+        begin
+
+        uint_17 := to_unsigned(division_result,17);
+        if to_integer(uint_17(15 downto 15- 15)) = 0 then
+            return division_result * 2**(16-(    15- 15));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 14)) = 0 then
+            return division_result * 2**(15-(    15- 14));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 13)) = 0 then
+            return division_result * 2**(15-(    15- 13));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 12)) = 0 then
+            return division_result * 2**(15-(    15- 12));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 11)) = 0 then
+            return division_result * 2**(15-(    15- 11));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 10)) = 0 then
+            return division_result * 2**(15-(    15- 10));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 9)) = 0 then
+            return division_result * 2**(15-(    15- 9));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 8)) = 0 then
+            return division_result * 2**(15-(    15- 8));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 7)) = 0 then
+           return division_result * 2**(16-(     15- 7));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 6)) = 0 then
+            return division_result * 2**(15-(    15- 6));
+        end if; 
+
+        if to_integer(uint_17(15 downto 15- 5)) = 0 then
+            return division_result * 2**(15-(    15- 5));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 4)) = 0 then
+            return division_result * 2**(15-(    15- 4));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 3)) = 0 then
+            return division_result * 2**(15-(    15- 3));
+        end if; 
+
+        if to_integer(uint_17(15 downto 15- 2)) = 0 then
+            return division_result * 2**(15-(    15- 2));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 1)) = 0 then
+            return division_result * 2**(15-(    15- 1));
+        end if;
+
+        if to_integer(uint_17(15 downto 15- 0)) = 0 then
+            return division_result * 2**(15-(    15- 0));
+        end if;
+
+        return division_result;
+        
+    end get_division_result; 
+
+
 end package body division_pkg;
