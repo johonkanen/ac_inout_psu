@@ -3,6 +3,7 @@ proc get_vhdl_sources {void}\
     return \
     { 
         /math_library/multiplier/multiplier_pkg.vhd
+        /math_library/division/division_internal_pkg.vhd
         /math_library/division/division_pkg.vhd
         /math_library/division/division_pkg_body.vhd
         /math_library/first_order_filter/first_order_filter_pkg.vhd

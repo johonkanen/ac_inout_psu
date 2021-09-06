@@ -35,6 +35,8 @@ architecture sim of tb_integer_division is
     signal divider : division_record := init_division;
 
 ------------------------------------------------------------------------ 
+    signal test_divident : natural := 2200;
+    signal test_divider : natural  := 5300;
 
     signal division_result : int18 := 0;
 ------------------------------------------------------------------------
@@ -75,8 +77,7 @@ begin
         --     return get_multiplier_result(hw_multiplier, 16);
         -- end "*";
     --------------------------------------------------
-        constant test_divident : natural := 800;
-        constant test_divider : natural  := 800;
+    --------------------------------------------------
         constant result_radix : natural  := 15;
     begin
         if rising_edge(simulator_clock) then
@@ -92,24 +93,9 @@ begin
             end if; 
 
             if division_is_ready(hw_multiplier, divider) then
-                if test_divider < 16384 then
-                    division_result <= (get_multiplier_result(hw_multiplier,16))*2**1;
-                end if;
-                if test_divider < 8192 then
-                    division_result <= (get_multiplier_result(hw_multiplier,16))*2**2;
-                end if ;
-                if test_divider < 4096 then
-                    division_result <= (get_multiplier_result(hw_multiplier,16))*2**3;
-                end if ;
-                if test_divider < 2048 then
-                    division_result <= (get_multiplier_result(hw_multiplier,16))*2**4;
-                end if ;
-                if test_divider < 1024 then
-                    division_result <= (get_multiplier_result(hw_multiplier,16))*2**5;
-                end if ;
-                if test_divider < 512 then
-                    division_result <= (get_multiplier_result(hw_multiplier,16))*2**6;
-                end if ;
+
+                division_result <= get_division_result(hw_multiplier, divider);
+
             end if;
 
         end if; -- rstn

@@ -181,6 +181,8 @@ architecture rtl of system_components is
     signal divider1 : division_record := init_division;
     signal division_multiplier2 : multiplier_record := init_multiplier;
     signal divider2 : division_record := init_division;
+    signal division_multiplier3 : multiplier_record := init_multiplier;
+    signal divider3 : division_record := init_division;
 --------------------------------------------------
 begin
 
@@ -206,84 +208,6 @@ begin
         --------------------------------------------------
 
         variable register_counter : natural range 0 to 31 := 0;
-
-        function get_division_result
-        (
-            division_result : int18
-        )
-        return natural
-        is
-            variable uint_17 : unsigned(16 downto 0);
-        begin
-
-        uint_17 := to_unsigned(division_result,17);
-        if to_integer(uint_17(15 downto 15- 15)) = 0 then
-            return division_result * 2**(16-(    15- 15));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 14)) = 0 then
-            return division_result * 2**(16-(    15- 14));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 13)) = 0 then
-            return division_result * 2**(16-(    15- 13));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 12)) = 0 then
-            return division_result * 2**(16-(    15- 12));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 11)) = 0 then
-            return division_result * 2**(16-(    15- 11));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 10)) = 0 then
-            return division_result * 2**(16-(    15- 10));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 9)) = 0 then
-            return division_result * 2**(16-(    15- 9));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 8)) = 0 then
-            return division_result * 2**(16-(    15- 8));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 7)) = 0 then
-           return division_result * 2**(16-(     15- 7));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 6)) = 0 then
-            return division_result * 2**(16-(    15- 6));
-        end if; 
-
-        if to_integer(uint_17(15 downto 15- 5)) = 0 then
-            return division_result * 2**(16-(    15- 5));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 4)) = 0 then
-            return division_result * 2**(16-(    15- 4));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 3)) = 0 then
-            return division_result * 2**(16-(    15- 3));
-        end if; 
-
-        if to_integer(uint_17(15 downto 15- 2)) = 0 then
-            return division_result * 2**(16-(    15- 2));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 1)) = 0 then
-            return division_result * 2**(16-(    15- 1));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 0)) = 0 then
-            return division_result * 2**(16-(    15- 0));
-        end if;
-
-        return division_result;
-        
-    end get_division_result; 
         
     begin
         if rising_edge(clock) then
@@ -315,6 +239,8 @@ begin
                 create_division(division_multiplier1, divider1);
                 create_multiplier(division_multiplier2);
                 create_division(division_multiplier2, divider2);
+                create_multiplier(division_multiplier3);
+                create_division(division_multiplier3, divider3);
             -------------------------------------------------- 
 
             uart_transmit_counter <= uart_transmit_counter - 1; 
@@ -327,8 +253,13 @@ begin
                 request_power_supply_calculation(power_supply_simulation, -grid_duty_ratio, output_duty_ratio);
 
                 test_leading_zeroes <= test_leading_zeroes + 1;
+                if test_leading_zeroes = 65535 then
+                    test_leading_zeroes <= 1;
+                end if;
+
                 request_division(divider1, test_leading_zeroes, test_leading_zeroes);
-                request_division(divider2, test_leading_zeroes, test_leading_zeroes, 2);
+                request_division(divider2, test_leading_zeroes, test_leading_zeroes/2 + test_leading_zeroes/4, 1);
+                request_division(divider3, test_leading_zeroes, test_leading_zeroes/2 + test_leading_zeroes/4, 2);
 
                 CASE uart_rx_data is
                     WHEN 10 => transmit_16_bit_word_with_uart(uart_data_in, get_filter_output(bandpass_filter.low_pass_filter) );
@@ -343,9 +274,10 @@ begin
                     WHEN 19 => transmit_16_bit_word_with_uart(uart_data_in, power_supply_simulation.grid_inverter_simulation.grid_emi_filter_2.capacitor_voltage.state/4 + 32768);
                     WHEN 20 => transmit_16_bit_word_with_uart(uart_data_in, power_supply_simulation.grid_inverter_simulation.grid_emi_filter_2.inductor_current.state/4+ 32768);
                     WHEN 21 => transmit_16_bit_word_with_uart(uart_data_in, power_supply_simulation.grid_inverter_simulation.grid_inverter.dc_link_voltage.state/2);
-                    WHEN 22 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(get_multiplier_result(division_multiplier1,16)));
-                    WHEN 23 => transmit_16_bit_word_with_uart(uart_data_in, get_multiplier_result(division_multiplier2, 16));
-                    WHEN 24 => transmit_16_bit_word_with_uart(uart_data_in, get_multiplier_result(division_multiplier2, 16) - get_multiplier_result(division_multiplier1, 16) + 32768);
+                    WHEN 22 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier1, divider1));
+                    WHEN 23 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier2, divider2));
+                    WHEN 24 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier3, divider3));
+                    WHEN 25 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier1, divider1) - get_division_result(division_multiplier2, divider2) + 32768);
                     WHEN others => -- get data from MDIO
                         register_counter := register_counter + 1;
                         if test_counter = 4600 then

@@ -8,6 +8,7 @@ SET source=%project_root%/source
 
 
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/multiplier/multiplier_pkg.vhd
+ghdl -a --ieee=synopsys --work=math_library %source%/math_library/division/division_internal_pkg.vhd
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/division/division_pkg.vhd
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/division/division_pkg_body.vhd
 ghdl -a --ieee=synopsys tb_integer_division.vhd
