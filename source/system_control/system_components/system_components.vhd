@@ -183,6 +183,8 @@ architecture rtl of system_components is
     signal divider2 : division_record := init_division;
     signal division_multiplier3 : multiplier_record := init_multiplier;
     signal divider3 : division_record := init_division;
+    signal division_multiplier4 : multiplier_record := init_multiplier;
+    signal divider4 : division_record := init_division;
 --------------------------------------------------
 begin
 
@@ -241,6 +243,8 @@ begin
                 create_division(division_multiplier2, divider2);
                 create_multiplier(division_multiplier3);
                 create_division(division_multiplier3, divider3);
+                create_multiplier(division_multiplier4);
+                create_division(division_multiplier4, divider4);
             -------------------------------------------------- 
 
             uart_transmit_counter <= uart_transmit_counter - 1; 
@@ -257,9 +261,10 @@ begin
                     test_leading_zeroes <= 1;
                 end if;
 
-                request_division(divider1, test_leading_zeroes, test_leading_zeroes);
-                request_division(divider2, test_leading_zeroes, test_leading_zeroes/2 + test_leading_zeroes/4, 1);
-                request_division(divider3, test_leading_zeroes, test_leading_zeroes/2 + test_leading_zeroes/4, 2);
+                request_division(divider1 , test_leading_zeroes     , test_leading_zeroes);
+                request_division(divider2 , test_leading_zeroes/128 , test_leading_zeroes                           , 1);
+                request_division(divider3 , test_leading_zeroes     , test_leading_zeroes/2 + test_leading_zeroes/4 , 1);
+                request_division(divider4 , test_leading_zeroes/8   , test_leading_zeroes                           , 1);
 
                 CASE uart_rx_data is
                     WHEN 10 => transmit_16_bit_word_with_uart(uart_data_in, get_filter_output(bandpass_filter.low_pass_filter) );
@@ -277,7 +282,7 @@ begin
                     WHEN 22 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier1, divider1));
                     WHEN 23 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier2, divider2));
                     WHEN 24 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier3, divider3));
-                    WHEN 25 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier1, divider1) - get_division_result(division_multiplier2, divider2) + 32768);
+                    WHEN 25 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier4, divider4));
                     WHEN others => -- get data from MDIO
                         register_counter := register_counter + 1;
                         if test_counter = 4600 then

@@ -111,24 +111,24 @@ package body division_pkg is
         variable multiplier_result : integer;
     begin
             multiplier_result := get_multiplier_result(multiplier,17);
-            if hw_divider.divisor < 2**1  then return (multiplier_result)*2**14; end if;
-            if hw_divider.divisor < 2**2  then return (multiplier_result)*2**13; end if;
-            if hw_divider.divisor < 2**3  then return (multiplier_result)*2**12; end if;
-            if hw_divider.divisor < 2**4  then return (multiplier_result)*2**11; end if;
-            if hw_divider.divisor < 2**5  then return (multiplier_result)*2**10; end if;
-            if hw_divider.divisor < 2**6  then return (multiplier_result)*2**9; end if;
-            if hw_divider.divisor < 2**7  then return (multiplier_result)*2**8; end if;
-            if hw_divider.divisor < 2**8  then return (multiplier_result)*2**7; end if;
-            if hw_divider.divisor < 2**9  then return (multiplier_result)*2**6; end if;
-            if hw_divider.divisor < 2**10 then return (multiplier_result)*2**5; end if;
-            if hw_divider.divisor < 2**11 then return (multiplier_result)*2**4; end if;
-            if hw_divider.divisor < 2**12 then return (multiplier_result)*2**3; end if;
-            if hw_divider.divisor < 2**13 then return (multiplier_result)*2**2; end if;
-            if hw_divider.divisor < 2**14 then return (multiplier_result)*2**1; end if;
-            if hw_divider.divisor < 2**15 then return (multiplier_result)*2**0; end if;
-            if hw_divider.divisor < 2**16 then return (multiplier_result)/2**1; end if;
+            if hw_divider.divisor < 2**1  then return (multiplier_result)*2**15; end if;
+            if hw_divider.divisor < 2**2  then return (multiplier_result)*2**14; end if;
+            if hw_divider.divisor < 2**3  then return (multiplier_result)*2**13; end if;
+            if hw_divider.divisor < 2**4  then return (multiplier_result)*2**12; end if;
+            if hw_divider.divisor < 2**5  then return (multiplier_result)*2**11; end if;
+            if hw_divider.divisor < 2**6  then return (multiplier_result)*2**10; end if;
+            if hw_divider.divisor < 2**7  then return (multiplier_result)*2**9; end if;
+            if hw_divider.divisor < 2**8  then return (multiplier_result)*2**8; end if;
+            if hw_divider.divisor < 2**9  then return (multiplier_result)*2**7; end if;
+            if hw_divider.divisor < 2**10 then return (multiplier_result)*2**6; end if;
+            if hw_divider.divisor < 2**11 then return (multiplier_result)*2**5; end if;
+            if hw_divider.divisor < 2**12 then return (multiplier_result)*2**4; end if;
+            if hw_divider.divisor < 2**13 then return (multiplier_result)*2**3; end if;
+            if hw_divider.divisor < 2**14 then return (multiplier_result)*2**2; end if;
+            if hw_divider.divisor < 2**15 then return (multiplier_result)*2**1; end if;
+            if hw_divider.divisor < 2**16 then return (multiplier_result)*2**0; end if;
 
-            return (multiplier_result)*2**15;
+            return (multiplier_result)*2**16;
         
     end get_division_result;
 
