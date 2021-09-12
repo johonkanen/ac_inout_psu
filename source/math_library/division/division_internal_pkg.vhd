@@ -101,84 +101,28 @@ package body division_internal_pkg is
     )
     return int18
     is
-        variable uint_18 : unsigned(17 downto 0);
-        variable uint_17 : unsigned(16 downto 0);
+        variable abs_number : natural;
 
     begin
-        -- TODO, fix this currently does not work for number > 65536
-        uint_18 := to_unsigned(abs(number),18);
-        if uint_18(16) = '1' then
-            uint_17 := uint_18(17 downto 1);
-        else
-            uint_17 := uint_18(16 downto 0);
-        end if;
+            abs_number := abs(number);
+            if abs_number < 2**1  then return abs_number*2**15; end if;
+            if abs_number < 2**2  then return abs_number*2**14; end if;
+            if abs_number < 2**3  then return abs_number*2**13; end if;
+            if abs_number < 2**4  then return abs_number*2**12; end if;
+            if abs_number < 2**5  then return abs_number*2**11; end if;
+            if abs_number < 2**6  then return abs_number*2**10; end if;
+            if abs_number < 2**7  then return abs_number*2**9; end if;
+            if abs_number < 2**8  then return abs_number*2**8; end if;
+            if abs_number < 2**9  then return abs_number*2**7; end if;
+            if abs_number < 2**10 then return abs_number*2**6; end if;
+            if abs_number < 2**11 then return abs_number*2**5; end if;
+            if abs_number < 2**12 then return abs_number*2**4; end if;
+            if abs_number < 2**13 then return abs_number*2**3; end if;
+            if abs_number < 2**14 then return abs_number*2**2; end if;
+            if abs_number < 2**15 then return abs_number*2**1; end if;
+            -- if abs_number < 2**16 then return abs_number/2**0; end if;
 
-
-        if to_integer(uint_17(15 downto 15- 15)) = 0 then
-            return number * 2**(16-(    15- 15));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 14)) = 0 then
-            return number * 2**(16-(    15- 14));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 13)) = 0 then
-            return number * 2**(16-(    15- 13));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 12)) = 0 then
-            return number * 2**(16-(    15- 12));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 11)) = 0 then
-            return number * 2**(16-(    15- 11));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 10)) = 0 then
-            return number * 2**(16-(    15- 10));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 9)) = 0 then
-            return number * 2**(16-(    15- 9));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 8)) = 0 then
-            return number * 2**(16-(    15- 8));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 7)) = 0 then
-           return number * 2**(16-(     15- 7));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 6)) = 0 then
-            return number * 2**(16-(    15- 6));
-        end if; 
-
-        if to_integer(uint_17(15 downto 15- 5)) = 0 then
-            return number * 2**(16-(    15- 5));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 4)) = 0 then
-            return number * 2**(16-(    15- 4));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 3)) = 0 then
-            return number * 2**(16-(    15- 3));
-        end if; 
-
-        if to_integer(uint_17(15 downto 15- 2)) = 0 then
-            return number * 2**(16-(    15- 2));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 1)) = 0 then
-            return number * 2**(16-(    15- 1));
-        end if;
-
-        if to_integer(uint_17(15 downto 15- 0)) = 0 then
-            return number * 2**(16-(    15- 0));
-        end if;
-
-        return number;
+            return abs_number;
         
     end remove_leading_zeros; 
 

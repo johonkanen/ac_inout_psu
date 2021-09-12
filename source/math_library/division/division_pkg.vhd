@@ -44,7 +44,8 @@ package division_pkg is
 ------------------------------------------------------------------------
     function get_division_result (
         multiplier : multiplier_record;
-        hw_divider : division_record)
+        hw_divider : division_record;
+        radix      : natural)
     return natural;
 ------------------------------------------------------------------------
 end package division_pkg;

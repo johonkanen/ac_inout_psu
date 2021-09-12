@@ -257,8 +257,8 @@ begin
                 request_power_supply_calculation(power_supply_simulation, -grid_duty_ratio, output_duty_ratio);
 
                 test_leading_zeroes <= test_leading_zeroes + 1;
-                if test_leading_zeroes = 65535 then
-                    test_leading_zeroes <= 1;
+                if test_leading_zeroes = 32767 then
+                    test_leading_zeroes <= 150;
                 end if;
 
                 request_division(divider1 , test_leading_zeroes     , test_leading_zeroes);
@@ -279,10 +279,10 @@ begin
                     WHEN 19 => transmit_16_bit_word_with_uart(uart_data_in, power_supply_simulation.grid_inverter_simulation.grid_emi_filter_2.capacitor_voltage.state/4 + 32768);
                     WHEN 20 => transmit_16_bit_word_with_uart(uart_data_in, power_supply_simulation.grid_inverter_simulation.grid_emi_filter_2.inductor_current.state/4+ 32768);
                     WHEN 21 => transmit_16_bit_word_with_uart(uart_data_in, power_supply_simulation.grid_inverter_simulation.grid_inverter.dc_link_voltage.state/2);
-                    WHEN 22 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier1, divider1));
-                    WHEN 23 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier2, divider2));
-                    WHEN 24 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier3, divider3));
-                    WHEN 25 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier4, divider4));
+                    WHEN 22 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier1, divider1, 16) - 1);
+                    WHEN 23 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier2, divider2, 16) - 1);
+                    WHEN 24 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier3, divider3, 16) - 1);
+                    WHEN 25 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier4, divider4, 16) - 1);
                     WHEN others => -- get data from MDIO
                         register_counter := register_counter + 1;
                         if test_counter = 4600 then

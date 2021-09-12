@@ -21,7 +21,7 @@ architecture sim of tb_integer_division is
     signal clocked_reset : std_logic;
     constant clock_per : time := 1 ns;
     constant clock_half_per : time := 0.5 ns;
-    constant simtime_in_clocks : integer := 100;
+    constant simtime_in_clocks : integer := 1e3;
 ------------------------------------------------------------------------
     signal simulation_counter : natural := 1;
 
@@ -35,8 +35,7 @@ architecture sim of tb_integer_division is
     signal divider : division_record := init_division;
 
 ------------------------------------------------------------------------ 
-    signal test_divident : natural := 2200;
-    signal test_divider : natural  := 5300;
+    signal test_divident : natural := 42768 - 20;
 
     signal division_result : int18 := 0;
 ------------------------------------------------------------------------
@@ -79,6 +78,7 @@ begin
     --------------------------------------------------
     --------------------------------------------------
         constant result_radix : natural  := 15;
+        variable div_result : int18;
     begin
         if rising_edge(simulator_clock) then
 
@@ -88,13 +88,16 @@ begin
 
             simulation_counter <= simulation_counter + 1;
             -- if simulation_counter mod 20  = 0 then
-            if simulation_counter = 10 then
-                request_division(divider, test_divident, test_divider);
+            if simulation_counter mod 20 = 0 then
+                test_divident <= test_divident +1;
+                request_division(divider , test_divident     , test_divident, 2);
             end if; 
 
             if division_is_ready(hw_multiplier, divider) then
 
                 division_result <= get_division_result(hw_multiplier, divider);
+                div_result := get_division_result(hw_multiplier, divider);
+                report integer'image(div_result) & "  " & integer'image(test_divident-1);
 
             end if;
 

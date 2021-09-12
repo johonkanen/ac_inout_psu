@@ -104,13 +104,14 @@ package body division_pkg is
     function get_division_result
     (
         multiplier : multiplier_record;
-        hw_divider : division_record
+        hw_divider : division_record;
+        radix : natural
     )
     return natural
     is
         variable multiplier_result : integer;
     begin
-            multiplier_result := get_multiplier_result(multiplier,17);
+            multiplier_result := get_multiplier_result(multiplier,radix);
             if hw_divider.divisor < 2**1  then return (multiplier_result)*2**15; end if;
             if hw_divider.divisor < 2**2  then return (multiplier_result)*2**14; end if;
             if hw_divider.divisor < 2**3  then return (multiplier_result)*2**13; end if;
@@ -126,9 +127,9 @@ package body division_pkg is
             if hw_divider.divisor < 2**13 then return (multiplier_result)*2**3; end if;
             if hw_divider.divisor < 2**14 then return (multiplier_result)*2**2; end if;
             if hw_divider.divisor < 2**15 then return (multiplier_result)*2**1; end if;
-            if hw_divider.divisor < 2**16 then return (multiplier_result)*2**0; end if;
+            if hw_divider.divisor < 2**16 then return (multiplier_result)/2**0; end if;
 
-            return (multiplier_result)*2**16;
+            return (multiplier_result)/2**1;
         
     end get_division_result;
 
