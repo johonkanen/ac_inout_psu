@@ -36,8 +36,11 @@ architecture sim of tb_nr_iterator is
     signal simulation_counter : natural := 0;
 
     signal check_division_to_be_ready : boolean := false;
-    signal test_division : natural := 19549;
-    signal multiplier_result : signed(35 downto 0) := (others => '0');
+    signal test_division : natural := 150;
+
+    signal division_multiplier : multiplier_record := multiplier_init_values;
+    signal divider             : division_record := init_division;
+
 begin
 
 ------------------------------------------------------------------------
@@ -71,17 +74,25 @@ begin
     --------------------------------------------------
     begin 
         if rising_edge(simulator_clock) then
+        --------------------------------------------------
+            create_multiplier(division_multiplier);
+            create_division(division_multiplier, divider);
+
             create_multiplier(hw_multiplier);
+        --------------------------------------------------
             CASE division_process_counter is
                 WHEN 0 =>
+                    check_division_to_be_ready <= false;
                     multiply(hw_multiplier, x, number_to_be_reciprocated);
                     division_process_counter <= division_process_counter + 1;
                 WHEN 1 =>
+                    check_division_to_be_ready <= false;
                     increment_counter_when_ready(hw_multiplier,division_process_counter);
                     if multiplier_is_ready(hw_multiplier) then
                         multiply(hw_multiplier, x, invert_bits(get_multiplier_result(hw_multiplier, 16)));
                     end if;
                 WHEN 2 =>
+                    check_division_to_be_ready <= false;
                     if multiplier_is_ready(hw_multiplier) then
                         x <= get_multiplier_result(hw_multiplier, 16);
                         if number_of_newton_raphson_iteration /= 0 then
@@ -103,19 +114,26 @@ begin
             if simulation_counter = 10 then
                 x                                  <= get_initial_value_for_division(remove_leading_zeros(test_division));
                 number_to_be_reciprocated          <= (remove_leading_zeros(test_division));
-                dividend                           <= test_division/2 + test_division/4;
+                dividend                           <= test_division/5;
                 divisor                            <= test_division;
                 division_process_counter           <= 0;
-                number_of_newton_raphson_iteration <= 4;
+                number_of_newton_raphson_iteration <= 1;
+                request_division(divider, test_division/5, test_division, 1);
+                -- test_division <= test_division + 1;
             end if;
 
+
             if multiplier_is_ready(hw_multiplier) and check_division_to_be_ready then
-                report integer'image(get_division_result(hw_multiplier,test_division,16));
+                report "result from state machine " & integer'image(get_division_result(hw_multiplier,test_division,17));
             end if; 
+            if division_is_ready(division_multiplier, divider) then 
+                report "result from divider " & integer'image(get_division_result(division_multiplier,test_division,17))& " " & integer'image(test_division);
+            --     test_division <= test_division + 850;
+            --     request_division(divider, test_division, test_division, 2);
+            end if;
     
         end if; -- rstn
     end process clocked_reset_generator;	
 ------------------------------------------------------------------------
-    multiplier_result <= hw_multiplier.signed_36_bit_result;
 
 end sim;

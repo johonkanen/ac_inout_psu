@@ -82,18 +82,17 @@ begin
 
             simulation_counter <= simulation_counter + 1;
             -- if simulation_counter mod 20  = 0 then
-            if simulation_counter mod 20 = 0 then
+            if simulation_counter mod 25 = 0 then
                 test_divident <= test_divident + 39;
                 if test_divident < 32768 then 
-                    request_division(divider , test_divident, test_divident, 2);
+                    request_division(divider , 500, 500, 2);
                 end if;
             end if; 
 
-            if division_is_ready(hw_multiplier, divider) then
+            if division_is_ready(hw_multiplier, divider) then 
 
-                division_result <= get_division_result(hw_multiplier , test_divident , 16);
-                div_result := get_division_result(hw_multiplier      , test_divident , 16);
-                assert abs(div_result-65535) < 67 report "division result : " & integer'image(abs(div_result-65535)) & " input " & integer'image(test_divident-1) severity error;
+                division_result <= get_division_result(hw_multiplier , divider , 16);
+                -- assert abs(division_result-65535) < 67 report "division result : " & integer'image(abs(division_result-65535)) & " input " & integer'image(test_divident-1) severity error;
 
             end if;
 

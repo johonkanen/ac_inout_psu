@@ -67,7 +67,7 @@ package body division_pkg is
         signal division : out division_record;
         number_to_be_divided : int18;
         number_to_be_reciprocated : int18;
-        iterations : in natural range 1 to 2
+        iterations : range_of_nr_iteration
     ) is
     begin
         request_division(division, number_to_be_divided, number_to_be_reciprocated);
