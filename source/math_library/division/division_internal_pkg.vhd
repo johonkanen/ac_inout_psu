@@ -104,7 +104,7 @@ package body division_internal_pkg is
         variable abs_number : natural;
 
     begin
-            abs_number := abs(number);
+            abs_number := (number);
             if abs_number < 2**1  then return abs_number*2**15; end if;
             if abs_number < 2**2  then return abs_number*2**14; end if;
             if abs_number < 2**3  then return abs_number*2**13; end if;

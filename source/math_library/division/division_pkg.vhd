@@ -48,4 +48,10 @@ package division_pkg is
         radix      : natural)
     return natural;
 ------------------------------------------------------------------------
+    function get_division_result (
+        multiplier : multiplier_record;
+        divisor : natural;
+        radix : natural)
+    return natural;
+------------------------------------------------------------------------
 end package division_pkg;

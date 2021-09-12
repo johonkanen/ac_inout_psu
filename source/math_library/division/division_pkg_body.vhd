@@ -19,19 +19,16 @@ package body division_pkg is
         CASE division_process_counter is
             WHEN 0 =>
                 multiply(hw_multiplier, number_to_be_reciprocated, x);
-                -- report integer'image(number_to_be_reciprocated) & " " & integer'image(x);
                 division_process_counter <= division_process_counter + 1;
             WHEN 1 =>
                 increment_counter_when_ready(hw_multiplier,division_process_counter);
                 if multiplier_is_ready(hw_multiplier) then
                     xa := get_multiplier_result(hw_multiplier, 16);
-                    -- report integer'image(xa);
                     multiply(hw_multiplier, x, invert_bits(xa));
                 end if;
             WHEN 2 =>
                 if multiplier_is_ready(hw_multiplier) then
                     x <= get_multiplier_result(hw_multiplier, 16);
-                    -- report integer'image(get_multiplier_result(hw_multiplier, 16));
                     if number_of_newton_raphson_iteration /= 0 then
                         number_of_newton_raphson_iteration <= 0;
                         division_process_counter <= 0;
@@ -109,7 +106,7 @@ package body division_pkg is
     function get_division_result
     (
         multiplier : multiplier_record;
-        hw_divider : division_record;
+        divisor : natural;
         radix : natural
     )
     return natural
@@ -117,24 +114,40 @@ package body division_pkg is
         variable multiplier_result : integer;
     begin
             multiplier_result := get_multiplier_result(multiplier,radix);
-            if hw_divider.divisor < 2**1  then return (multiplier_result)*2**16; end if;
-            if hw_divider.divisor < 2**2  then return (multiplier_result)*2**15; end if;
-            if hw_divider.divisor < 2**3  then return (multiplier_result)*2**14; end if;
-            if hw_divider.divisor < 2**4  then return (multiplier_result)*2**13; end if;
-            if hw_divider.divisor < 2**5  then return (multiplier_result)*2**12; end if;
-            if hw_divider.divisor < 2**6  then return (multiplier_result)*2**11; end if;
-            if hw_divider.divisor < 2**7  then return (multiplier_result)*2**10; end if;
-            if hw_divider.divisor < 2**8  then return (multiplier_result)*2**9; end if;
-            if hw_divider.divisor < 2**9  then return (multiplier_result)*2**8; end if;
-            if hw_divider.divisor < 2**10 then return (multiplier_result)*2**7; end if;
-            if hw_divider.divisor < 2**11 then return (multiplier_result)*2**6; end if;
-            if hw_divider.divisor < 2**12 then return (multiplier_result)*2**5; end if;
-            if hw_divider.divisor < 2**13 then return (multiplier_result)*2**4; end if;
-            if hw_divider.divisor < 2**14 then return (multiplier_result)*2**3; end if;
-            if hw_divider.divisor < 2**15 then return (multiplier_result)*2**2; end if;
-            if hw_divider.divisor < 2**16 then return (multiplier_result)/2**1; end if;
+
+            if divisor < 2**1  then  report "divisor < 2**1"  ; return (multiplier_result)*2**15 ; end if ;
+            if divisor < 2**2  then  report "divisor < 2**2"  ; return (multiplier_result)*2**14 ; end if ;
+            if divisor < 2**3  then  report "divisor < 2**3"  ; return (multiplier_result)*2**13 ; end if ;
+            if divisor < 2**4  then  report "divisor < 2**4"  ; return (multiplier_result)*2**12 ; end if ;
+            if divisor < 2**5  then  report "divisor < 2**5"  ; return (multiplier_result)*2**11 ; end if ;
+            if divisor < 2**6  then  report "divisor < 2**6"  ; return (multiplier_result)*2**10 ; end if ;
+            if divisor < 2**7  then  report "divisor < 2**7"  ; return (multiplier_result)*2**9  ; end if ;
+            if divisor < 2**8  then  report "divisor < 2**8"  ; return (multiplier_result)*2**8  ; end if ;
+            if divisor < 2**9  then  report "divisor < 2**9"  ; return (multiplier_result)*2**7  ; end if ;
+            if divisor < 2**10 then  report "divisor < 2**10" ; return (multiplier_result)*2**6  ; end if ;
+            if divisor < 2**11 then  report "divisor < 2**11" ; return (multiplier_result)*2**5  ; end if ;
+            if divisor < 2**12 then  report "divisor < 2**12" ; return (multiplier_result)*2**4  ; end if ;
+            if divisor < 2**13 then  report "divisor < 2**13" ; return (multiplier_result)*2**3  ; end if ;
+            if divisor < 2**14 then  report "divisor < 2**14" ; return (multiplier_result)*2**2  ; end if ;
+            if divisor < 2**15 then  report "divisor < 2**15" ; return (multiplier_result)*2**1  ; end if ;
 
             return (multiplier_result);
+        
+    end get_division_result;
+
+------------------------------------------------------------------------
+    function get_division_result
+    (
+        multiplier : multiplier_record;
+        hw_divider : division_record;
+        radix : natural
+    )
+    return natural
+    is
+        variable multiplier_result : integer;
+    begin
+            multiplier_result := get_multiplier_result(multiplier,radix); 
+            return get_division_result(multiplier, hw_divider.divisor, radix);
         
     end get_division_result;
 
