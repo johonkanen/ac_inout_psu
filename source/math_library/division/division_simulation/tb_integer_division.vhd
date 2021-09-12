@@ -21,7 +21,7 @@ architecture sim of tb_integer_division is
     signal clocked_reset : std_logic;
     constant clock_per : time := 1 ns;
     constant clock_half_per : time := 0.5 ns;
-    constant simtime_in_clocks : integer := 1e3;
+    constant simtime_in_clocks : integer := 10e3;
 ------------------------------------------------------------------------
     signal simulation_counter : natural := 1;
 
@@ -35,9 +35,10 @@ architecture sim of tb_integer_division is
     signal divider : division_record := init_division;
 
 ------------------------------------------------------------------------ 
-    signal test_divident : natural := 22583;
+    signal test_divident : natural := 128;
 
     signal division_result : int18 := 0;
+    signal x : int18 := 0;
 ------------------------------------------------------------------------
 begin
 
@@ -46,6 +47,9 @@ begin
     begin
         simulation_running <= true;
         wait for simtime_in_clocks*clock_per;
+        report "*******************";
+        report "division successful! last tested number " & integer'image(test_divident) & "at clock cycle " & integer'image(simtime_in_clocks);
+        report "*******************";
         simulation_running <= false;
         wait;
     end process simtime;	
@@ -68,17 +72,8 @@ begin
 
     clocked_reset_generator : process(simulator_clock, rstn)
     --------------------------------------------------
-        -- impure function "*" ( left, right : int18)
-        -- return int18
-        -- is
-        -- begin
-        --     sequential_multiply(hw_multiplier, left, right);
-        --     return get_multiplier_result(hw_multiplier, 16);
-        -- end "*";
-    --------------------------------------------------
-    --------------------------------------------------
-        constant result_radix : natural  := 15;
         variable div_result : int18;
+    --------------------------------------------------
     begin
         if rising_edge(simulator_clock) then
 
@@ -89,20 +84,23 @@ begin
             simulation_counter <= simulation_counter + 1;
             -- if simulation_counter mod 20  = 0 then
             if simulation_counter mod 20 = 0 then
-                test_divident <= test_divident +1;
-                request_division(divider , test_divident     , test_divident, 2);
+                test_divident <= test_divident + 39;
+                if test_divident < 32768 then 
+                    request_division(divider , test_divident, test_divident, 2);
+                end if;
             end if; 
 
             if division_is_ready(hw_multiplier, divider) then
 
-                division_result <= get_division_result(hw_multiplier, divider, 15);
-                div_result := get_division_result(hw_multiplier, divider, 15);
-                report integer'image(div_result) & "  " & integer'image(test_divident-1);
+                division_result <= get_division_result(hw_multiplier, divider, 16);
+                div_result := get_division_result(hw_multiplier, divider, 16);
+                assert abs(div_result-65535) < 67 report "division result : " & integer'image(abs(div_result-65535)) & " input " & integer'image(test_divident-1) severity error;
 
             end if;
 
         end if; -- rstn
     end process clocked_reset_generator;	
+    x <= divider.x;
 
 ------------------------------------------------------------------------
 end sim;

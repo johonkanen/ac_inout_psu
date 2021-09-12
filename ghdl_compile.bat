@@ -4,7 +4,8 @@ set source=source/
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/multiplier/multiplier_pkg.vhd
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/division/division_internal_pkg.vhd
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/division/division_pkg.vhd
-ghdl -a --ieee=synopsys --work=math_library %source%/math_library/division/division_pkg_body.vhd
+ghdl -a --ieee=synopsys %source%/math_library/division/division_pkg.vhd
+rem ghdl -a --ieee=synopsys --work=math_library %source%/math_library/division/division_pkg_body.vhd
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/first_order_filter/first_order_filter_pkg.vhd
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/state_variable/state_variable_pkg.vhd
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/lcr_filter_model/lcr_filter_model_pkg.vhd
