@@ -35,7 +35,7 @@ architecture sim of tb_integer_division is
     signal divider : division_record := init_division;
 
 ------------------------------------------------------------------------ 
-    signal test_divident : natural := 42768 - 20;
+    signal test_divident : natural := 22583;
 
     signal division_result : int18 := 0;
 ------------------------------------------------------------------------
@@ -95,8 +95,8 @@ begin
 
             if division_is_ready(hw_multiplier, divider) then
 
-                division_result <= get_division_result(hw_multiplier, divider);
-                div_result := get_division_result(hw_multiplier, divider);
+                division_result <= get_division_result(hw_multiplier, divider, 15);
+                div_result := get_division_result(hw_multiplier, divider, 15);
                 report integer'image(div_result) & "  " & integer'image(test_divident-1);
 
             end if;
