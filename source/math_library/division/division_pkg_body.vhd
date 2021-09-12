@@ -113,17 +113,19 @@ package body division_pkg is
     return natural
     is
         variable multiplier_result : integer;
+        variable multiplier_result2 : integer;
     begin
             multiplier_result := get_multiplier_result(multiplier,radix);
+            multiplier_result2 := get_multiplier_result(multiplier,radix/2+1);
 
-            if divisor < 2**1  then  report "divisor < 2**1"  ; return (multiplier_result)*2**15 ; end if ;
-            if divisor < 2**2  then  report "divisor < 2**2"  ; return (multiplier_result)*2**14 ; end if ;
-            if divisor < 2**3  then  report "divisor < 2**3"  ; return (multiplier_result)*2**13 ; end if ;
-            if divisor < 2**4  then  report "divisor < 2**4"  ; return (multiplier_result)*2**12 ; end if ;
-            if divisor < 2**5  then  report "divisor < 2**5"  ; return (multiplier_result)*2**11 ; end if ;
-            if divisor < 2**6  then  report "divisor < 2**6"  ; return (multiplier_result)*2**10 ; end if ;
-            if divisor < 2**7  then  report "divisor < 2**7"  ; return (multiplier_result)*2**9  ; end if ;
-            if divisor < 2**8  then  report "divisor < 2**8"  ; return (multiplier_result)*2**8  ; end if ;
+            if divisor < 2**1  then  report "divisor < 2**1"  ; return (multiplier_result2)*2**7 ; end if ;
+            if divisor < 2**2  then  report "divisor < 2**2"  ; return (multiplier_result2)*2**6 ; end if ;
+            if divisor < 2**3  then  report "divisor < 2**3"  ; return (multiplier_result2)*2**5 ; end if ;
+            if divisor < 2**4  then  report "divisor < 2**4"  ; return (multiplier_result2)*2**4 ; end if ;
+            if divisor < 2**5  then  report "divisor < 2**5"  ; return (multiplier_result2)*2**3 ; end if ;
+            if divisor < 2**6  then  report "divisor < 2**6"  ; return (multiplier_result2)*2**2 ; end if ;
+            if divisor < 2**7  then  report "divisor < 2**7"  ; return (multiplier_result2)*2**1 ; end if ;
+            if divisor < 2**8  then  report "divisor < 2**8"  ; return (multiplier_result2)      ; end if ;
             if divisor < 2**9  then  report "divisor < 2**9"  ; return (multiplier_result)*2**7  ; end if ;
             if divisor < 2**10 then  report "divisor < 2**10" ; return (multiplier_result)*2**6  ; end if ;
             if divisor < 2**11 then  report "divisor < 2**11" ; return (multiplier_result)*2**5  ; end if ;

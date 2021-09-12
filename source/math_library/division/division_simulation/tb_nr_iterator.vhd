@@ -22,7 +22,7 @@ architecture sim of tb_nr_iterator is
     signal clocked_reset : std_logic;
     constant clock_per : time := 1 ns;
     constant clock_half_per : time := 0.5 ns;
-    constant simtime_in_clocks : integer := 100;
+    constant simtime_in_clocks : integer := 200;
 
     signal division_process_counter           : natural := 3;
     signal x                                  : int18 := 0;
@@ -36,7 +36,7 @@ architecture sim of tb_nr_iterator is
     signal simulation_counter : natural := 0;
 
     signal check_division_to_be_ready : boolean := false;
-    signal test_division : natural := 150;
+    signal test_division : natural := 250;
 
     signal division_multiplier : multiplier_record := multiplier_init_values;
     signal divider             : division_record := init_division;
@@ -114,22 +114,22 @@ begin
             if simulation_counter = 10 then
                 x                                  <= get_initial_value_for_division(remove_leading_zeros(test_division));
                 number_to_be_reciprocated          <= (remove_leading_zeros(test_division));
-                dividend                           <= test_division/5;
+                dividend                           <= test_division/128;
                 divisor                            <= test_division;
                 division_process_counter           <= 0;
                 number_of_newton_raphson_iteration <= 1;
-                request_division(divider, test_division/5, test_division, 1);
+                request_division(divider, test_division/128, test_division, 1);
                 -- test_division <= test_division + 1;
             end if;
 
 
-            if multiplier_is_ready(hw_multiplier) and check_division_to_be_ready then
-                report "result from state machine " & integer'image(get_division_result(hw_multiplier,test_division,17));
-            end if; 
+            -- if multiplier_is_ready(hw_multiplier) and check_division_to_be_ready then
+            --     report "result from state machine " & integer'image(get_division_result(hw_multiplier,test_division,17));
+            -- end if; 
             if division_is_ready(division_multiplier, divider) then 
                 report "result from divider " & integer'image(get_division_result(division_multiplier,test_division,17))& " " & integer'image(test_division);
-            --     test_division <= test_division + 850;
-            --     request_division(divider, test_division, test_division, 2);
+                test_division <= test_division + 1;
+                request_division(divider, test_division/128, test_division, 1);
             end if;
     
         end if; -- rstn

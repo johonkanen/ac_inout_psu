@@ -257,14 +257,14 @@ begin
                 request_power_supply_calculation(power_supply_simulation, -grid_duty_ratio, output_duty_ratio);
 
                 test_leading_zeroes <= test_leading_zeroes + 1;
-                if test_leading_zeroes = 511 then
-                    test_leading_zeroes <= 0;
+                if test_leading_zeroes = 32767 then
+                    test_leading_zeroes <= 1;
                 end if;
 
-                request_division(divider1 , test_leading_zeroes     , test_leading_zeroes                          , 3);
-                request_division(divider2 , test_leading_zeroes/128 , test_leading_zeroes                          , 3);
-                request_division(divider3 , test_leading_zeroes     , test_leading_zeroes/2 + test_leading_zeroes/4, 3);
-                request_division(divider4 , test_leading_zeroes/8   , test_leading_zeroes                          , 3);
+                request_division(divider1 , test_leading_zeroes     , test_leading_zeroes                          , 1);
+                request_division(divider2 , test_leading_zeroes/128 , test_leading_zeroes                          , 1);
+                request_division(divider3 , test_leading_zeroes     , test_leading_zeroes/2 + test_leading_zeroes/4, 1);
+                request_division(divider4 , test_leading_zeroes/8   , test_leading_zeroes                          , 1);
 
                 CASE uart_rx_data is
                     WHEN 10 => transmit_16_bit_word_with_uart(uart_data_in, get_filter_output(bandpass_filter.low_pass_filter) );
