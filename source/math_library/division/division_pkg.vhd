@@ -15,9 +15,10 @@ package division_pkg is
         number_of_newton_raphson_iteration : natural range 0 to 1;
         dividend : int18;
         divisor : int18;
+        check_division_to_be_ready : boolean;
     end record;
 
-    constant init_division : division_record := (3, 0, 0, 0, 0, 0);
+    constant init_division : division_record := (3, 0, 0, 0, 0, 0, false);
 ------------------------------------------------------------------------
     procedure create_division (
         signal hw_multiplier : inout multiplier_record;

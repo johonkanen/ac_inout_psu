@@ -12,33 +12,37 @@ package body division_pkg is
         alias number_to_be_reciprocated is division.number_to_be_reciprocated; 
         alias number_of_newton_raphson_iteration is division.number_of_newton_raphson_iteration; 
         alias dividend is division.dividend;
+        alias check_division_to_be_ready is division.check_division_to_be_ready;
         variable xa : int18;
     --------------------------------------------------
     begin
         
-        CASE division_process_counter is
-            WHEN 0 =>
-                multiply(hw_multiplier, number_to_be_reciprocated, x);
-                division_process_counter <= division_process_counter + 1;
-            WHEN 1 =>
-                increment_counter_when_ready(hw_multiplier,division_process_counter);
-                if multiplier_is_ready(hw_multiplier) then
-                    xa := get_multiplier_result(hw_multiplier, 16);
-                    multiply(hw_multiplier, x, invert_bits(xa));
-                end if;
-            WHEN 2 =>
-                if multiplier_is_ready(hw_multiplier) then
-                    x <= get_multiplier_result(hw_multiplier, 16);
-                    if number_of_newton_raphson_iteration /= 0 then
-                        number_of_newton_raphson_iteration <= 0;
-                        division_process_counter <= 0;
-                    else
-                        division_process_counter <= division_process_counter + 1;
-                        multiply(hw_multiplier, get_multiplier_result(hw_multiplier, 17), dividend);
+            CASE division_process_counter is
+                WHEN 0 =>
+                    multiply(hw_multiplier, x, number_to_be_reciprocated);
+                    division_process_counter <= division_process_counter + 1;
+                WHEN 1 =>
+                    increment_counter_when_ready(hw_multiplier,division_process_counter);
+                    if multiplier_is_ready(hw_multiplier) then
+                        multiply(hw_multiplier, x, invert_bits(get_multiplier_result(hw_multiplier, 16)));
                     end if;
-                end if;
-            WHEN others => -- wait for start
-        end CASE;
+                WHEN 2 =>
+                    if multiplier_is_ready(hw_multiplier) then
+                        x <= get_multiplier_result(hw_multiplier, 16);
+                        if number_of_newton_raphson_iteration /= 0 then
+                            number_of_newton_raphson_iteration <= number_of_newton_raphson_iteration - 1;
+                            division_process_counter <= 0;
+                        else
+                            division_process_counter <= division_process_counter + 1;
+                            multiply(hw_multiplier, get_multiplier_result(hw_multiplier, 16), dividend);
+                            check_division_to_be_ready <= true;
+                        end if;
+                    end if;
+                WHEN others => -- wait for start
+                    if multiplier_is_ready(hw_multiplier) then
+                        check_division_to_be_ready <= false;
+                    end if;
+            end CASE;
     end create_division;
 
 ------------------------------------------------------------------------
@@ -48,16 +52,13 @@ package body division_pkg is
         number_to_be_divided : int18;
         number_to_be_reciprocated : int18
     ) is
-        variable abs_number_to_be_reciprocated : natural range 0 to 2**17-1;
-        variable jee : natural range 0 to 2**17-1;
     begin
-        abs_number_to_be_reciprocated := abs(number_to_be_reciprocated);
-        jee := remove_leading_zeros(abs_number_to_be_reciprocated);
-        division.divisor                   <= abs_number_to_be_reciprocated;
-        division.division_process_counter  <= 0;
-        division.x                         <= get_initial_value_for_division(jee);
-        division.number_to_be_reciprocated <= jee;
-        division.dividend                  <= number_to_be_divided;
+        division.x                                  <= get_initial_value_for_division(remove_leading_zeros(number_to_be_reciprocated));
+        division.number_to_be_reciprocated          <= remove_leading_zeros(number_to_be_reciprocated);
+        division.dividend                           <= number_to_be_divided;
+        division.divisor                            <= number_to_be_reciprocated;
+        division.division_process_counter           <= 0;
+        division.number_of_newton_raphson_iteration <= 0;
     end request_division;
 
 ------------------------------------------------------------------------
@@ -83,7 +84,7 @@ package body division_pkg is
     return boolean
     is
     begin
-        if division.division_process_counter = 3 then
+        if division.check_division_to_be_ready then
             return multiplier_is_ready(division_multiplier);
         else
             return false;

@@ -78,7 +78,6 @@ begin
         if rising_edge(simulator_clock) then
 
             create_multiplier(hw_multiplier);
-            create_multiplier(hw_multiplier1);
             create_division(hw_multiplier, divider);
 
             simulation_counter <= simulation_counter + 1;
@@ -92,8 +91,8 @@ begin
 
             if division_is_ready(hw_multiplier, divider) then
 
-                division_result <= get_division_result(hw_multiplier, divider, 16);
-                div_result := get_division_result(hw_multiplier, divider, 16);
+                division_result <= get_division_result(hw_multiplier , test_divident , 16);
+                div_result := get_division_result(hw_multiplier      , test_divident , 16);
                 assert abs(div_result-65535) < 67 report "division result : " & integer'image(abs(div_result-65535)) & " input " & integer'image(test_divident-1) severity error;
 
             end if;

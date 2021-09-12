@@ -22,20 +22,21 @@ architecture sim of tb_nr_iterator is
     signal clocked_reset : std_logic;
     constant clock_per : time := 1 ns;
     constant clock_half_per : time := 0.5 ns;
-    constant simtime_in_clocks : integer := 50;
+    constant simtime_in_clocks : integer := 100;
 
     signal division_process_counter           : natural := 3;
     signal x                                  : int18 := 0;
     signal number_to_be_reciprocated          : int18 := 0;
     signal number_of_newton_raphson_iteration : int18 := 0;
     signal dividend                           : int18 := 0;
+    signal divisor                            : int18 := 0;
 
     signal hw_multiplier : multiplier_record := multiplier_init_values;
 
     signal simulation_counter : natural := 0;
 
     signal check_division_to_be_ready : boolean := false;
-    signal test_division : natural := 1;
+    signal test_division : natural := 19549;
     signal multiplier_result : signed(35 downto 0) := (others => '0');
 begin
 
@@ -88,7 +89,7 @@ begin
                             division_process_counter <= 0;
                         else
                             division_process_counter <= division_process_counter + 1;
-                            multiply(hw_multiplier, get_multiplier_result(hw_multiplier, 16), dividend);
+                            multiply(hw_multiplier, dividend, get_multiplier_result(hw_multiplier, 16));
                             check_division_to_be_ready <= true;
                         end if;
                     end if;
@@ -98,18 +99,19 @@ begin
                     end if;
             end CASE;
 
-            if multiplier_is_ready(hw_multiplier) and check_division_to_be_ready then
-                report integer'image(get_division_result(hw_multiplier,test_division,16));
-            end if;
-
             simulation_counter <= simulation_counter + 1;
             if simulation_counter = 10 then
-                x <= get_initial_value_for_division(remove_leading_zeros(test_division));
-                number_to_be_reciprocated <= (remove_leading_zeros(test_division));
-                dividend <= test_division;
-                division_process_counter <= 0;
-                number_of_newton_raphson_iteration <= 0;
+                x                                  <= get_initial_value_for_division(remove_leading_zeros(test_division));
+                number_to_be_reciprocated          <= (remove_leading_zeros(test_division));
+                dividend                           <= test_division/2 + test_division/4;
+                divisor                            <= test_division;
+                division_process_counter           <= 0;
+                number_of_newton_raphson_iteration <= 4;
             end if;
+
+            if multiplier_is_ready(hw_multiplier) and check_division_to_be_ready then
+                report integer'image(get_division_result(hw_multiplier,test_division,16));
+            end if; 
     
         end if; -- rstn
     end process clocked_reset_generator;	
