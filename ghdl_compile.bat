@@ -2,6 +2,7 @@ echo off
 set source=source/
 
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/multiplier/multiplier_pkg.vhd
+ghdl -a --ieee=synopsys --work=math_library %source%/math_library/sincos/sincos_pkg.vhd
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/division/division_internal_pkg.vhd
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/division/division_pkg.vhd
 ghdl -a --ieee=synopsys %source%/math_library/division/division_pkg.vhd
