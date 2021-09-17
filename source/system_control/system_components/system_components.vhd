@@ -185,6 +185,11 @@ architecture rtl of system_components is
     signal divider3 : division_record := init_division;
     signal division_multiplier4 : multiplier_record := init_multiplier;
     signal divider4 : division_record := init_division;
+    signal division_multiplier5 : multiplier_record := init_multiplier;
+    signal divider5 : division_record := init_division;
+    signal division_multiplier6 : multiplier_record := init_multiplier;
+    signal divider6 : division_record := init_division;
+--------------------------------------------------
 --------------------------------------------------
 begin
 
@@ -245,6 +250,10 @@ begin
                 create_division(division_multiplier3, divider3);
                 create_multiplier(division_multiplier4);
                 create_division(division_multiplier4, divider4);
+                create_multiplier(division_multiplier5);
+                create_division(division_multiplier5, divider5);
+                create_multiplier(division_multiplier6);
+                create_division(division_multiplier6, divider6);
             -------------------------------------------------- 
 
             uart_transmit_counter <= uart_transmit_counter - 1; 
@@ -261,10 +270,12 @@ begin
                     test_leading_zeroes <= 1;
                 end if;
 
-                request_division(divider1 , test_leading_zeroes     , test_leading_zeroes                          , 1);
-                request_division(divider2 , test_leading_zeroes/128 , test_leading_zeroes                          , 1);
-                request_division(divider3 , test_leading_zeroes     , test_leading_zeroes/2 + test_leading_zeroes/4, 1);
-                request_division(divider4 , test_leading_zeroes/8   , test_leading_zeroes                          , 1);
+                request_division(divider1 , test_leading_zeroes       , test_leading_zeroes                           , 1);
+                request_division(divider2 , test_leading_zeroes/128   , test_leading_zeroes                           , 1);
+                request_division(divider3 , test_leading_zeroes       , test_leading_zeroes/2 + test_leading_zeroes/4 , 1);
+                request_division(divider4 , test_leading_zeroes +2500 , test_leading_zeroes                           , 1);
+                request_division(divider5 , test_leading_zeroes       , test_leading_zeroes                           , 2);
+                request_division(divider6 , test_leading_zeroes       , test_leading_zeroes +2500                     , 1);
 
                 CASE uart_rx_data is
                     WHEN 10 => transmit_16_bit_word_with_uart(uart_data_in, get_filter_output(bandpass_filter.low_pass_filter) );
@@ -283,6 +294,8 @@ begin
                     WHEN 23 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier2, divider2, 17));
                     WHEN 24 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier3, divider3, 17));
                     WHEN 25 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier4, divider4, 17));
+                    WHEN 26 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier5, divider5, 17));
+                    WHEN 27 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier6, divider6, 17));
                     WHEN others => -- get data from MDIO
                         register_counter := register_counter + 1;
                         if test_counter = 4600 then
