@@ -17,3 +17,4 @@ ghdl -r --ieee=synopsys tb_integer_division --vcd=tb_integer_division.vcd
 
 
 IF %1 EQU 1 start "" gtkwave tb_integer_division.vcd
+IF %2 EQU 1 EXIT
