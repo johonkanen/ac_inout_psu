@@ -17,7 +17,7 @@ package sincos_pkg is
         cos16 : int18;
         sin : int18;
         cos : int18;
-        sincos_is_ready : boolean;
+        sincos_has_finished : boolean;
     end record;
 
     constant init_sincos : sincos_record := (0, (others => '0'), 0, 0, 0, 0, 0, false);
@@ -112,7 +112,7 @@ package body sincos_pkg is
     return boolean
     is
     begin
-        return sincos_object.sincos_is_ready;
+        return sincos_object.sincos_has_finished;
     end sincos_is_ready;
 ------------------------------------------------------------------------ 
     procedure create_sincos
@@ -127,7 +127,7 @@ package body sincos_pkg is
         alias cos16                  is sincos_object.cos16                 ;
         alias sin                    is sincos_object.sin                   ;
         alias cos                    is sincos_object.cos                   ;
-        alias sincos_is_ready        is sincos_object.sincos_is_ready       ;
+        alias sincos_has_finished        is sincos_object.sincos_has_finished       ;
 
         type int18_array is array (integer range <>) of int18;
         constant sinegains : int18_array(0 to 2) := (12868 , 21159 , 10180);
@@ -139,7 +139,7 @@ package body sincos_pkg is
         constant seven_fourths : integer := 57344 ;
 ------------------------------------------------------------------------
     begin
-            sincos_is_ready <= false;
+            sincos_has_finished <= false;
 
             CASE sincos_process_counter is
                 WHEN 0 => 
@@ -181,7 +181,7 @@ package body sincos_pkg is
                     sincos_process_counter <= sincos_process_counter + 1;
                 WHEN 8 =>
                     sincos_process_counter <= sincos_process_counter + 1;
-                    sincos_is_ready <= true;
+                    sincos_has_finished <= true;
 
                     if (to_integer(angle_rad16)) < one_quarter then
                         sin <= sin16;

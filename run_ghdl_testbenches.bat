@@ -3,6 +3,9 @@ FOR /F "tokens=* USEBACKQ" %%F IN (`git rev-parse --show-toplevel`) DO (
 SET project_root=%%F
 )
 
+cd %project_root%\source\math_library\grid_inverter_control\simulate_grid_inverter_control\
+call sim_grid_inverter_control.bat 0 1 
+
 cd %project_root%\source\math_library\sincos\sincos_simulation\
 call sim_sincos.bat 0 1 
 
