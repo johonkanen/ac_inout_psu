@@ -8,6 +8,7 @@ LIBRARY std  ;
 
 library math_library;
     use math_library.multiplier_pkg.all;
+    use math_library.division_pkg.all;
     use math_library.sincos_pkg.all;
     use math_library.pi_controller_pkg.all;
     use math_library.state_variable_pkg.all;
@@ -47,6 +48,8 @@ architecture sim of tb_grid_inverter_control is
     -- controller
     signal multiplier : multiplier_record := init_multiplier; 
     signal current_pi_control : pi_controller_record := init_pi_controller; 
+    signal divider_multiplier : multiplier_record := init_multiplier;
+    signal divider : division_record := init_division;
     --------------------------------------------------
     signal sine : int18 := 0;
     signal grid_current : int18 := 0;
@@ -94,18 +97,22 @@ begin
             create_state_variable(grid_inductor, grid_inductor_multiplier, get_sine(sincos)/2);
             create_inverter_model(inverter_model, 0, 0);
             inverter_model.dc_link_voltage.state <= 25e3;
-            inverter_model.inverter_lc_filter.capacitor_voltage.state <= 0; -- get_sine(sincos)/4;
+            inverter_model.inverter_lc_filter.capacitor_voltage.state <= get_sine(sincos)/16;
             --------------------------------------------------
             create_multiplier(multiplier); 
-            create_pi_controller(multiplier, current_pi_control, 80e2, 2e2);
+            create_pi_controller(multiplier, current_pi_control, 40e2, 2e2);
+            create_multiplier(divider_multiplier);
+            create_division(divider_multiplier, divider);
             --------------------------------------------------
 
             if sincos_is_ready(sincos) or simulation_counter = 0 then
                 sincos_angle <= sincos_angle + 300;
                 request_sincos(sincos, sincos_angle);
                 -- request_state_variable_calculation(grid_inductor);
-                request_inverter_calculation(inverter_model, get_pi_control_output(current_pi_control)*2);
+                request_inverter_calculation(inverter_model, get_pi_control_output(current_pi_control));
                 calculate_pi_control(current_pi_control, -get_sine(sincos)/32 - get_inverter_inductor_current(inverter_model));
+                request_division(divider, get_inverter_capacitor_voltage(inverter_model), get_dc_link_voltage(inverter_model));
+
             end if;
 
         end if; -- rstn
