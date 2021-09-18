@@ -24,18 +24,13 @@ architecture sim of tb_sincos is
     constant simtime_in_clocks : integer := 5000;
 ------------------------------------------------------------------------
     signal simulation_counter : natural := 0;
-    signal hw_multiplier : multiplier_record := init_multiplier;
 
-    signal sincos_process_counter : natural := 15;
     signal angle_rad16 : unsigned(15 downto 0) := (others => '0');
 
-    signal test_reduced_angle : integer := 0;
-    signal angle_squared : int18 := 0;
-    signal sin16 : int18 := 0;
-    signal cos16 : int18 := 32768;
+    signal sincos_multiplier : multiplier_record := init_multiplier;
+    signal sincos : sincos_record := init_sincos;
     signal sin : int18 := 0;
     signal cos : int18 := 32768;
-    signal sincos_is_ready : boolean := false;
 
 begin
 
@@ -66,91 +61,20 @@ begin
 ------------------------------------------------------------------------
 
     clocked_reset_generator : process(simulator_clock, rstn)
-        variable h0 : int18 := 0;
-        variable h1 : int18 := 0;
-        variable h2 : int18 := 0;
-
-        variable c0 : int18 := 0;
-        variable c1 : int18 := 0;
-        variable c2 : int18 := 0;
     begin
         if rising_edge(simulator_clock) then
             simulation_counter <= simulation_counter + 1;
 
-            create_multiplier(hw_multiplier);
+            create_multiplier(sincos_multiplier);
+            create_sincos(sincos_multiplier, sincos);
 
-            if simulation_counter = 10 or sincos_is_ready then
-                sincos_process_counter <= 0;
+            if simulation_counter = 10 or sincos_is_ready(sincos) then
                 angle_rad16 <= angle_rad16 + 511;
+                request_sincos(sincos, angle_rad16);
             end if; 
 
-            -- using Horners scheme sin = x(1 -(angle_squared*(sinegains(0) - angle_squared*(sinegains(1) - angle_squared*(sinegains(2)))))
-            -- h2 <= angle_squared*(sinegains(2));
-            -- h1 <= angle_squared*(sinegains(1) - h2);
-            -- h0 <= angle_squared*(sinegains(0) - h1);
-            -- using Horners scheme cos = 1 - angle_squared*(cosgains(0) - angle_squared*(cosgains(1) - angle_squared*(cosgains(2))));
-            sincos_is_ready <= false;
-            CASE sincos_process_counter is
-                WHEN 0 =>
-                    test_reduced_angle <= (to_integer(angle_rad16));
-                    multiply(hw_multiplier, angle_reduction(to_integer(angle_rad16)), angle_reduction(to_integer(angle_rad16)));
-                    sincos_process_counter <= sincos_process_counter + 1;
-                WHEN 1 =>
-                    if multiplier_is_ready(hw_multiplier) then
-                        angle_squared <=        get_multiplier_result(hw_multiplier, 15);
-                        multiply(hw_multiplier,                sinegains(2), get_multiplier_result(hw_multiplier, 15));
-                    end if;
-                    increment_counter_when_ready(hw_multiplier,sincos_process_counter);
-                WHEN 2 =>
-                    if multiplier_is_ready(hw_multiplier) then 
-                        multiply(hw_multiplier, angle_squared, sinegains(1) - get_multiplier_result(hw_multiplier, 15)); 
-                    end if;
-                    increment_counter_when_ready(hw_multiplier,sincos_process_counter);
-                WHEN 3 =>
-                    if multiplier_is_ready(hw_multiplier) then
-                        multiply(hw_multiplier, angle_reduction(test_reduced_angle), sinegains(0) - get_multiplier_result(hw_multiplier, 15)); 
-                    end if;
-                    increment_counter_when_ready(hw_multiplier,sincos_process_counter);
-                WHEN 4 =>
-                    if multiplier_is_ready(hw_multiplier) then
-                        sin16 <= get_multiplier_result(hw_multiplier,12);
-                        multiply(hw_multiplier, angle_squared, cosgains(2));
-                    end if;
-                    increment_counter_when_ready(hw_multiplier,sincos_process_counter); 
-
-                WHEN 5 =>
-                    if multiplier_is_ready(hw_multiplier) then
-                        multiply(hw_multiplier, angle_squared, cosgains(1) - get_multiplier_result(hw_multiplier, 15));
-                    end if;
-                    increment_counter_when_ready(hw_multiplier,sincos_process_counter); 
-                WHEN 6 => 
-                    if multiplier_is_ready(hw_multiplier) then
-                        cos16 <= cosgains(0) - get_multiplier_result(hw_multiplier, 14);
-                    end if;
-                    increment_counter_when_ready(hw_multiplier,sincos_process_counter); 
-                WHEN 7 =>
-                    sincos_process_counter <= sincos_process_counter + 1;
-                    sincos_is_ready <= true;
-
-                    if test_reduced_angle < one_quarter then
-                        sin <= sin16;
-                        cos <= cos16;
-                    elsif test_reduced_angle < three_fourths then
-                        sin <= cos16;
-                        cos <= -sin16;
-                    elsif test_reduced_angle < five_fourths then
-                        sin <= -sin16;
-                        cos <= -cos16;
-                    elsif test_reduced_angle < seven_fourths then
-                        sin <= -cos16;
-                        cos <= sin16;
-                    else
-                        sin <= sin16;
-                        cos <= cos16;
-                    end if;
-
-                when others =>
-            end CASE; 
+            sin <= sincos.sin;
+            cos <= sincos.cos;
         end if; -- rstn
     end process clocked_reset_generator;	
 ------------------------------------------------------------------------ 

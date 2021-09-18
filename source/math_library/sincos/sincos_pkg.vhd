@@ -9,10 +9,9 @@ package sincos_pkg is
 
 ------------------------------------------------------------------------
     type sincos_record is record
-        sincos_process_counter : natural               ;
-        angle_rad16            : unsigned(15 downto 0) ;
+        sincos_process_counter : natural range 0 to 15;
+        angle_rad16            : unsigned(15 downto 0);
 
-        test_reduced_angle : integer;
         angle_squared : int18;
         sin16 : int18;
         cos16 : int18;
@@ -21,19 +20,34 @@ package sincos_pkg is
         sincos_is_ready : boolean;
     end record;
 
-    constant init_sincos : sincos_record := (0, (others => '0'), 0, 0, 0, 0, 0, 0, false);
+    constant init_sincos : sincos_record := (0, (others => '0'), 0, 0, 0, 0, 0, false);
+------------------------------------------------------------------------
+    procedure request_sincos (
+        signal sincos_object : inout sincos_record;
+        angle_rad16 : in int18);
+
+    procedure request_sincos (
+        signal sincos_object : inout sincos_record;
+        angle_rad16 : in unsigned);
+------------------------------------------------------------------------
+    function sincos_is_ready ( sincos_object : sincos_record)
+        return boolean;
 ------------------------------------------------------------------------
     function angle_reduction ( angle_in_rad16 : int18)
         return int18;
+------------------------------------------------------------------------
+    procedure create_sincos (
+        signal hw_multiplier : inout multiplier_record;
+        signal sincos_object : inout sincos_record);
 ------------------------------------------------------------------------
     type int18_array is array (integer range <>) of int18;
     constant sinegains : int18_array(0 to 2) := (12868 , 21159 , 10180);
     constant cosgains  : int18_array(0 to 2) := (32768 , 80805 , 64473);
 
-    constant one_quarter   : integer := 8192;
-    constant three_fourths : integer := 24576;
-    constant five_fourths  : integer := 40960;
-    constant seven_fourths : integer := 57344;
+    constant one_quarter   : integer := 8192  ;
+    constant three_fourths : integer := 24576 ;
+    constant five_fourths  : integer := 40960 ;
+    constant seven_fourths : integer := 57344 ;
 
 end package sincos_pkg;
 
@@ -53,6 +67,38 @@ package body sincos_pkg is
         return to_integer((sign16_angle(13 downto 0)));
     end angle_reduction;
 ------------------------------------------------------------------------ 
+    procedure request_sincos
+    (
+        signal sincos_object : inout sincos_record;
+        angle_rad16 : in int18
+    ) is
+    begin
+        sincos_object.angle_rad16 <= to_unsigned(angle_rad16, 16);
+        sincos_object.sincos_process_counter <= 0;
+        
+    end request_sincos;
+------------------------------------------------------------------------ 
+    procedure request_sincos
+    (
+        signal sincos_object : inout sincos_record;
+        angle_rad16 : in unsigned
+    ) is
+    begin
+        sincos_object.angle_rad16 <= angle_rad16;
+        sincos_object.sincos_process_counter <= 0;
+        
+    end request_sincos;
+------------------------------------------------------------------------ 
+    function sincos_is_ready
+    (
+        sincos_object : sincos_record
+    )
+    return boolean
+    is
+    begin
+        return sincos_object.sincos_is_ready;
+    end sincos_is_ready;
+------------------------------------------------------------------------ 
     procedure create_sincos
     (
         signal hw_multiplier : inout multiplier_record;
@@ -60,7 +106,6 @@ package body sincos_pkg is
     ) is
         alias sincos_process_counter is sincos_object.sincos_process_counter;
         alias angle_rad16            is sincos_object.angle_rad16           ;
-        alias test_reduced_angle     is sincos_object.test_reduced_angle    ;
         alias angle_squared          is sincos_object.angle_squared         ;
         alias sin16                  is sincos_object.sin16                 ;
         alias cos16                  is sincos_object.cos16                 ;
@@ -69,9 +114,10 @@ package body sincos_pkg is
         alias sincos_is_ready        is sincos_object.sincos_is_ready       ;
     begin
             sincos_is_ready <= false;
+
             CASE sincos_process_counter is
                 WHEN 0 =>
-                    test_reduced_angle <= (to_integer(angle_rad16));
+                    
                     multiply(hw_multiplier, angle_reduction(to_integer(angle_rad16)), angle_reduction(to_integer(angle_rad16)));
                     sincos_process_counter <= sincos_process_counter + 1;
                 WHEN 1 =>
@@ -87,16 +133,23 @@ package body sincos_pkg is
                     increment_counter_when_ready(hw_multiplier,sincos_process_counter);
                 WHEN 3 =>
                     if multiplier_is_ready(hw_multiplier) then
-                        multiply(hw_multiplier, angle_reduction(test_reduced_angle), sinegains(0) - get_multiplier_result(hw_multiplier, 15)); 
+                        multiply(hw_multiplier, angle_reduction((to_integer(angle_rad16))), sinegains(0) - get_multiplier_result(hw_multiplier, 15)); 
                     end if;
                     increment_counter_when_ready(hw_multiplier,sincos_process_counter);
                 WHEN 4 =>
                     if multiplier_is_ready(hw_multiplier) then
                         sin16 <= get_multiplier_result(hw_multiplier,12);
+                    end if;
+                    increment_counter_when_ready(hw_multiplier,sincos_process_counter); 
+                WHEN others => -- do nothing
+            end CASE;
+
+            CASE sincos_process_counter is
+                WHEN 4 =>
+                    if multiplier_is_ready(hw_multiplier) then
                         multiply(hw_multiplier, angle_squared, cosgains(2));
                     end if;
                     increment_counter_when_ready(hw_multiplier,sincos_process_counter); 
-
                 WHEN 5 =>
                     if multiplier_is_ready(hw_multiplier) then
                         multiply(hw_multiplier, angle_squared, cosgains(1) - get_multiplier_result(hw_multiplier, 15));
@@ -111,16 +164,16 @@ package body sincos_pkg is
                     sincos_process_counter <= sincos_process_counter + 1;
                     sincos_is_ready <= true;
 
-                    if test_reduced_angle < one_quarter then
+                    if (to_integer(angle_rad16)) < one_quarter then
                         sin <= sin16;
                         cos <= cos16;
-                    elsif test_reduced_angle < three_fourths then
+                    elsif (to_integer(angle_rad16)) < three_fourths then
                         sin <= cos16;
                         cos <= -sin16;
-                    elsif test_reduced_angle < five_fourths then
+                    elsif (to_integer(angle_rad16)) < five_fourths then
                         sin <= -sin16;
                         cos <= -cos16;
-                    elsif test_reduced_angle < seven_fourths then
+                    elsif (to_integer(angle_rad16)) < seven_fourths then
                         sin <= -cos16;
                         cos <= sin16;
                     else
