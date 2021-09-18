@@ -25,6 +25,13 @@ package inverter_model_pkg is
     constant init_inverter_model : inverter_model_record := (multiplier_init_values, init_lcr_model_integrator_gains(5e3, 1000), init_state_variable_gain(500), 0, 0, 0, 0, 0, 4);
 
 ------------------------------------------------------------------------
+    function init_inverter_state_variable_gains (
+            inductor_integrator_gain     : int18;
+            ac_capacitor_integrator_gain : int18;
+            dc_link_integrator_gain      : int18)
+        return inverter_model_record;
+------------------------------------------------------------------------
+------------------------------------------------------------------------
     function get_inverter_inductor_current ( inverter_model : inverter_model_record)
         return int18;
 ------------------------------------------------------------------------
@@ -136,6 +143,21 @@ package body inverter_model_pkg is
     begin
         return inverter_model.inverter_lc_filter.capacitor_voltage.state;
     end get_inverter_capacitor_voltage;
+------------------------------------------------------------------------
+    function init_inverter_state_variable_gains
+    (
+        inductor_integrator_gain : int18;
+        ac_capacitor_integrator_gain : int18;
+        dc_link_integrator_gain : int18
+    )
+    return inverter_model_record
+    is
+        variable initial_model_gains : inverter_model_record := init_inverter_model;
+    begin
+        initial_model_gains.inverter_lc_filter := init_lcr_model_integrator_gains(inductor_integrator_gain, ac_capacitor_integrator_gain);
+        initial_model_gains.dc_link_voltage    := init_state_variable_gain(dc_link_integrator_gain);
+        return initial_model_gains;
+    end init_inverter_state_variable_gains;
 
 ------------------------------------------------------------------------
 end package body inverter_model_pkg; 

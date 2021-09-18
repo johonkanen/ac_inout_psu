@@ -18,6 +18,9 @@ package pi_controller_pkg is
     constant init_pi_controller : pi_controller_record := (0, 0, 7, 0);
 
 ------------------------------------------------------------------------
+    function get_pi_control_output ( pi_controller : pi_controller_record)
+        return int18;
+------------------------------------------------------------------------
     procedure create_pi_controller (
         signal hw_multiplier : inout multiplier_record;
         signal pi_controller : inout pi_controller_record;
@@ -94,6 +97,16 @@ package body pi_controller_pkg is
         pi_controller.pi_error <= pi_control_input;
         
     end calculate_pi_control;
-
+------------------------------------------------------------------------ 
+    function get_pi_control_output
+    (
+        pi_controller : pi_controller_record
+    )
+    return int18
+    is
+    begin
+        return pi_controller.pi_out;
+    end get_pi_control_output;
+------------------------------------------------------------------------ 
 end package body pi_controller_pkg;
 
