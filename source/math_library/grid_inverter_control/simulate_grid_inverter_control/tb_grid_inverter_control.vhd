@@ -9,6 +9,9 @@ LIBRARY std  ;
 library math_library;
     use math_library.multiplier_pkg.all;
     use math_library.sincos_pkg.all;
+    use math_library.pi_controller_pkg.all;
+    use math_library.state_variable_pkg.all;
+    use math_library.inverter_model_pkg.all;
 
 entity tb_grid_inverter_control is
 end;
@@ -25,14 +28,23 @@ architecture sim of tb_grid_inverter_control is
 ------------------------------------------------------------------------
     signal simulation_counter : natural := 0;
 
-    signal multiplier : multiplier_record := init_multiplier;
 
+    --------------------------------------------------
+    -- grid voltage
     signal sincos_multiplier : multiplier_record := init_multiplier;
-    signal sincos : sincos_record := init_sincos;
+    signal sincos : sincos_record := init_sincos; 
+    signal sincos_angle : unsigned(15 downto 0) := (others => '0'); 
 
-    signal sincos_angle : unsigned(15 downto 0) := (others => '0');
+    --------------------------------------------------
+    -- inverter model
+    signal inverter_model : inverter_model_record := init_inverter_model;
+    signal grid_inductor : state_variable_record := init_state_variable_gain(500);
 
-
+    --------------------------------------------------
+    -- controller
+    signal multiplier : multiplier_record := init_multiplier; 
+    signal pi_controller : pi_controller_record := init_pi_controller; 
+    --------------------------------------------------
     signal sine : int18 := 0;
 
 begin
@@ -66,17 +78,22 @@ begin
     clocked_reset_generator : process(simulator_clock, rstn)
     begin
         if rising_edge(simulator_clock) then
+            --------------------------------------------------
             simulation_counter <= simulation_counter + 1;
-            create_multiplier(multiplier);
+            --------------------------------------------------
             create_multiplier(sincos_multiplier);
-            create_sincos(sincos_multiplier, sincos);
+            create_sincos(sincos_multiplier, sincos); 
 
-            if sincos_is_ready(sincos) or simulation_counter = 4 then
+            if sincos_is_ready(sincos) or simulation_counter = 0 then
                 sincos_angle <= sincos_angle + 300;
                 request_sincos(sincos, sincos_angle);
             end if;
 
+            create_inverter_model(inverter_model, 500, 0);
+            --------------------------------------------------
+            create_multiplier(multiplier); 
     
+            --------------------------------------------------
         end if; -- rstn
     end process clocked_reset_generator;	
 ------------------------------------------------------------------------

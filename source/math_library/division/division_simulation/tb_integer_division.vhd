@@ -66,6 +66,7 @@ begin
                 rstn <= '1';
                 simulator_clock <= not simulator_clock;
             end loop;
+            report "division simulation finished";
         wait;
     end process;
 ------------------------------------------------------------------------

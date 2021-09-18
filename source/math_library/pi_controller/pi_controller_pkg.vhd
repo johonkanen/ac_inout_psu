@@ -15,6 +15,7 @@ package pi_controller_pkg is
         pi_error : int18;
     end record;
     constant pi_controller_init : pi_controller_record := (0, 0, 7, 0);
+    constant init_pi_controller : pi_controller_record := (0, 0, 7, 0);
 
 ------------------------------------------------------------------------
     procedure create_pi_controller (

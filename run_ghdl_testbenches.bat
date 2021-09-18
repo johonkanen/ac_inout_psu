@@ -11,4 +11,3 @@ call sim_sincos.bat 0 1
 
 cd %project_root%\source\math_library\division\division_simulation\
 call sim_integer_division.bat 0 1
-
