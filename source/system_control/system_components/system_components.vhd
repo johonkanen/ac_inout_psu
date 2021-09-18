@@ -204,6 +204,10 @@ architecture rtl of system_components is
     signal cos : int18 := 32768;
     signal angle_rad16 : unsigned(15 downto 0) := (others => '0');
 --------------------------------------------------
+    signal sine_w_harmonics : int18 := 0;
+    signal harmonic_process_counter : natural range 0 to 15 := 15;
+
+--------------------------------------------------
 begin
 
     -- system_components_FPGA_out <= (
@@ -255,6 +259,55 @@ begin
             create_multiplier(sincos_multiplier3);
             create_sincos(sincos_multiplier3, sincos3);
 
+            CASE harmonic_process_counter is
+                WHEN 0 => 
+                    request_sincos(sincos, angle_rad16);
+                    harmonic_process_counter <= harmonic_process_counter + 1;
+                WHEN 1 => 
+                    if sincos_is_ready(sincos) then
+                        sine_w_harmonics <= get_sine(sincos) / 2 + 32768;
+                        request_sincos(sincos, to_integer(angle_rad16)*2 + angle_rad16);
+                        harmonic_process_counter <= harmonic_process_counter + 1;
+                    end if;
+                WHEN 2 => 
+                    if sincos_is_ready(sincos) then
+                        sine_w_harmonics <= sine_w_harmonics + get_sine(sincos) / 16;
+                        request_sincos(sincos, to_integer(angle_rad16)*4 + angle_rad16);
+                        harmonic_process_counter <= harmonic_process_counter + 1;
+                    end if;
+                WHEN 3 =>
+                    if sincos_is_ready(sincos) then
+                        sine_w_harmonics <= sine_w_harmonics + get_sine(sincos) / 64;
+                        request_sincos(sincos, to_integer(angle_rad16)*8 - angle_rad16);
+                        harmonic_process_counter <= harmonic_process_counter + 1;
+                    end if;
+                WHEN 4 =>
+                    if sincos_is_ready(sincos) then
+                        sine_w_harmonics <= sine_w_harmonics + get_sine(sincos) / 32;
+                        request_sincos(sincos, to_integer(angle_rad16)*8 + angle_rad16);
+                        harmonic_process_counter <= harmonic_process_counter + 1;
+                    end if;
+                WHEN 5 =>
+                    if sincos_is_ready(sincos) then
+                        sine_w_harmonics <= sine_w_harmonics + get_sine(sincos) / 32;
+                        request_sincos(sincos, to_integer(angle_rad16)*8 + to_integer(angle_rad16)*2 + angle_rad16);
+                        harmonic_process_counter <= harmonic_process_counter + 1;
+                    end if;
+                WHEN 6 =>
+                    if sincos_is_ready(sincos) then
+                        sine_w_harmonics <= sine_w_harmonics + get_sine(sincos) / 32;
+                        request_sincos(sincos, to_integer(angle_rad16)*16 + angle_rad16);
+                        harmonic_process_counter <= harmonic_process_counter + 1;
+                    end if;
+                WHEN 7 =>
+                    if sincos_is_ready(sincos) then
+                        sine_w_harmonics <= sine_w_harmonics + get_sine(sincos) / 8;
+                        harmonic_process_counter <= harmonic_process_counter + 1;
+                    end if;
+
+                WHEN others => 
+            end CASE;
+
             -------------------------------------------------- 
             create_multiplier(hw_multiplier); 
             sequential_multiply(hw_multiplier, power_supply_simulation.output_inverter_simulation.output_emi_filter.capacitor_voltage.state, output_resistance);
@@ -285,7 +338,7 @@ begin
             if ad_conversion_is_ready(spi_sar_adc_data_out) then
                 request_power_supply_calculation(power_supply_simulation, -grid_duty_ratio, output_duty_ratio);
                 angle_rad16 <= angle_rad16 + 328;
-                request_sincos(sincos, angle_rad16);
+                harmonic_process_counter <= 0;
                 request_sincos(sincos2, to_integer(angle_rad16)*4+angle_rad16);
                 request_sincos(sincos3, to_integer(angle_rad16)*8-angle_rad16);
 
@@ -320,7 +373,7 @@ begin
                     WHEN 25 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier4, divider4, 17));
                     WHEN 26 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier5, divider5, 17));
                     WHEN 27 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier6, divider6, 17));
-                    WHEN 28 => transmit_16_bit_word_with_uart(uart_data_in, get_sine(sincos)/4+32768);
+                    WHEN 28 => transmit_16_bit_word_with_uart(uart_data_in, sine_w_harmonics);
                     WHEN 29 => transmit_16_bit_word_with_uart(uart_data_in, get_cosine(sincos)/4+32768 + get_cosine(sincos2)/16 + get_cosine(sincos3)/32);
                     WHEN others => -- get data from MDIO
                         register_counter := register_counter + 1;
