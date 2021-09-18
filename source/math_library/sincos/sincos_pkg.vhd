@@ -20,7 +20,7 @@ package sincos_pkg is
         sincos_has_finished : boolean;
     end record;
 
-    constant init_sincos : sincos_record := (0, (others => '0'), 0, 0, 0, 0, 0, false);
+    constant init_sincos : sincos_record := (15, (others => '0'), 0, 0, 0, 0, 0, false);
 ------------------------------------------------------------------------
     procedure request_sincos (
         signal sincos_object : inout sincos_record;

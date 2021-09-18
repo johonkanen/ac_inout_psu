@@ -21,13 +21,19 @@ architecture sim of tb_grid_inverter_control is
     signal clocked_reset : std_logic;
     constant clock_per : time := 1 ns;
     constant clock_half_per : time := 0.5 ns;
-    constant simtime_in_clocks : integer := 50;
+    constant simtime_in_clocks : integer := 15000;
 ------------------------------------------------------------------------
-    signal simulation_counter : natural := 25;
+    signal simulation_counter : natural := 0;
 
     signal multiplier : multiplier_record := init_multiplier;
+
+    signal sincos_multiplier : multiplier_record := init_multiplier;
     signal sincos : sincos_record := init_sincos;
 
+    signal sincos_angle : unsigned(15 downto 0) := (others => '0');
+
+
+    signal sine : int18 := 0;
 
 begin
 
@@ -61,9 +67,19 @@ begin
     begin
         if rising_edge(simulator_clock) then
             simulation_counter <= simulation_counter + 1;
+            create_multiplier(multiplier);
+            create_multiplier(sincos_multiplier);
+            create_sincos(sincos_multiplier, sincos);
+
+            if sincos_is_ready(sincos) or simulation_counter = 4 then
+                sincos_angle <= sincos_angle + 300;
+                request_sincos(sincos, sincos_angle);
+            end if;
+
     
         end if; -- rstn
     end process clocked_reset_generator;	
 ------------------------------------------------------------------------
+    sine <= sincos.sin;
 
 end sim;
