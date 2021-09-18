@@ -35,6 +35,8 @@ package state_variable_pkg is
 ------------------------------------------------------------------------
     procedure calculate ( signal state_variable : out state_variable_record);
 
+    procedure request_state_variable_calculation (
+        signal state_variable : out state_variable_record );
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
     function "-" ( left : state_variable_record; right : integer)
@@ -111,6 +113,15 @@ package body state_variable_pkg is
     begin
         state_variable.state_counter <= 0;
     end calculate;
+------------------------------------------------------------------------
+    procedure request_state_variable_calculation
+    (
+        signal state_variable : out state_variable_record 
+    ) is
+    begin
+        calculate(state_variable);
+        
+    end request_state_variable_calculation;
 
 ------------------------------------------------------------------------
     function "-"
