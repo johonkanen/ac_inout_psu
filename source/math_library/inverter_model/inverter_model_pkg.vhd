@@ -31,6 +31,9 @@ package inverter_model_pkg is
     function get_dc_link_voltage ( inverter_model : inverter_model_record)
         return int18;
 ------------------------------------------------------------------------
+    function get_inverter_capacitor_voltage ( inverter_model : inverter_model_record)
+        return int18;
+------------------------------------------------------------------------
     procedure create_inverter_model (
         signal inverter_model : inout inverter_model_record;
         dc_link_load_current : in int18;
@@ -123,6 +126,16 @@ package body inverter_model_pkg is
     begin
         return inverter_model.dc_link_voltage.state;
     end get_dc_link_voltage;
+------------------------------------------------------------------------
+    function get_inverter_capacitor_voltage
+    (
+        inverter_model : inverter_model_record
+    )
+    return int18
+    is
+    begin
+        return inverter_model.inverter_lc_filter.capacitor_voltage.state;
+    end get_inverter_capacitor_voltage;
 
 ------------------------------------------------------------------------
 end package body inverter_model_pkg; 
