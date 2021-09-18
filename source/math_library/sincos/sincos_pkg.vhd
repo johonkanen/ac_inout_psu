@@ -36,7 +36,7 @@ package body sincos_pkg is
         variable reduced_angle : natural;
     begin
         unsigned_angle := to_unsigned(angle_in_rad16,16);
-        reduced_angle := to_integer(unsigned_angle(12 downto 0)); 
+        reduced_angle := to_integer(unsigned_angle(13 downto 0)); 
         return reduced_angle;
     end angle_reduction;
 

@@ -151,19 +151,19 @@ begin
 
                     if angle_rad16 < one_quarter then
                         sin <= sin16;
-                        cos  <= cos16;
+                        cos <= cos16;
                     elsif angle_rad16 < three_fourths then
                         sin <= cos16;
-                        cos  <= -sin16;
+                        cos <= -sin16;
                     elsif angle_rad16 < five_fourths then
                         sin <= -sin16;
-                        cos  <= -cos16;
+                        cos <= -cos16;
                     elsif angle_rad16 < seven_fourths then
                         sin <= -cos16;
                         cos  <= sin16;
                     else
                         sin <= sin16;
-                        cos  <= cos16;
+                        cos <= cos16;
                     end if;
 
                 when others =>
