@@ -21,6 +21,7 @@ library math_library;
     use math_library.lcr_filter_model_pkg.all;
     use math_library.power_supply_simulation_model_pkg.all;
     use math_library.state_variable_pkg.all;
+    use math_library.sincos_pkg.all;
 
 entity system_components is
     port (
@@ -190,6 +191,18 @@ architecture rtl of system_components is
     signal division_multiplier6 : multiplier_record := init_multiplier;
     signal divider6 : division_record := init_division;
 --------------------------------------------------
+    signal sincos_multiplier : multiplier_record := init_multiplier;
+    signal sincos : sincos_record := init_sincos;
+
+    signal sincos_multiplier2 : multiplier_record := init_multiplier;
+    signal sincos2 : sincos_record := init_sincos;
+
+    signal sincos_multiplier3 : multiplier_record := init_multiplier;
+    signal sincos3 : sincos_record := init_sincos;
+
+    signal sin : int18 := 0;
+    signal cos : int18 := 32768;
+    signal angle_rad16 : unsigned(15 downto 0) := (others => '0');
 --------------------------------------------------
 begin
 
@@ -234,6 +247,13 @@ begin
             system_components_FPGA_out.test_ad_mux <= integer_to_std(number_to_be_converted => uart_rx_data, bits_in_word => 3);
             -------------------------------------------------- 
             create_power_supply_simulation_model(power_supply_simulation, 8e3, output_inverter_load_current + output_load_current);
+            -------------------------------------------------- 
+            create_multiplier(sincos_multiplier);
+            create_sincos(sincos_multiplier, sincos);
+            create_multiplier(sincos_multiplier2);
+            create_sincos(sincos_multiplier2, sincos2);
+            create_multiplier(sincos_multiplier3);
+            create_sincos(sincos_multiplier3, sincos3);
 
             -------------------------------------------------- 
             create_multiplier(hw_multiplier); 
@@ -264,6 +284,10 @@ begin
 
             if ad_conversion_is_ready(spi_sar_adc_data_out) then
                 request_power_supply_calculation(power_supply_simulation, -grid_duty_ratio, output_duty_ratio);
+                angle_rad16 <= angle_rad16 + 328;
+                request_sincos(sincos, angle_rad16);
+                request_sincos(sincos2, to_integer(angle_rad16)*4+angle_rad16);
+                request_sincos(sincos3, to_integer(angle_rad16)*8-angle_rad16);
 
                 test_leading_zeroes <= test_leading_zeroes + 1;
                 if test_leading_zeroes = 32767 then
@@ -296,6 +320,8 @@ begin
                     WHEN 25 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier4, divider4, 17));
                     WHEN 26 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier5, divider5, 17));
                     WHEN 27 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier6, divider6, 17));
+                    WHEN 28 => transmit_16_bit_word_with_uart(uart_data_in, get_sine(sincos)/4+32768);
+                    WHEN 29 => transmit_16_bit_word_with_uart(uart_data_in, get_cosine(sincos)/4+32768 + get_cosine(sincos2)/16 + get_cosine(sincos3)/32);
                     WHEN others => -- get data from MDIO
                         register_counter := register_counter + 1;
                         if test_counter = 4600 then

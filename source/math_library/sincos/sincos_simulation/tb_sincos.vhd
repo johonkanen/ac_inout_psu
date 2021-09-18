@@ -73,8 +73,8 @@ begin
                 request_sincos(sincos, angle_rad16);
             end if; 
             if sincos_is_ready(sincos) then
-                sin <= sincos.sin;
-                cos <= sincos.cos;
+                sin <= get_sine(sincos);
+                cos <= get_cosine(sincos);
             end if;
 
         end if; -- rstn

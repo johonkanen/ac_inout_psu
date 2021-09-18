@@ -30,6 +30,12 @@ package sincos_pkg is
         signal sincos_object : inout sincos_record;
         angle_rad16 : in unsigned);
 ------------------------------------------------------------------------
+    function get_sine ( sincos_object : sincos_record)
+        return int18;
+------------------------------------------------------------------------
+    function get_cosine ( sincos_object : sincos_record)
+        return int18;
+------------------------------------------------------------------------
     function sincos_is_ready ( sincos_object : sincos_record)
         return boolean;
 ------------------------------------------------------------------------
@@ -78,6 +84,26 @@ package body sincos_pkg is
         sincos_object.sincos_process_counter <= 0;
         
     end request_sincos;
+------------------------------------------------------------------------ 
+    function get_sine
+    (
+        sincos_object : sincos_record
+    )
+    return int18
+    is
+    begin
+        return sincos_object.sin;
+    end get_sine;
+------------------------------------------------------------------------ 
+    function get_cosine
+    (
+        sincos_object : sincos_record
+    )
+    return int18
+    is
+    begin
+        return sincos_object.cos;
+    end get_cosine;
 ------------------------------------------------------------------------ 
     function sincos_is_ready
     (
