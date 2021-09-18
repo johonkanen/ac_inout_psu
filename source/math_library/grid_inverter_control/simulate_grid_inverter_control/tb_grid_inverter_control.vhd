@@ -91,27 +91,27 @@ begin
             create_sincos(sincos_multiplier, sincos); 
             --------------------------------------------------
             create_multiplier(grid_inductor_multiplier); 
-            create_state_variable(grid_inductor, grid_inductor_multiplier, get_cosine(sincos)/64);
-            create_inverter_model(inverter_model, 0, -get_pi_control_output(current_pi_control));
-            inverter_model.dc_link_voltage.state <= 15e3;
-            inverter_model.inverter_lc_filter.capacitor_voltage.state <= 0;
+            create_state_variable(grid_inductor, grid_inductor_multiplier, get_sine(sincos)/2);
+            create_inverter_model(inverter_model, 0, 0);
+            inverter_model.dc_link_voltage.state <= 25e3;
+            inverter_model.inverter_lc_filter.capacitor_voltage.state <= 0; -- get_sine(sincos)/4;
             --------------------------------------------------
             create_multiplier(multiplier); 
-            create_pi_controller(multiplier, current_pi_control, 20e2, 2e2);
+            create_pi_controller(multiplier, current_pi_control, 80e2, 2e2);
             --------------------------------------------------
 
             if sincos_is_ready(sincos) or simulation_counter = 0 then
                 sincos_angle <= sincos_angle + 300;
                 request_sincos(sincos, sincos_angle);
-                request_state_variable_calculation(grid_inductor);
-                request_inverter_calculation(inverter_model,get_pi_control_output(current_pi_control)*2);
-                calculate_pi_control(current_pi_control, get_cosine(sincos)/4 - get_inverter_inductor_current(inverter_model));
+                -- request_state_variable_calculation(grid_inductor);
+                request_inverter_calculation(inverter_model, get_pi_control_output(current_pi_control)*2);
+                calculate_pi_control(current_pi_control, -get_sine(sincos)/32 - get_inverter_inductor_current(inverter_model));
             end if;
 
         end if; -- rstn
     end process clocked_reset_generator;	
 ------------------------------------------------------------------------
-    sine <= sincos.cos;
+    sine <= sincos.sin;
     grid_current <= grid_inductor.state;
     pi_control_output <= get_pi_control_output(current_pi_control);
     inverter_inductor_current <= get_inverter_inductor_current(inverter_model);
