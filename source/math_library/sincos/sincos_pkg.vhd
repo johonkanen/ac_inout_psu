@@ -39,21 +39,11 @@ package sincos_pkg is
     procedure create_sincos (
         signal hw_multiplier : inout multiplier_record;
         signal sincos_object : inout sincos_record);
-------------------------------------------------------------------------
-    type int18_array is array (integer range <>) of int18;
-    constant sinegains : int18_array(0 to 2) := (12868 , 21159 , 10180);
-    constant cosgains  : int18_array(0 to 2) := (32768 , 80805 , 64473);
-
-    constant one_quarter   : integer := 8192  ;
-    constant three_fourths : integer := 24576 ;
-    constant five_fourths  : integer := 40960 ;
-    constant seven_fourths : integer := 57344 ;
-
+------------------------------------------------------------------------ 
 end package sincos_pkg;
 
 
-package body sincos_pkg is
-
+package body sincos_pkg is 
 ------------------------------------------------------------------------
     function angle_reduction
     (
@@ -112,31 +102,40 @@ package body sincos_pkg is
         alias sin                    is sincos_object.sin                   ;
         alias cos                    is sincos_object.cos                   ;
         alias sincos_is_ready        is sincos_object.sincos_is_ready       ;
+
+        type int18_array is array (integer range <>) of int18;
+        constant sinegains : int18_array(0 to 2) := (12868 , 21159 , 10180);
+        constant cosgains  : int18_array(0 to 2) := (32768 , 80805 , 64473);
+
+        constant one_quarter   : integer := 8192  ;
+        constant three_fourths : integer := 24576 ;
+        constant five_fourths  : integer := 40960 ;
+        constant seven_fourths : integer := 57344 ;
+------------------------------------------------------------------------
     begin
             sincos_is_ready <= false;
 
             CASE sincos_process_counter is
-                WHEN 0 =>
-                    
+                WHEN 0 => 
                     multiply(hw_multiplier, angle_reduction(to_integer(angle_rad16)), angle_reduction(to_integer(angle_rad16)));
                     sincos_process_counter <= sincos_process_counter + 1;
                 WHEN 1 =>
                     if multiplier_is_ready(hw_multiplier) then
-                        angle_squared <=        get_multiplier_result(hw_multiplier, 15);
+                        angle_squared <= get_multiplier_result(hw_multiplier, 15);
                         multiply(hw_multiplier,                sinegains(2), get_multiplier_result(hw_multiplier, 15));
                     end if;
                     increment_counter_when_ready(hw_multiplier,sincos_process_counter);
-                WHEN 2 =>
+                WHEN 3 =>
                     if multiplier_is_ready(hw_multiplier) then 
                         multiply(hw_multiplier, angle_squared, sinegains(1) - get_multiplier_result(hw_multiplier, 15)); 
                     end if;
                     increment_counter_when_ready(hw_multiplier,sincos_process_counter);
-                WHEN 3 =>
+                WHEN 5 =>
                     if multiplier_is_ready(hw_multiplier) then
                         multiply(hw_multiplier, angle_reduction((to_integer(angle_rad16))), sinegains(0) - get_multiplier_result(hw_multiplier, 15)); 
                     end if;
                     increment_counter_when_ready(hw_multiplier,sincos_process_counter);
-                WHEN 4 =>
+                WHEN 7 =>
                     if multiplier_is_ready(hw_multiplier) then
                         sin16 <= get_multiplier_result(hw_multiplier,12);
                     end if;
@@ -145,22 +144,16 @@ package body sincos_pkg is
             end CASE;
 
             CASE sincos_process_counter is
+                WHEN 2 =>
+                    multiply(hw_multiplier, angle_squared, cosgains(2));
+                    sincos_process_counter <= sincos_process_counter + 1;
                 WHEN 4 =>
-                    if multiplier_is_ready(hw_multiplier) then
-                        multiply(hw_multiplier, angle_squared, cosgains(2));
-                    end if;
-                    increment_counter_when_ready(hw_multiplier,sincos_process_counter); 
-                WHEN 5 =>
-                    if multiplier_is_ready(hw_multiplier) then
-                        multiply(hw_multiplier, angle_squared, cosgains(1) - get_multiplier_result(hw_multiplier, 15));
-                    end if;
-                    increment_counter_when_ready(hw_multiplier,sincos_process_counter); 
+                    multiply(hw_multiplier, angle_squared, cosgains(1) - get_multiplier_result(hw_multiplier, 15));
+                    sincos_process_counter <= sincos_process_counter + 1;
                 WHEN 6 => 
-                    if multiplier_is_ready(hw_multiplier) then
-                        cos16 <= cosgains(0) - get_multiplier_result(hw_multiplier, 14);
-                    end if;
-                    increment_counter_when_ready(hw_multiplier,sincos_process_counter); 
-                WHEN 7 =>
+                    cos16 <= cosgains(0) - get_multiplier_result(hw_multiplier, 14);
+                    sincos_process_counter <= sincos_process_counter + 1;
+                WHEN 8 =>
                     sincos_process_counter <= sincos_process_counter + 1;
                     sincos_is_ready <= true;
 
