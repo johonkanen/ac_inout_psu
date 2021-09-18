@@ -63,6 +63,7 @@ begin
         simulation_running <= true;
         wait for simtime_in_clocks*clock_per;
         simulation_running <= false;
+        report "inverter simulation succeeded";
         wait;
     end process simtime;	
 

@@ -52,7 +52,7 @@ package body pi_controller_pkg is
         alias pi_out is pi_controller.pi_out;
         alias integrator is pi_controller.integrator;
         constant pi_controller_radix : natural := 12;
-        constant pi_controller_limit : natural := 2**14;
+        constant pi_controller_limit : natural := 2**15;
     begin
         CASE pi_control_process_counter is
             WHEN 0 =>

@@ -64,6 +64,7 @@ begin
         simulation_running <= true;
         wait for simtime_in_clocks*clock_per;
         simulation_running <= false;
+        report "power supply model simulation successfull";
         wait;
     end process simtime;	
 

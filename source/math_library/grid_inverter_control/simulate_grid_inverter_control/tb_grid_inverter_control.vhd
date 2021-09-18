@@ -109,8 +109,8 @@ begin
             create_sincos(sincos_multiplier, sincos); 
             --------------------------------------------------
             create_multiplier(grid_inductor_multiplier); 
-            create_state_variable(grid_inductor, grid_inductor_multiplier, get_sine(sincos)/2);
-            create_inverter_model(inverter_model, dc_link_load_current, 0);
+            create_state_variable(grid_inductor, grid_inductor_multiplier, get_inverter_capacitor_voltage(inverter_model)-get_sine(sincos)/4);
+            create_inverter_model(inverter_model, dc_link_load_current, grid_inductor.state);
             inverter_model.inverter_lc_filter.capacitor_voltage.state <= get_sine(sincos)/4;
             --------------------------------------------------
             create_multiplier(multiplier); 
@@ -123,7 +123,7 @@ begin
             create_multiplier(control_multiplier);
             --------------------------------------------------
             CASE simulation_counter is
-                WHEN 0      => dc_link_load_current <= 2800;
+                WHEN 0      => dc_link_load_current <= 1800;
                 WHEN 10e3   => dc_link_load_current <= 5800;
                 WHEN others => -- do nothing
             end CASE;

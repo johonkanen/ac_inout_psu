@@ -50,6 +50,7 @@ begin
         simulation_running <= true;
         wait for simtime_in_clocks*clock_per;
         simulation_running <= false;
+        report "lcr filter simulation succeeded";
         wait;
     end process simtime;	
 

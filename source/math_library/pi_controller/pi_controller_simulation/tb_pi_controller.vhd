@@ -29,14 +29,12 @@ architecture sim of tb_pi_controller is
     signal hw_multiplier : multiplier_record;
     signal state_variable_multiplier : multiplier_record;
 
-    signal pi_control_process_counter : natural :=0;
-
     constant kp : natural := 1e5;
     constant ki : natural := 1e4;
     constant pi_controller_radix : natural := 12;
     constant pi_controller_limit : natural := 10e3;
 
-    signal dc_link_voltege : state_variable_record := (0000, 200);
+    signal dc_link_voltege : state_variable_record := init_state_variable_gain(200);
     signal voltage : int18 := 0;
 
     signal state_counter : natural := 0;
@@ -51,6 +49,7 @@ begin
         simulation_running <= true;
         wait for simtime_in_clocks*clock_per;
         simulation_running <= false;
+        report "pi control simulation ready";
         wait;
     end process simtime;	
 
@@ -73,7 +72,7 @@ begin
     clocked_reset_generator : process(simulator_clock, rstn)
         variable pi_error : int18 := 0;
         variable voltage_reference : int18 := 1000;
-        variable load_current : int18 := -15e3;
+        variable load_current : int18 := -29e3;
     begin
         if rising_edge(simulator_clock) then
 
@@ -89,9 +88,6 @@ begin
 
             if (simulation_counter + 1250) mod 2500 = 0 then
                 load_current := -load_current;
-            end if;
-            if simulation_counter mod 2500 = 0 then
-                -- voltage_reference := -voltage_reference;
             end if;
 
             if simulation_counter mod 10 = 0 then

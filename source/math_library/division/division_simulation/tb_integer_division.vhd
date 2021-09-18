@@ -47,10 +47,10 @@ begin
     begin
         simulation_running <= true;
         wait for simtime_in_clocks*clock_per;
+        simulation_running <= false;
         report "*******************";
         report "division successful! last tested number " & integer'image(test_divident) & "at clock cycle " & integer'image(simtime_in_clocks);
         report "*******************";
-        simulation_running <= false;
         wait;
     end process simtime;	
 
