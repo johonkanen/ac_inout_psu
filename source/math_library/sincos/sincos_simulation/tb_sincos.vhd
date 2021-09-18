@@ -27,12 +27,12 @@ architecture sim of tb_sincos is
     signal hw_multiplier : multiplier_record := init_multiplier;
 
     signal sincos_process_counter : natural := 15;
-    signal angle_rad16 : natural := 0;
+    signal angle_rad16 : unsigned(15 downto 0) := (others => '0');
 
-    signal test_reduced_angle : natural := 0;
+    signal test_reduced_angle : integer := 0;
     signal angle_squared : int18 := 0;
     signal sin16 : int18 := 0;
-    signal cos16 : int18 := 0;
+    signal cos16 : int18 := 32768;
     signal sin : int18 := 0;
     signal cos : int18 := 0;
     signal sincos_is_ready : boolean := false;
@@ -81,10 +81,10 @@ begin
 
             if simulation_counter = 10 or sincos_is_ready then
                 sincos_process_counter <= 0;
-                angle_rad16 <= angle_rad16 + 512;
+                angle_rad16 <= angle_rad16 + 511;
             end if; 
 
-            -- using Horners scheme sin = x(1 -(angle_squared*sinegains(0) - angle_squared*(sinegains(1) - angle_squared*(sinegains(2))));
+            -- using Horners scheme sin = x(1 -(angle_squared*(sinegains(0) - angle_squared*(sinegains(1) - angle_squared*(sinegains(2)))))
             -- h2 <= angle_squared*(sinegains(2));
             -- h1 <= angle_squared*(sinegains(1) - h2);
             -- h0 <= angle_squared*(sinegains(0) - h1);
@@ -92,75 +92,58 @@ begin
             sincos_is_ready <= false;
             CASE sincos_process_counter is
                 WHEN 0 =>
-                    test_reduced_angle <= angle_reduction(angle_rad16);
-                    multiply(hw_multiplier, angle_reduction(angle_rad16), angle_reduction(angle_rad16));
+                    test_reduced_angle <= (to_integer(angle_rad16));
+                    multiply(hw_multiplier, angle_reduction(to_integer(angle_rad16)), angle_reduction(to_integer(angle_rad16)));
                     sincos_process_counter <= sincos_process_counter + 1;
                 WHEN 1 =>
                     if multiplier_is_ready(hw_multiplier) then
-                        angle_squared <= get_multiplier_result(hw_multiplier, 18);
-                        multiply(hw_multiplier, get_multiplier_result(hw_multiplier, 18), sinegains(2));
+                        angle_squared <=        get_multiplier_result(hw_multiplier, 15);
+                        multiply(hw_multiplier,                sinegains(2), get_multiplier_result(hw_multiplier, 15));
                     end if;
                     increment_counter_when_ready(hw_multiplier,sincos_process_counter);
                 WHEN 2 =>
-                    if multiplier_is_ready(hw_multiplier) then
-                        h2 := get_multiplier_result(hw_multiplier, 12);
-                        multiply(hw_multiplier, angle_squared, sinegains(2)); 
+                    if multiplier_is_ready(hw_multiplier) then 
+                        multiply(hw_multiplier, angle_squared, sinegains(1) - get_multiplier_result(hw_multiplier, 15)); 
                     end if;
                     increment_counter_when_ready(hw_multiplier,sincos_process_counter);
                 WHEN 3 =>
                     if multiplier_is_ready(hw_multiplier) then
-                        h1 := sinegains(1) - get_multiplier_result(hw_multiplier, 12);
-                        multiply(hw_multiplier, angle_squared, h1); 
+                        multiply(hw_multiplier, angle_reduction(test_reduced_angle), sinegains(0) - get_multiplier_result(hw_multiplier, 15)); 
                     end if;
                     increment_counter_when_ready(hw_multiplier,sincos_process_counter);
                 WHEN 4 =>
                     if multiplier_is_ready(hw_multiplier) then
-                        h0 := sinegains(0) - get_multiplier_result(hw_multiplier, 12);
-                        sin16 <= h0;
-
-                        -- calculate cosine
+                        sin16 <= get_multiplier_result(hw_multiplier,12);
                         multiply(hw_multiplier, angle_squared, cosgains(2));
                     end if;
                     increment_counter_when_ready(hw_multiplier,sincos_process_counter); 
+
                 WHEN 5 =>
                     if multiplier_is_ready(hw_multiplier) then
-                        c2 := get_multiplier_result(hw_multiplier, 12);
-                        multiply(hw_multiplier, angle_squared, cosgains(1) - c2);
+                        multiply(hw_multiplier, angle_squared, cosgains(1) - get_multiplier_result(hw_multiplier, 15));
                     end if;
                     increment_counter_when_ready(hw_multiplier,sincos_process_counter); 
                 WHEN 6 => 
                     if multiplier_is_ready(hw_multiplier) then
-                        c1 := get_multiplier_result(hw_multiplier, 12);
-                        multiply(hw_multiplier, angle_squared, cosgains(1) - c1);
+                        cos16 <= cosgains(0) - get_multiplier_result(hw_multiplier, 14);
                     end if;
                     increment_counter_when_ready(hw_multiplier,sincos_process_counter); 
                 WHEN 7 =>
-                    if multiplier_is_ready(hw_multiplier) then
-                        c0 := get_multiplier_result(hw_multiplier, 11);
-                        multiply(hw_multiplier, angle_squared, c0);
-                    end if;
-                    increment_counter_when_ready(hw_multiplier,sincos_process_counter); 
-                WHEN 8 =>
-                    if multiplier_is_ready(hw_multiplier) then
-                        cos16 <= 65535 - get_multiplier_result(hw_multiplier, 12);
-                    end if;
-                    increment_counter_when_ready(hw_multiplier,sincos_process_counter); 
-                WHEN 9 =>
                     sincos_process_counter <= sincos_process_counter + 1;
                     sincos_is_ready <= true;
 
-                    if angle_rad16 < one_quarter then
+                    if test_reduced_angle < one_quarter then
                         sin <= sin16;
                         cos <= cos16;
-                    elsif angle_rad16 < three_fourths then
+                    elsif test_reduced_angle < three_fourths then
                         sin <= cos16;
                         cos <= -sin16;
-                    elsif angle_rad16 < five_fourths then
+                    elsif test_reduced_angle < five_fourths then
                         sin <= -sin16;
                         cos <= -cos16;
-                    elsif angle_rad16 < seven_fourths then
+                    elsif test_reduced_angle < seven_fourths then
                         sin <= -cos16;
-                        cos  <= sin16;
+                        cos <= sin16;
                     else
                         sin <= sin16;
                         cos <= cos16;

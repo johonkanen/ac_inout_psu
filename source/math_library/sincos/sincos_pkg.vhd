@@ -8,8 +8,8 @@ library math_library;
 package sincos_pkg is
 
 ------------------------------------------------------------------------
-    function angle_reduction ( angle_in_rad16 : natural)
-        return natural;
+    function angle_reduction ( angle_in_rad16 : int18)
+        return int18;
 ------------------------------------------------------------------------
     type int18_array is array (integer range <>) of int18;
     constant sinegains : int18_array(0 to 2) := (12868 , 21159 , 10180);
@@ -28,16 +28,14 @@ package body sincos_pkg is
 ------------------------------------------------------------------------
     function angle_reduction
     (
-        angle_in_rad16 : natural
+        angle_in_rad16 : int18
     )
-    return natural
-    is 
-        variable unsigned_angle : unsigned(15 downto 0);
-        variable reduced_angle : natural;
+        return int18
+    is
+        variable sign16_angle : signed(17 downto 0);
     begin
-        unsigned_angle := to_unsigned(angle_in_rad16,16);
-        reduced_angle := to_integer(unsigned_angle(13 downto 0)); 
-        return reduced_angle;
+        sign16_angle := to_signed(angle_in_rad16,18); 
+        return to_integer((sign16_angle(13 downto 0)));
     end angle_reduction;
 
 ------------------------------------------------------------------------ 
