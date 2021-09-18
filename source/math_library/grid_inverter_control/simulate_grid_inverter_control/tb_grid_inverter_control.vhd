@@ -48,6 +48,12 @@ architecture sim of tb_grid_inverter_control is
     -- controller
     signal multiplier : multiplier_record := init_multiplier; 
     signal current_pi_control : pi_controller_record := init_pi_controller; 
+
+    signal voltage_control_multiplier : multiplier_record := init_multiplier;
+    signal voltage_pi_control         : pi_controller_record := init_pi_controller;
+
+    signal control_multiplier : multiplier_record := init_multiplier;
+
     signal divider_multiplier : multiplier_record := init_multiplier;
     signal divider : division_record := init_division;
     --------------------------------------------------
@@ -57,6 +63,8 @@ architecture sim of tb_grid_inverter_control is
     signal inverter_inductor_current : int18 := 0;
     signal divider_output : int18 := 0;
     signal dc_link_voltage : int18 := 0;
+
+    
 
 begin
 
@@ -97,14 +105,18 @@ begin
             --------------------------------------------------
             create_multiplier(grid_inductor_multiplier); 
             create_state_variable(grid_inductor, grid_inductor_multiplier, get_sine(sincos)/2);
-            create_inverter_model(inverter_model, 1200, 0);
+            create_inverter_model(inverter_model, 800, 0);
             -- inverter_model.dc_link_voltage.state <= 15e3;
             inverter_model.inverter_lc_filter.capacitor_voltage.state <= get_sine(sincos)/4;
             --------------------------------------------------
             create_multiplier(multiplier); 
-            create_pi_controller(multiplier, current_pi_control, 60e2, 5e2);
+            create_pi_controller(multiplier, current_pi_control, 80e2, 6e2);
+            create_multiplier(voltage_control_multiplier);
+            create_pi_controller(voltage_control_multiplier, voltage_pi_control, 500, 30);        
             create_multiplier(divider_multiplier);
             create_division(divider_multiplier, divider);
+
+            create_multiplier(control_multiplier);
             --------------------------------------------------
 
             if sincos_is_ready(sincos) or simulation_counter = 0 then
@@ -112,8 +124,10 @@ begin
                 request_sincos(sincos, sincos_angle);
                 -- request_state_variable_calculation(grid_inductor);
                 request_inverter_calculation(inverter_model, get_pi_control_output(current_pi_control) + divider_output*2);
-                calculate_pi_control(current_pi_control, get_sine(sincos)/16 - get_inverter_inductor_current(inverter_model));
                 request_division(divider, abs(get_inverter_capacitor_voltage(inverter_model)), get_dc_link_voltage(inverter_model));
+
+                calculate_pi_control(current_pi_control, get_multiplier_result(control_multiplier,15) - get_inverter_inductor_current(inverter_model));
+                calculate_pi_control(voltage_pi_control, 25e3 - get_dc_link_voltage(inverter_model));
 
             end if;
             if division_is_ready(divider_multiplier, divider) then
@@ -124,10 +138,12 @@ begin
                 end if;
             end if;
 
+            sequential_multiply(control_multiplier, get_sine(sincos)/4, get_pi_control_output(voltage_pi_control));
+
         end if; -- rstn
     end process clocked_reset_generator;	
 ------------------------------------------------------------------------
-    sine <= sincos.sin;
+    sine <= get_sine(sincos)/4;
     grid_current <= grid_inductor.state;
     pi_control_output <= get_pi_control_output(current_pi_control);
     inverter_inductor_current <= get_inverter_inductor_current(inverter_model);
