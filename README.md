@@ -2,6 +2,8 @@
 A vhdl implementation for a 3kW single phase input/output power supply control and communications. Power supply has gigabit ethernet and uart communications.
 Hardware test code currently developed in source/system_control/system_components/system_components.vhd
 
+There is a run_ghdl_testbenches.bat file that can be run on console to trigger testbenches.
+
 A companion website with some descriptions on the project can be found at
 https://hardwaredescriptions.com
 
