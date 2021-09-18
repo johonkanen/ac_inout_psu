@@ -34,7 +34,7 @@ architecture sim of tb_sincos is
     signal sin16 : int18 := 0;
     signal cos16 : int18 := 32768;
     signal sin : int18 := 0;
-    signal cos : int18 := 0;
+    signal cos : int18 := 32768;
     signal sincos_is_ready : boolean := false;
 
 begin
