@@ -40,6 +40,7 @@ architecture sim of tb_grid_inverter_control is
     signal inverter_model : inverter_model_record := init_inverter_model;
     
     signal grid_inductor_multiplier : multiplier_record := init_multiplier;
+    -- inductor = 2^radix*ts/gain = 13uh for grid
     signal grid_inductor : state_variable_record := init_state_variable_gain(50000);
 
     --------------------------------------------------
@@ -91,11 +92,13 @@ begin
                 sincos_angle <= sincos_angle + 300;
                 request_sincos(sincos, sincos_angle);
                 request_state_variable_calculation(grid_inductor);
+                request_inverter_calculation(inverter_model,0);
             end if;
 
+            --------------------------------------------------
             create_multiplier(grid_inductor_multiplier); 
             create_state_variable(grid_inductor, grid_inductor_multiplier, get_sine(sincos)/256);
-            create_inverter_model(inverter_model, 500, 0);
+            create_inverter_model(inverter_model, 500, grid_inductor.state);
             --------------------------------------------------
             create_multiplier(multiplier); 
     
