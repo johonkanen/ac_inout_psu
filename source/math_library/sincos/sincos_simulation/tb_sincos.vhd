@@ -72,9 +72,11 @@ begin
                 angle_rad16 <= angle_rad16 + 511;
                 request_sincos(sincos, angle_rad16);
             end if; 
+            if sincos_is_ready(sincos) then
+                sin <= sincos.sin;
+                cos <= sincos.cos;
+            end if;
 
-            sin <= sincos.sin;
-            cos <= sincos.cos;
         end if; -- rstn
     end process clocked_reset_generator;	
 ------------------------------------------------------------------------ 
