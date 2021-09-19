@@ -18,7 +18,7 @@ ghdl -a --ieee=synopsys --work=math_library %source%/math_library/power_supply_m
 ghdl -a --ieee=synopsys %source%/ethernet_communication/ethernet/ethernet_clocks_pkg.vhd 
 ghdl -a --ieee=synopsys %source%/system_clocks_pkg.vhd
 
-        ghdl -a --ieee=synopsys %source%/system_control/system_components/adc_interface/spi_sar_adc/spi_sar_adc_pkg.vhd 
+        ghdl -a --ieee=synopsys %source%/adc_interface/spi_sar_adc/spi_sar_adc_pkg.vhd 
 
             ghdl -a --ieee=synopsys %source%/uart/uart_transreceiver/uart_tx/uart_tx_pkg.vhd
             ghdl -a --ieee=synopsys %source%/uart/uart_transreceiver/uart_rx/uart_rx_pkg.vhd
@@ -61,9 +61,9 @@ ghdl -a --ieee=synopsys %source%/system_clocks_pkg.vhd
         ghdl -a --ieee=synopsys %source%/ethernet_communication/ethernet/ethernet_pkg.vhd
     ghdl -a --ieee=synopsys %source%/ethernet_communication/ethernet_communication_pkg.vhd
 
-            ghdl -a --ieee=synopsys %source%/system_control/system_components/power_supply_control/gate_drive_power/gate_drive_power_pkg.vhd
-            ghdl -a --ieee=synopsys %source%/system_control/system_components/power_supply_control/gate_drive_power/gate_drive_power_internal_pkg.vhd
-        ghdl -a --ieee=synopsys %source%/system_control/system_components/power_supply_control/power_supply_control_pkg.vhd
+            ghdl -a --ieee=synopsys %source%/system_control/system_components/power_supply_hardware/power_supply_control/gate_drive_power/gate_drive_power_pkg.vhd
+            ghdl -a --ieee=synopsys %source%/system_control/system_components/power_supply_hardware/power_supply_control/gate_drive_power/gate_drive_power_internal_pkg.vhd
+        ghdl -a --ieee=synopsys %source%/system_control/system_components/power_supply_hardware/power_supply_control/power_supply_control_pkg.vhd
     ghdl -a --ieee=synopsys %source%/system_control/system_components/system_components_pkg.vhd
     ghdl -a --ieee=synopsys %source%/system_control/system_components/system_components.vhd
 ghdl -a --ieee=synopsys %source%/system_control/system_control_pkg.vhd

@@ -22,7 +22,6 @@ architecture hack_test of system_components is
     alias clock is system_clocks.core_clock;
     alias reset_n is system_clocks.pll_locked;
 
-    signal power_supply_control_clocks   : power_supply_control_clock_group;
     signal power_supply_control_data_in  : power_supply_control_data_input_group;
     signal power_supply_control_data_out : power_supply_control_data_output_group;
     
@@ -452,9 +451,8 @@ begin
     	  uart_data_out);
 
 ------------------------------------------------------------------------ 
-    power_supply_control_clocks <= (clock => clock, reset_n => reset_n);
     u_power_supply_control : power_supply_control
-    port map( power_supply_control_clocks                          ,
+    port map( system_clocks                          ,
     	  system_components_FPGA_in.power_supply_control_FPGA_in   ,
     	  system_components_FPGA_out.power_supply_control_FPGA_out ,
     	  system_components_data_in.power_supply_control_data_in   ,
