@@ -23,4 +23,17 @@ package body system_control_internal_pkg is
     end stop_gate_drive_powers;
 
 ------------------------------------------------------------------------
+    procedure idle_system
+    (
+        st_system_controller : out t_system_controller;
+        signal system_component_input : out system_components_data_input_group;
+        system_component_output : in system_components_data_output_group 
+    ) is
+    begin 
+        st_system_controller := idle;
+        stop_gate_drive_powers(system_component_input);
+        
+    end idle_system;
+        
+------------------------------------------------------------------------
 end package body system_control_internal_pkg; 

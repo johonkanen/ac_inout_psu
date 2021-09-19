@@ -7,6 +7,7 @@ library work;
 
 package system_control_internal_pkg is
 
+    type t_system_controller is (idle, bypass_input_relay, charge_gate_drivers, fault); 
 ------------------------------------------------------------------------
     procedure start_gate_drive_powers (
         signal system_components_input : out system_components_data_input_group);
