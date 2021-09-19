@@ -5,10 +5,11 @@ library ieee;
 library work;
     use work.power_supply_control_pkg.all;
     use work.gate_drive_power_pkg.all;
+    use work.system_clocks_pkg.all;
 
 entity power_supply_control is
     port (
-        power_supply_control_clocks   : in power_supply_control_clock_group;
+        system_clocks                 : in system_clocks_group;
         power_supply_control_FPGA_in  : in power_supply_control_FPGA_input_group;
         power_supply_control_FPGA_out : out power_supply_control_FPGA_output_group;
         power_supply_control_data_in  : in power_supply_control_data_input_group;
@@ -23,8 +24,8 @@ architecture rtl of power_supply_control is
     
 begin 
 
-    gate_drive_power_clocks <= (clock  => power_supply_control_clocks.clock,
-                               reset_n => power_supply_control_clocks.reset_n);
+    -- gate_drive_power_clocks <= (clock  => power_supply_control_clocks.clock,
+    --                            reset_n => power_supply_control_clocks.reset_n);
 ------------------------------------------------------------------------
     u_gate_drive_power : gate_drive_power
     port map( gate_drive_power_clocks,
