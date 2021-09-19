@@ -34,7 +34,6 @@ package power_supply_control_pkg is
         );
     end component power_supply_control;
     
-    -- signal power_supply_control_clocks   : power_supply_control_clock_group;
     -- signal power_supply_control_FPGA_in  : power_supply_control_FPGA_input_group;
     -- signal power_supply_control_FPGA_out : power_supply_control_FPGA_output_group;
     -- signal power_supply_control_data_in  : power_supply_control_data_input_group;
