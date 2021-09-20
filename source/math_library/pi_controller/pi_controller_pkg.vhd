@@ -32,6 +32,9 @@ package pi_controller_pkg is
         pi_control_input : in int18);
 
 ------------------------------------------------------------------------
+    function pi_control_calculation_is_ready ( pi_controller : pi_controller_record)
+        return boolean;
+------------------------------------------------------------------------
 end package pi_controller_pkg;
 
 
@@ -107,6 +110,17 @@ package body pi_controller_pkg is
     begin
         return pi_controller.pi_out;
     end get_pi_control_output;
+------------------------------------------------------------------------ 
+    function pi_control_calculation_is_ready
+    (
+        pi_controller : pi_controller_record
+    )
+    return boolean
+    is
+    begin
+        return pi_controller.pi_control_process_counter = 3;
+        
+    end pi_control_calculation_is_ready;
 ------------------------------------------------------------------------ 
 end package body pi_controller_pkg;
 

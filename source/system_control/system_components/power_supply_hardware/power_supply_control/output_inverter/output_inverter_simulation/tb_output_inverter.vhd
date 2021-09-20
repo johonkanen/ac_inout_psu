@@ -50,6 +50,7 @@ architecture sim of tb_output_inverter is
     signal input_dc_link_voltage : int18 := 15e3;
     signal control_multiplier : multiplier_record := init_multiplier;
     signal current_pi_controller : pi_controller_record := init_pi_controller;
+    signal voltage_pi_controller : pi_controller_record := init_pi_controller;
 
 begin
 
@@ -91,19 +92,25 @@ begin
 
             create_multiplier(control_multiplier);
             create_pi_controller(control_multiplier, current_pi_controller, 5e3, 2e2);
+            create_pi_controller(control_multiplier, voltage_pi_controller, 5e3, 2e2);
 
             CASE simulation_counter is
+                WHEN 0 =>
+                    input_dc_link_voltage <= 25e3;
                 WHEN 21e3 =>
                     -- load_resistance <= 15e3;
                     -- load_current <= 5e3;
-                    input_dc_link_voltage <= 10e3;
+                    input_dc_link_voltage <= 3000;
                 WHEN others =>
             end CASE;
 
             create_multiplier(multiplier);
             if simulation_counter mod 25 = 0 then 
                 request_inverter_calculation(output_inverter, get_pi_control_output(current_pi_controller));
-                calculate_pi_control(current_pi_controller, 1e3 - get_inverter_inductor_current(output_inverter));
+                calculate_pi_control(current_pi_controller, get_pi_control_output(voltage_pi_controller) - get_inverter_inductor_current(output_inverter));
+            end if;
+            if pi_control_calculation_is_ready(current_pi_controller) then
+                calculate_pi_control(voltage_pi_controller, 2e3 - get_inverter_capacitor_voltage(output_inverter));
             end if;
 
             sequential_multiply(multiplier, get_inverter_capacitor_voltage(output_inverter), -load_resistance); 
