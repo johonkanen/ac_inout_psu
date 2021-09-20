@@ -42,8 +42,9 @@ architecture sim of tb_output_inverter is
     signal test_lcr : lcr_model_record := init_lcr_model_integrator_gains(10e3, 1e3);
     -- signal output_inverter : inverter_model_record := init_inverter_model;
     signal output_inverter_voltage : int18 := 0;
+    signal output_inverter_current : int18 := 0;
     signal multiplier : multiplier_record := init_multiplier;
-    signal load_resistance : int18 := 15e3;
+    signal load_resistance : int18 := 0;
     signal radix15_duty : int18 := 15e3;
     signal load_current : int18 := 0;
 
@@ -51,6 +52,8 @@ architecture sim of tb_output_inverter is
     signal control_multiplier : multiplier_record := init_multiplier;
     signal current_pi_controller : pi_controller_record := init_pi_controller;
     signal voltage_pi_controller : pi_controller_record := init_pi_controller;
+
+    signal prbs17 : std_logic_vector(16 downto 0) := (others => '1');
 
 begin
 
@@ -96,28 +99,34 @@ begin
 
             CASE simulation_counter is
                 WHEN 0 =>
-                    input_dc_link_voltage <= 10e3;
-                WHEN 21e3 =>
-                    -- load_resistance <= 15e3;
-                    -- load_current <= 5e3;
                     input_dc_link_voltage <= 20e3;
+                WHEN 13e3 =>
+                    load_resistance <= 55e3;
+                WHEN 21e3 =>
+                    input_dc_link_voltage <= 10e3;
+                WHEN 27e3 =>
+                    load_current <= 5e3;
                 WHEN others =>
             end CASE;
 
             create_multiplier(multiplier);
             if simulation_counter mod 25 = 0 then 
                 request_inverter_calculation(output_inverter, get_pi_control_output(current_pi_controller));
-                calculate_pi_control(current_pi_controller, get_pi_control_output(voltage_pi_controller) - get_inverter_inductor_current(output_inverter));
+                calculate_pi_control(current_pi_controller, get_pi_control_output(voltage_pi_controller) - get_inverter_inductor_current(output_inverter) + to_integer(signed(prbs17))/2**9);
             end if;
             if pi_control_calculation_is_ready(current_pi_controller) then
                 calculate_pi_control(voltage_pi_controller, 2e3 - get_inverter_capacitor_voltage(output_inverter));
             end if;
 
-            -- sequential_multiply(multiplier, get_inverter_capacitor_voltage(output_inverter), -load_resistance); 
+            sequential_multiply(multiplier, get_inverter_capacitor_voltage(output_inverter), -load_resistance); 
 
+            --- plot measurements
+            prbs17 <= prbs17(15 downto 0) & prbs17(16);
+            prbs17(14) <= prbs17(16) xor prbs17(13);
 
             --- plot measurements
             output_inverter_voltage <= get_inverter_capacitor_voltage(output_inverter);
+            output_inverter_current <= get_inverter_inductor_current(output_inverter);
     
         end if; -- rstn
     end process clocked_reset_generator;	
