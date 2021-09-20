@@ -56,9 +56,14 @@ architecture sim of tb_output_inverter is
     signal prbs17 : std_logic_vector(16 downto 0) := (others => '1');
     signal sincos_multiplier : multiplier_record := init_multiplier;
     signal sincos : sincos_record := init_sincos;
+    
+    signal sincos_multiplier2 : multiplier_record := init_multiplier;
+    signal sincos2 : sincos_record := init_sincos;
 
     signal sincos_angel : unsigned(15 downto 0) := (others => '0');
+    signal sincos_angel2 : unsigned(15 downto 0) := (others => '0');
     signal sincos_out : int18 := 0;
+    signal pi_out : int18 := 0;
 begin
 
 ------------------------------------------------------------------------
@@ -95,7 +100,7 @@ begin
 
             create_lcr_filter(test_lcr,lcr_filter_multiplier, 0, 0 );
             create_inverter_model(output_inverter, 100, get_multiplier_result(multiplier, 15) + load_current);
-            output_inverter.dc_link_voltage.state <= input_dc_link_voltage + to_integer(signed(prbs17))/2**6;
+            output_inverter.dc_link_voltage.state <= input_dc_link_voltage + get_sine(sincos2)/64 + to_integer(signed(prbs17))/2**6 ;
 
             create_multiplier(control_multiplier);
             create_pi_controller(control_multiplier, current_pi_controller, 5000, 200);
@@ -103,17 +108,21 @@ begin
 
             create_multiplier(sincos_multiplier);
             create_sincos(sincos_multiplier, sincos);
+            create_multiplier(sincos_multiplier2);
+            create_sincos(sincos_multiplier2, sincos2);
             sincos_angel <= sincos_angel + 10;
+            sincos_angel2 <= sincos_angel2 + 20;
 
             request_sincos(sincos, sincos_angel);
+            request_sincos(sincos2, sincos_angel2);
 
             CASE simulation_counter is
                 WHEN 0 =>
-                    input_dc_link_voltage <= 15e3;
+                    input_dc_link_voltage <= 5e3;
                 WHEN 11500 =>
                     load_resistance <= 55e3;
                 WHEN 21700 =>
-                    input_dc_link_voltage <= 10e3;
+                    input_dc_link_voltage <= 5e3;
                 WHEN 28e3 =>
                     load_resistance <= 0;
                     -- load_current <= 15e3;
@@ -139,6 +148,7 @@ begin
             output_inverter_voltage <= get_inverter_capacitor_voltage(output_inverter);
             output_inverter_current <= get_inverter_inductor_current(output_inverter);
             sincos_out <= get_sine(sincos)/4 - get_inverter_capacitor_voltage(output_inverter);
+            pi_out <= get_pi_control_output(current_pi_controller);
     
         end if; -- rstn
     end process clocked_reset_generator;	
