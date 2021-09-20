@@ -63,14 +63,23 @@ package body sincos_pkg is
         return to_integer((sign16_angle(13 downto 0)));
     end angle_reduction;
 ------------------------------------------------------------------------ 
+    function sincos_is_busy
+    (
+        sincos_object : sincos_record
+    )
+    return boolean
+    is
+    begin
+        return sincos_object.sincos_process_counter <= 8;
+    end sincos_is_busy;
+------------------------------------------------------------------------ 
     procedure request_sincos
     (
         signal sincos_object : inout sincos_record;
         angle_rad16 : in int18
     ) is
     begin
-        sincos_object.angle_rad16 <= to_unsigned(angle_rad16, 16);
-        sincos_object.sincos_process_counter <= 0;
+            request_sincos(sincos_object, to_unsigned(angle_rad16, 16));
         
     end request_sincos;
 ------------------------------------------------------------------------ 
@@ -80,8 +89,10 @@ package body sincos_pkg is
         angle_rad16 : in unsigned
     ) is
     begin
-        sincos_object.angle_rad16 <= angle_rad16;
-        sincos_object.sincos_process_counter <= 0;
+        if sincos_object.sincos_process_counter >= 8 then
+            sincos_object.angle_rad16 <= angle_rad16;
+            sincos_object.sincos_process_counter <= 0;
+        end if;
         
     end request_sincos;
 ------------------------------------------------------------------------ 
@@ -120,14 +131,14 @@ package body sincos_pkg is
         signal hw_multiplier : inout multiplier_record;
         signal sincos_object : inout sincos_record
     ) is
-        alias sincos_process_counter is sincos_object.sincos_process_counter;
-        alias angle_rad16            is sincos_object.angle_rad16           ;
-        alias angle_squared          is sincos_object.angle_squared         ;
-        alias sin16                  is sincos_object.sin16                 ;
-        alias cos16                  is sincos_object.cos16                 ;
-        alias sin                    is sincos_object.sin                   ;
-        alias cos                    is sincos_object.cos                   ;
-        alias sincos_has_finished        is sincos_object.sincos_has_finished       ;
+        alias sincos_process_counter is sincos_object.sincos_process_counter ;
+        alias angle_rad16            is sincos_object.angle_rad16            ;
+        alias angle_squared          is sincos_object.angle_squared          ;
+        alias sin16                  is sincos_object.sin16                  ;
+        alias cos16                  is sincos_object.cos16                  ;
+        alias sin                    is sincos_object.sin                    ;
+        alias cos                    is sincos_object.cos                    ;
+        alias sincos_has_finished    is sincos_object.sincos_has_finished    ;
 
         type int18_array is array (integer range <>) of int18;
         constant sinegains : int18_array(0 to 2) := (12868 , 21159 , 10180);
