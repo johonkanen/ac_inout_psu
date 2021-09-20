@@ -26,20 +26,30 @@ architecture sim of tb_output_inverter is
     signal clocked_reset : std_logic;
     constant clock_per : time := 1 ns;
     constant clock_half_per : time := 0.5 ns;
-    constant simtime_in_clocks : integer := 50;
+    constant simtime_in_clocks : integer := 45000;
 ------------------------------------------------------------------------
     signal simulation_counter : natural := 0;
 
-    signal inverter_model : inverter_model_record := init_inverter_state_and_gains(
+    signal output_inverter : inverter_model_record := init_inverter_state_and_gains(
                                                         dc_link_voltage_init         => 15e3 ,
-                                                        inductor_integrator_gain     => 3e2  ,
-                                                        ac_capacitor_integrator_gain => 20e3 ,
+                                                        inductor_integrator_gain     => 25e3  ,
+                                                        ac_capacitor_integrator_gain => 20e2 ,
                                                         dc_link_integrator_gain      => 1000);
     
     signal grid_inductor_multiplier : multiplier_record := init_multiplier;
 
     signal lcr_filter_multiplier : multiplier_record := init_multiplier;
     signal test_lcr : lcr_model_record := init_lcr_model_integrator_gains(10e3, 1e3);
+    -- signal output_inverter : inverter_model_record := init_inverter_model;
+    signal output_inverter_voltage : int18 := 0;
+    signal multiplier : multiplier_record := init_multiplier;
+    signal load_resistance : int18 := 15e3;
+    signal radix15_duty : int18 := 15e3;
+    signal load_current : int18 := 0;
+
+    signal input_dc_link_voltage : int18 := 15e3;
+    signal control_multiplier : multiplier_record := init_multiplier;
+    signal current_pi_controller : pi_controller_record := init_pi_controller;
 
 begin
 
@@ -76,7 +86,31 @@ begin
             simulation_counter <= simulation_counter + 1;
 
             create_lcr_filter(test_lcr,lcr_filter_multiplier, 0, 0 );
+            create_inverter_model(output_inverter, 100, get_multiplier_result(multiplier, 15) + load_current);
+            output_inverter.dc_link_voltage.state <= input_dc_link_voltage;
 
+            create_multiplier(control_multiplier);
+            create_pi_controller(control_multiplier, current_pi_controller, 5e3, 2e2);
+
+            CASE simulation_counter is
+                WHEN 21e3 =>
+                    -- load_resistance <= 15e3;
+                    -- load_current <= 5e3;
+                    input_dc_link_voltage <= 10e3;
+                WHEN others =>
+            end CASE;
+
+            create_multiplier(multiplier);
+            if simulation_counter mod 25 = 0 then 
+                request_inverter_calculation(output_inverter, get_pi_control_output(current_pi_controller));
+                calculate_pi_control(current_pi_controller, 1e3 - get_inverter_inductor_current(output_inverter));
+            end if;
+
+            sequential_multiply(multiplier, get_inverter_capacitor_voltage(output_inverter), -load_resistance); 
+
+
+            --- plot measurements
+            output_inverter_voltage <= get_inverter_capacitor_voltage(output_inverter);
     
         end if; -- rstn
     end process clocked_reset_generator;	
