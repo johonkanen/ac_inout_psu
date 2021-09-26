@@ -53,6 +53,7 @@ architecture sim of tb_output_inverter is
     signal current_pi_controller : pi_controller_record := init_pi_controller;
     signal voltage_pi_controller : pi_controller_record := init_pi_controller;
 
+------------------------------------------------------------------------
     signal prbs17 : std_logic_vector(16 downto 0) := (others => '1');
     signal sincos_multiplier : multiplier_record := init_multiplier;
     signal sincos : sincos_record := init_sincos;
@@ -60,6 +61,7 @@ architecture sim of tb_output_inverter is
     signal sincos_multiplier2 : multiplier_record := init_multiplier;
     signal sincos2 : sincos_record := init_sincos;
 
+------------------------------------------------------------------------
     signal sincos_angel : unsigned(15 downto 0) := (others => '0');
     signal sincos_angel2 : unsigned(15 downto 0) := (others => '0');
     signal sincos_out : int18 := 0;

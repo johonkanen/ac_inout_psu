@@ -27,9 +27,6 @@ call sim_nr_iterator.bat 0
 cd %project_root%\source\math_library\pi_controller\pi_controller_simulation\
 call sim_pi_controller.bat 0
 
-cd %project_root%\source\math_library\grid_inverter_control\simulate_grid_inverter_control\
-call sim_grid_inverter_control.bat 0 1 
-
 cd %project_root%\source\math_library\sincos\sincos_simulation\
 call sim_sincos.bat 0 1 
 

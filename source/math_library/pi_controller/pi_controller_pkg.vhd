@@ -13,9 +13,11 @@ package pi_controller_pkg is
         pi_out     : int18;
         pi_control_process_counter : natural range 0 to 7;
         pi_error : int18;
+        pi_high_limit : int18;
+        pi_low_limit : int18;
     end record;
-    constant pi_controller_init : pi_controller_record := (0, 0, 7, 0);
-    constant init_pi_controller : pi_controller_record := (0, 0, 7, 0);
+    constant pi_controller_init : pi_controller_record := (0, 0, 7, 0, 32768, -32768);
+    constant init_pi_controller : pi_controller_record := pi_controller_init;
 
 ------------------------------------------------------------------------
     function get_pi_control_output ( pi_controller : pi_controller_record)
