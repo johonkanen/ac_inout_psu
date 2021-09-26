@@ -118,11 +118,11 @@ begin
 
             CASE simulation_counter is
                 WHEN 0 =>
-                    input_dc_link_voltage <= 5e3;
+                    input_dc_link_voltage <= 12e3;
                 WHEN 11500 =>
                     load_resistance <= 55e3;
                 WHEN 21700 =>
-                    input_dc_link_voltage <= 5e3;
+                    input_dc_link_voltage <= 20e3;
                 WHEN 28e3 =>
                     load_resistance <= 0;
                     -- load_current <= 15e3;
@@ -135,7 +135,7 @@ begin
                 calculate_pi_control(current_pi_controller, get_pi_control_output(voltage_pi_controller) - get_inverter_inductor_current(output_inverter));
             end if;
             if pi_control_calculation_is_ready(current_pi_controller) then
-                calculate_pi_control(voltage_pi_controller, get_sine(sincos)/4 - get_inverter_capacitor_voltage(output_inverter));
+                calculate_pi_control(voltage_pi_controller, get_sine(sincos)/8 - get_inverter_capacitor_voltage(output_inverter));
             end if;
 
             sequential_multiply(multiplier, get_inverter_capacitor_voltage(output_inverter), -load_resistance); 
@@ -147,7 +147,7 @@ begin
             --- plot measurements
             output_inverter_voltage <= get_inverter_capacitor_voltage(output_inverter);
             output_inverter_current <= get_inverter_inductor_current(output_inverter);
-            sincos_out <= get_sine(sincos)/4 - get_inverter_capacitor_voltage(output_inverter);
+            sincos_out <= get_sine(sincos)/8 - get_inverter_capacitor_voltage(output_inverter);
             pi_out <= get_pi_control_output(current_pi_controller);
     
         end if; -- rstn

@@ -169,7 +169,8 @@ begin
 
             input_voltage <= 32e2;
             if simulation_counter = 12000  then
-                load_resistance <= 65e3;
+                -- load_resistance <= 65e3;
+                load_current <= -25e3;
             end if;
 
             CASE process_counter is 
