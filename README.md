@@ -7,6 +7,9 @@ There is a run_ghdl_testbenches.bat file that can be run on console to trigger t
 A companion website with some descriptions on the project can be found at
 https://hardwaredescriptions.com
 
+A tutorial on how to use the code and install ghdl/gtkwave is currently being written at
+https://hardwaredescriptions.com/getting-started-with-fpga-and-vhdl-step-by-step-guide-from-tool-installation-to-your-first-inverter-control/
+
 The steps to produce the uart console programs for testing the VHDL are found in https://hardwaredescriptions.com/?page_id=912
 
 system sources are in ./get_vhdl_sources.tcl file in reverse order compared to the code architecture. This is done to ease maintaining ghdl_compile.bat which is used for syntax checking and simulation
