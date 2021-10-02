@@ -37,7 +37,7 @@ architecture sim of tb_inverter_control_simulation is
     signal inverter_model : inverter_model_record := init_inverter_state_and_gains(
         dc_link_voltage_init          => 25e3 ,
         inductor_integrator_gain      => 20e3 ,
-        ac_capacitor_integrator_gain  => 8e3  ,
+        ac_capacitor_integrator_gain  => 2e3  ,
         dc_link_integrator_gain       => 2e3);
 
 ------------------------------------------------------------------------ 
@@ -94,7 +94,7 @@ begin
 
             --------------------------------------------------
             create_multiplier(voltage_pi_control_multiplier);
-            create_pi_controller(voltage_pi_control_multiplier, voltage_pi_control, 5000 , 1800);
+            create_pi_controller(voltage_pi_control_multiplier, voltage_pi_control, 11200 , 2000);
 
             create_multiplier(current_pi_control_multiplier);
             create_pi_controller(current_pi_control_multiplier, current_pi_control, 6000 , 800); 
@@ -103,12 +103,20 @@ begin
             create_inverter_model(inverter_model,dc_link_load_current => 0, load_current => load_current);
             set_dc_link_voltage(inverter_model, 20e3);
 
-            -- force output voltage to zero for tuning current control
-
+            --------------------------------------------------
+            -- force output voltage to zero for tuning current control 
             if simulation_counter > 20e3 and simulation_counter < 25e3 then
                 inverter_model.inverter_lc_filter.capacitor_voltage.state <= 0;
             end if;
 
+            -- add load current steps
+            CASE simulation_counter is
+                WHEN 10e3 =>
+                    load_current <= -15e3;
+                WHEN 15e3 =>
+                    load_current <= 15e3;
+                WHEN others => -- do nothing
+            end CASE;
             --------------------------------------------------
             sincos_angle <= sincos_angle + 25;
             request_sincos(sincos, sincos_angle);
@@ -116,16 +124,10 @@ begin
             if simulation_counter mod 25 = 0 then
                 request_inverter_calculation(inverter_model, get_pi_control_output(current_pi_control));
                 calculate_pi_control(current_pi_control, get_pi_control_output(voltage_pi_control) - get_inverter_inductor_current(inverter_model));
-                calculate_pi_control(voltage_pi_control, 1000 - get_inverter_capacitor_voltage(inverter_model));
+                calculate_pi_control(voltage_pi_control, get_sine(sincos)/4 - get_inverter_capacitor_voltage(inverter_model));
             end if;
 
-            -- CASE simulation_counter is
-            --     WHEN 10e3 =>
-            --         load_current <= -5e3;
-            --     WHEN 15e3 =>
-            --         load_current <= 5e3;
-            --     WHEN others => -- do nothing
-            -- end CASE;
+
 
             --------------------------------------------------
             sine_output <= get_sine(sincos);
