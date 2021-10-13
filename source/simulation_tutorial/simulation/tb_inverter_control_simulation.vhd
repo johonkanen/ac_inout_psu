@@ -125,9 +125,7 @@ begin
                 request_inverter_calculation(inverter_model, get_pi_control_output(current_pi_control));
                 calculate_pi_control(current_pi_control, get_pi_control_output(voltage_pi_control) - get_inverter_inductor_current(inverter_model));
                 calculate_pi_control(voltage_pi_control, get_sine(sincos)/4 - get_inverter_capacitor_voltage(inverter_model));
-            end if;
-
-
+            end if; 
 
             --------------------------------------------------
             sine_output <= get_sine(sincos);
