@@ -15,6 +15,9 @@ ghdl -a --ieee=synopsys --work=math_library %source%/math_library/inverter_model
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/power_supply_model/psu_inverter_simulation_models_pkg.vhd
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/power_supply_model/power_supply_simulation_model_pkg.vhd
 
+ghdl -a --ieee=synopsys %source%/spi/spi_pkg.vhd
+ghdl -a --ieee=synopsys %source%/spi/spi_adc_pkg.vhd
+
 ghdl -a --ieee=synopsys %source%/ethernet_communication/ethernet/ethernet_clocks_pkg.vhd 
 ghdl -a --ieee=synopsys %source%/system_clocks_pkg.vhd
 
