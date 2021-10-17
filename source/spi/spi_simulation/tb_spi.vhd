@@ -69,12 +69,12 @@ begin
             create_spi_adc(adc);
 
             --------------------------------------------------
-            if simulation_counter = 24 then
-                set_clock_division(adc.spi_io_clock_group, 8);
+            if simulation_counter = 6 then
+                request_spi_clock(adc.spi_io_clock_group, 6);
             end if;
-            if simulation_counter = 34 then
-                set_clock_division(adc.spi_io_clock_group, 3);
-            end if;
+            -- if simulation_counter = 34 then
+            --     set_clock_division(adc.spi_io_clock_group, 3);
+            -- end if;
 
 
         end if; -- rising_edge

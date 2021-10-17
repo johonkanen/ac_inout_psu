@@ -6,12 +6,14 @@ package spi_pkg is
 
 ------------------------------------------------------------------------
     type spi_io_clock_record is record
-        clock_division_counter : natural range 0 to 2**8-1;
-        spi_io_clock : std_logic;
-        spi_clock_division : natural;
+        clock_division_counter    : natural range 0 to 2**8-1;
+        spi_io_clock              : std_logic;
+        spi_clock_division        : natural;
+        number_of_clocks_in_frame : natural;
+        spi_clock_counter         : natural;
     end record;
 ------------------------------------------------------------------------
-    constant init_spi_io_clock : spi_io_clock_record := (0,'1',5);
+    constant init_spi_io_clock : spi_io_clock_record := (4,'1',5, 8, 0);
 
 ------------------------------------------------------------------------
     procedure create_spi_io_clock (
@@ -20,6 +22,10 @@ package spi_pkg is
     procedure set_clock_division (
         signal spi_clock_group : inout spi_io_clock_record;
         clock_divider : in natural);
+
+    procedure request_spi_clock (
+        signal spi_clock_group : inout spi_io_clock_record;
+        number_of_spi_clocks : in natural);
 
 ------------------------------------------------------------------------
     type chip_select_record is record
@@ -48,22 +54,29 @@ package body spi_pkg is
         alias clock_division_counter is spi_clock_group.clock_division_counter;
         alias spi_io_clock is spi_clock_group.spi_io_clock;
         alias spi_clock_division is spi_clock_group.spi_clock_division;
+        alias spi_clock_counter is spi_clock_group.spi_clock_counter;
     begin
         --------------------------------------------------
-        if clock_division_counter > 0 then
-            clock_division_counter <= clock_division_counter - 1;
-        end if;
+        if spi_clock_counter > 0 then
+            if clock_division_counter > 0 then
+                clock_division_counter <= clock_division_counter - 1;
+            end if;
 
-        if clock_division_counter = 0 then
-            clock_division_counter <= spi_clock_division;
-        end if;
+            if clock_division_counter = 0 then
+                clock_division_counter <= spi_clock_division;
+            end if;
 
-        spi_io_clock <= '1';
-        if clock_division_counter > spi_clock_division/2 then
-            spi_io_clock <= '0';
+            spi_io_clock <= '1';
+            if clock_division_counter > spi_clock_division/2 then
+                spi_io_clock <= '0';
+            end if;
+            --------------------------------------------------
+            if clock_division_counter = 1 then
+                spi_clock_counter <= spi_clock_counter - 1;
+            end if;
         end if;
+        -------------------------------------------------- 
         --------------------------------------------------
-        
     end create_spi_io_clock;
 
 ------------------------------------------------------------------------
@@ -74,7 +87,19 @@ package body spi_pkg is
     ) is
     begin
         spi_clock_group.spi_clock_division <= clock_divider; 
+        spi_clock_group.spi_clock_division <= clock_divider; 
     end set_clock_division;
+------------------------------------------------------------------------
+    procedure request_spi_clock
+    (
+        signal spi_clock_group : inout spi_io_clock_record;
+        number_of_spi_clocks : in natural
+    ) is
+    begin
+        spi_clock_group.spi_clock_counter <= number_of_spi_clocks;
+        spi_clock_group.spi_io_clock <= '0';        
+        
+    end request_spi_clock;
 
 ------------------------------------------------------------------------
 ------------------------------------------------------------------------
