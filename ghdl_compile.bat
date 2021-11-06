@@ -8,12 +8,13 @@ ghdl -a --ieee=synopsys --work=math_library %source%/math_library/division/divis
 ghdl -a --ieee=synopsys %source%/math_library/division/division_pkg.vhd
 rem ghdl -a --ieee=synopsys --work=math_library %source%/math_library/division/division_pkg_body.vhd
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/first_order_filter/first_order_filter_pkg.vhd
-ghdl -a --ieee=synopsys --work=math_library %source%/math_library/state_variable/state_variable_pkg.vhd
-ghdl -a --ieee=synopsys --work=math_library %source%/math_library/lcr_filter_model/lcr_filter_model_pkg.vhd
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/pi_controller/pi_controller_pkg.vhd
-ghdl -a --ieee=synopsys --work=math_library %source%/math_library/inverter_model/inverter_model_pkg.vhd
-ghdl -a --ieee=synopsys --work=math_library %source%/math_library/power_supply_model/psu_inverter_simulation_models_pkg.vhd
-ghdl -a --ieee=synopsys --work=math_library %source%/math_library/power_supply_model/power_supply_simulation_model_pkg.vhd
+
+ghdl -a --ieee=synopsys --work=math_library %source%/dynamic_simulation_library/state_variable/state_variable_pkg.vhd
+ghdl -a --ieee=synopsys --work=math_library %source%/dynamic_simulation_library/lcr_filter_model/lcr_filter_model_pkg.vhd
+ghdl -a --ieee=synopsys --work=math_library %source%/dynamic_simulation_library/inverter_model/inverter_model_pkg.vhd
+ghdl -a --ieee=synopsys --work=math_library %source%/dynamic_simulation_library/power_supply_model/psu_inverter_simulation_models_pkg.vhd
+ghdl -a --ieee=synopsys --work=math_library %source%/dynamic_simulation_library/power_supply_model/power_supply_simulation_model_pkg.vhd
 
 ghdl -a --ieee=synopsys %source%/spi/spi_pkg.vhd
 ghdl -a --ieee=synopsys %source%/spi/spi_adc_pkg.vhd
