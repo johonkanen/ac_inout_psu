@@ -18,6 +18,7 @@ package uart_transreceiver_pkg is
     
     type uart_transreceiver_FPGA_output_group is record
         uart_tx_FPGA_out : uart_tx_FPGA_output_group; 
+        led : std_logic;
     end record;
     
     type uart_transreceiver_data_input_group is record

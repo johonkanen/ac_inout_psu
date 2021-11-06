@@ -89,7 +89,8 @@ begin
             end CASE;
             if multiplier_is_ready(hw_multiplier) then
                 int18_multiplier_output <= get_multiplier_result(hw_multiplier,1);
-                report "multiplication result at simulation_counter value " & integer'image(simulation_counter)  &" : " & integer'image((get_multiplier_result(hw_multiplier,0)));
+                report "multiplication result at simulation_counter value " & 
+                    integer'image(simulation_counter)  &" : " & integer'image((get_multiplier_result(hw_multiplier,0)));
             end if; 
 
         end if; -- rstn

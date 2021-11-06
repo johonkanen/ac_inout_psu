@@ -57,25 +57,29 @@ package body spi_pkg is
         alias spi_clock_counter is spi_clock_group.spi_clock_counter;
     begin
         --------------------------------------------------
+        spi_io_clock <= '1';
+        if clock_division_counter > spi_clock_division/2 then
+            spi_io_clock <= '0';
+        end if;
+        -------------------------------------------------- 
         if spi_clock_counter > 0 then
+            --------------------------------------------------
             if clock_division_counter > 0 then
                 clock_division_counter <= clock_division_counter - 1;
-            end if;
-
+            end if; 
+            --------------------------------------------------
             if clock_division_counter = 0 then
                 clock_division_counter <= spi_clock_division;
-            end if;
-
-            spi_io_clock <= '1';
-            if clock_division_counter > spi_clock_division/2 then
-                spi_io_clock <= '0';
-            end if;
+            end if; 
             --------------------------------------------------
             if clock_division_counter = 1 then
                 spi_clock_counter <= spi_clock_counter - 1;
             end if;
+            --------------------------------------------------
+        else
+            spi_io_clock <= '1';
         end if;
-        -------------------------------------------------- 
+
         --------------------------------------------------
     end create_spi_io_clock;
 

@@ -30,6 +30,7 @@ package system_components_pkg is
         spi_sar_adc_FPGA_out            : spi_sar_adc_FPGA_output_group;
         test_ad_mux                     : std_logic_vector(2 downto 0);
         ethernet_communication_FPGA_out : ethernet_communication_FPGA_output_group;
+        led : std_logic;
     end record;
 
     type system_components_FPGA_inout_record is record
