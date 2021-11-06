@@ -4,3 +4,6 @@
 [submodule "source/dynamic_simulation_library"]
 	path = source/dynamic_simulation_library
 	url = https://github.com/johonkanen/dynamic_simulation_library.git
+[submodule "source/math_library"]
+	path = source/math_library
+	url = https://github.com/johonkanen/math_library.git
