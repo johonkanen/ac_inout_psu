@@ -2,6 +2,7 @@
 *.swp*
 *.cf
 *.vcd
+*.ghw
 *.swo
 /compile*
 vunit_out
