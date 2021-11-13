@@ -10,8 +10,8 @@ ghdl -a --ieee=synopsys --work=math_library %source%/math_library/multiplier/mul
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/sincos/sincos_pkg.vhd
 ghdl -a --ieee=synopsys tb_sincos.vhd
 ghdl -e --ieee=synopsys tb_sincos
-ghdl -r --ieee=synopsys tb_sincos --vcd=tb_sincos.vcd
+ghdl -r --ieee=synopsys tb_sincos --wave=tb_sincos.ghw
 
 
-IF %1 EQU 1 start "" gtkwave tb_sincos.vcd
+IF %1 EQU 1 start "" gtkwave tb_sincos.ghw
 IF %2 EQU 1 EXIT

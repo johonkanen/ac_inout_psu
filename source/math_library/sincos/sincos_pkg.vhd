@@ -148,11 +148,13 @@ package body sincos_pkg is
         constant three_fourths : integer := 24576 ;
         constant five_fourths  : integer := 40960 ;
         constant seven_fourths : integer := 57344 ;
+        alias sin_process_counter is sincos_process_counter;
+        alias cos_process_counter is sincos_process_counter;
 ------------------------------------------------------------------------
     begin
             sincos_has_finished <= false;
 
-            CASE sincos_process_counter is
+            CASE sin_process_counter is
                 WHEN 0 => 
                     multiply(hw_multiplier, angle_reduction(to_integer(angle_rad16)), angle_reduction(to_integer(angle_rad16)));
                     sincos_process_counter <= sincos_process_counter + 1;
@@ -180,7 +182,7 @@ package body sincos_pkg is
                 WHEN others => -- do nothing
             end CASE;
 
-            CASE sincos_process_counter is
+            CASE cos_process_counter is
                 WHEN 2 =>
                     multiply(hw_multiplier, angle_squared, cosgains(2));
                     sincos_process_counter <= sincos_process_counter + 1;
