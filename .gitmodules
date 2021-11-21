@@ -7,3 +7,6 @@
 [submodule "source/math_library"]
 	path = source/math_library
 	url = https://github.com/johonkanen/math_library.git
+[submodule "source/gigabit_ethernet"]
+	path = source/gigabit_ethernet
+	url = https://github.com/johonkanen/gigabit_ethernet.git
