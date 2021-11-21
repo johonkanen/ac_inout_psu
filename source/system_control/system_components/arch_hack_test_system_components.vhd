@@ -182,12 +182,32 @@ architecture hack_test of system_components is
     signal sincos_multiplier3 : multiplier_record := init_multiplier;
     signal sincos3 : sincos_record := init_sincos;
 
+    signal sincos_multiplier4 : multiplier_record := init_multiplier;
+    signal sincos4 : sincos_record := init_sincos;
+
     signal sin : int18 := 0;
     signal cos : int18 := 32768;
     signal angle_rad16 : unsigned(15 downto 0) := (others => '0');
 --------------------------------------------------
     signal sine_w_harmonics : int18 := 0;
     signal harmonic_process_counter : natural range 0 to 15 := 15;
+
+    function saturate_to
+    (
+        number : integer;
+        saturation_value : integer
+    )
+    return integer
+    is
+    begin
+        if number > saturation_value then
+            return saturation_value;
+        else
+            return number;
+        end if;
+    end saturate_to;
+
+    signal sine_counter : natural range 0 to 65535 := 0;
 
 --------------------------------------------------
 begin
@@ -240,6 +260,8 @@ begin
             create_sincos(sincos_multiplier2, sincos2);
             create_multiplier(sincos_multiplier3);
             create_sincos(sincos_multiplier3, sincos3);
+            create_multiplier(sincos_multiplier4);
+            create_sincos(sincos_multiplier4, sincos4);
 
             CASE harmonic_process_counter is
                 WHEN 0 => 
@@ -324,6 +346,9 @@ begin
                 request_sincos(sincos2, to_integer(angle_rad16)*4+angle_rad16);
                 request_sincos(sincos3, to_integer(angle_rad16)*8-angle_rad16);
 
+                sine_counter <= sine_counter + 1;
+                request_sincos(sincos4, sine_counter);
+
                 test_leading_zeroes <= test_leading_zeroes + 1;
                 if test_leading_zeroes = 32767 then
                     test_leading_zeroes <= 1;
@@ -357,6 +382,7 @@ begin
                     WHEN 27 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier6, divider6, 17));
                     WHEN 28 => transmit_16_bit_word_with_uart(uart_data_in, sine_w_harmonics);
                     WHEN 29 => transmit_16_bit_word_with_uart(uart_data_in, get_cosine(sincos)/4+32768 + get_cosine(sincos2)/16 + get_cosine(sincos3)/32);
+                    WHEN 30 => transmit_16_bit_word_with_uart(uart_data_in, saturate_to(get_cosine(sincos4)+32768, 65535));
                     WHEN others => -- get data from MDIO
                         register_counter := register_counter + 1;
                         if test_counter = 4600 then
