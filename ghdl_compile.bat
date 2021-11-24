@@ -5,8 +5,6 @@ ghdl -a --ieee=synopsys --work=math_library %source%/math_library/multiplier/mul
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/sincos/sincos_pkg.vhd
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/division/division_internal_pkg.vhd
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/division/division_pkg.vhd
-ghdl -a --ieee=synopsys %source%/math_library/division/division_pkg.vhd
-rem ghdl -a --ieee=synopsys --work=math_library %source%/math_library/division/division_pkg_body.vhd
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/first_order_filter/first_order_filter_pkg.vhd
 ghdl -a --ieee=synopsys --work=math_library %source%/math_library/pi_controller/pi_controller_pkg.vhd
 
