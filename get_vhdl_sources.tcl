@@ -16,6 +16,10 @@ proc get_vhdl_sources {void}\
         /dynamic_simulation_library/power_supply_model/psu_inverter_simulation_models_pkg.vhd
         /dynamic_simulation_library/power_supply_model/power_supply_simulation_model_pkg.vhd
 
+        /dynamic_simulation_library/ac_motor_models/pmsm_electrical_model_pkg.vhd
+        /dynamic_simulation_library/ac_motor_models/pmsm_mechanical_model_pkg.vhd
+        /dynamic_simulation_library/ac_motor_models/permanent_magnet_motor_model_pkg.vhd
+
         /system_clocks_pkg.vhd
 
                                     /gigabit_ethernet/ethernet/mdio_driver/mdio_three_state_io_driver/mdio_three_state_io_driver_pkg.vhd

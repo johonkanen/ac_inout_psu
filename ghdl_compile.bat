@@ -14,6 +14,10 @@ ghdl -a --ieee=synopsys --work=math_library %source%/dynamic_simulation_library/
 ghdl -a --ieee=synopsys --work=math_library %source%/dynamic_simulation_library/power_supply_model/psu_inverter_simulation_models_pkg.vhd
 ghdl -a --ieee=synopsys --work=math_library %source%/dynamic_simulation_library/power_supply_model/power_supply_simulation_model_pkg.vhd
 
+ghdl -a --ieee=synopsys --work=math_library %source%/dynamic_simulation_library/ac_motor_models/pmsm_electrical_model_pkg.vhd
+ghdl -a --ieee=synopsys --work=math_library %source%/dynamic_simulation_library/ac_motor_models/pmsm_mechanical_model_pkg.vhd
+ghdl -a --ieee=synopsys --work=math_library %source%/dynamic_simulation_library/ac_motor_models/permanent_magnet_motor_model_pkg.vhd
+
 ghdl -a --ieee=synopsys %source%/spi/spi_pkg.vhd
 ghdl -a --ieee=synopsys %source%/spi/spi_adc_pkg.vhd
 

@@ -18,6 +18,8 @@ architecture hack_test of system_components is
     use math_library.state_variable_pkg.all;
     use math_library.sincos_pkg.all;
 
+    use math_library.permanent_magnet_motor_model_pkg.all;
+
 
     alias clock is system_clocks.core_clock;
     alias reset_n is system_clocks.pll_locked;
@@ -32,11 +34,13 @@ architecture hack_test of system_components is
     signal uart_transmit_counter : natural range 0 to 2**16-1 := 0;
     constant counter_at_100khz   : natural                    := 120e6/80e3;
 
+
     signal uart_rx_data : natural range 0 to 2**16-1;
 
     signal spi_sar_adc_clocks   : spi_sar_adc_clock_group;
     signal spi_sar_adc_data_in  : spi_sar_adc_data_input_group;
     signal spi_sar_adc_data_out : spi_sar_adc_data_output_group;
+
 
 
     signal test_counter : natural range 0 to 2**16-1;
@@ -209,6 +213,18 @@ architecture hack_test of system_components is
 
     signal sine_counter : natural range 0 to 65535 := 0;
 
+    type abc is (id, iq, w, angle);
+    type multiplier_array is array (abc range abc'left to abc'right) of multiplier_record;
+    signal pmsm_multiplier : multiplier_array := (init_multiplier, init_multiplier, init_multiplier, init_multiplier);
+
+    alias id_multiplier is pmsm_multiplier(id);
+    alias iq_multiplier is pmsm_multiplier(iq);
+    alias w_multiplier is pmsm_multiplier(w);
+
+    signal pmsm_model : permanent_magnet_motor_model_record := init_permanent_magnet_motor_model;
+    signal vd_input_voltage : int18 := 300;
+    signal vq_input_voltage : int18 := -300;
+
 --------------------------------------------------
 begin
 
@@ -262,6 +278,19 @@ begin
             create_sincos(sincos_multiplier3, sincos3);
             create_multiplier(sincos_multiplier4);
             create_sincos(sincos_multiplier4, sincos4);
+
+            create_multiplier(pmsm_multiplier(id));
+            create_multiplier(pmsm_multiplier(iq));
+            create_multiplier(pmsm_multiplier(w));
+            create_multiplier(pmsm_multiplier(angle));
+
+            --------------------------------------------------
+            create_pmsm_model(
+                pmsm_model        ,
+                pmsm_multiplier(id)    ,
+                pmsm_multiplier(iq)    ,
+                pmsm_multiplier(w)     ,
+                pmsm_multiplier(angle) );
 
             CASE harmonic_process_counter is
                 WHEN 0 => 
@@ -332,7 +361,6 @@ begin
                 create_multiplier(division_multiplier6);
                 create_division(division_multiplier6, divider6);
             -------------------------------------------------- 
-
             uart_transmit_counter <= uart_transmit_counter - 1; 
             if uart_transmit_counter = 0 then
                 uart_transmit_counter <= counter_at_100khz;
@@ -345,6 +373,12 @@ begin
                 harmonic_process_counter <= 0;
                 request_sincos(sincos2, to_integer(angle_rad16)*4+angle_rad16);
                 request_sincos(sincos3, to_integer(angle_rad16)*8-angle_rad16);
+
+
+                request_id_calculation(pmsm_model, vd_input_voltage);
+                request_iq_calculation(pmsm_model, vq_input_voltage);
+                request_angular_speed_calculation(pmsm_model);
+                request_electrical_angle_calculation(pmsm_model);
 
                 sine_counter <= sine_counter + 1;
                 request_sincos(sincos4, sine_counter);
@@ -383,6 +417,10 @@ begin
                     WHEN 28 => transmit_16_bit_word_with_uart(uart_data_in, sine_w_harmonics);
                     WHEN 29 => transmit_16_bit_word_with_uart(uart_data_in, get_cosine(sincos)/4+32768 + get_cosine(sincos2)/16 + get_cosine(sincos3)/32);
                     WHEN 30 => transmit_16_bit_word_with_uart(uart_data_in, saturate_to(get_cosine(sincos4)+32768, 65535));
+                    WHEN 31 => transmit_16_bit_word_with_uart(uart_data_in, get_d_component(pmsm_model)/2 +32768);
+                    WHEN 32 => transmit_16_bit_word_with_uart(uart_data_in, get_q_component(pmsm_model)/2 +32768);
+                    WHEN 33 => transmit_16_bit_word_with_uart(uart_data_in, get_angular_speed(pmsm_model)/2 +32768);
+                    WHEN 34 => transmit_16_bit_word_with_uart(uart_data_in, get_electrical_angle(pmsm_model));
                     WHEN others => -- get data from MDIO
                         register_counter := register_counter + 1;
                         if test_counter = 4600 then
@@ -400,10 +438,12 @@ begin
 
                 CASE test_counter is
                     WHEN 0     => output_duty_ratio   <= 20e3;
+                                  set_load_torque(pmsm_model, 100);
                     WHEN 8192  => grid_duty_ratio     <= 15e3;
                     WHEN 16384 => output_resistance   <= 40e3;
                     WHEN 24576 => output_load_current <= -output_load_current;
                     WHEN 32768 => output_duty_ratio   <= 15e3;
+                                  set_load_torque(pmsm_model, 1000);
                     WHEN 40960 => grid_duty_ratio     <= 20e3;
                     WHEN 49152 => output_resistance   <= 30e3;
                     WHEN 57344 => output_load_current <= -output_load_current;
