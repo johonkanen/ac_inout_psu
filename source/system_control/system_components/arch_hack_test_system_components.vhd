@@ -192,6 +192,7 @@ architecture hack_test of system_components is
     signal sin : int18 := 0;
     signal cos : int18 := 32768;
     signal angle_rad16 : unsigned(15 downto 0) := (others => '0');
+    signal angle_rad16_25khz : unsigned(15 downto 0) := (others => '0');
 --------------------------------------------------
     signal sine_w_harmonics : int18 := 0;
     signal harmonic_process_counter : natural range 0 to 15 := 15;
@@ -369,10 +370,11 @@ begin
 
             if ad_conversion_is_ready(spi_sar_adc_data_out) then
                 request_power_supply_calculation(power_supply_simulation, -grid_duty_ratio, output_duty_ratio);
-                angle_rad16 <= angle_rad16 + 328;
+                angle_rad16 <= angle_rad16 + 1285;
+                angle_rad16_25khz <= angle_rad16_25khz + 13107;
                 harmonic_process_counter <= 0;
-                request_sincos(sincos2, to_integer(angle_rad16)*4+angle_rad16);
-                request_sincos(sincos3, to_integer(angle_rad16)*8-angle_rad16);
+                request_sincos(sincos2, to_integer(angle_rad16_25khz));
+                request_sincos(sincos3, to_integer(angle_rad16));
 
 
                 request_id_calculation(pmsm_model, vd_input_voltage);
@@ -415,8 +417,8 @@ begin
                     WHEN 26 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier5, divider5, 17));
                     WHEN 27 => transmit_16_bit_word_with_uart(uart_data_in, get_division_result(division_multiplier6, divider6, 17));
                     WHEN 28 => transmit_16_bit_word_with_uart(uart_data_in, sine_w_harmonics);
-                    WHEN 29 => transmit_16_bit_word_with_uart(uart_data_in, get_cosine(sincos)/4+32768 + get_cosine(sincos2)/16 + get_cosine(sincos3)/32);
-                    WHEN 30 => transmit_16_bit_word_with_uart(uart_data_in, saturate_to(get_cosine(sincos4)+32768, 65535));
+                    WHEN 29 => transmit_16_bit_word_with_uart(uart_data_in, saturate_to(get_cosine(sincos2)+32768,65535));
+                    WHEN 30 => transmit_16_bit_word_with_uart(uart_data_in, saturate_to(get_cosine(sincos3)+32768, 65535));
                     WHEN 31 => transmit_16_bit_word_with_uart(uart_data_in, get_d_component(pmsm_model)/2 +32768);
                     WHEN 32 => transmit_16_bit_word_with_uart(uart_data_in, get_q_component(pmsm_model)/2 +32768);
                     WHEN 33 => transmit_16_bit_word_with_uart(uart_data_in, get_angular_speed(pmsm_model)/2 +32768);
