@@ -287,11 +287,12 @@ begin
 
             --------------------------------------------------
             create_pmsm_model(
-                pmsm_model        ,
+                pmsm_model             ,
                 pmsm_multiplier(id)    ,
                 pmsm_multiplier(iq)    ,
                 pmsm_multiplier(w)     ,
-                pmsm_multiplier(angle) );
+                pmsm_multiplier(angle) ,
+                default_motor_parameters );
 
             CASE harmonic_process_counter is
                 WHEN 0 => 

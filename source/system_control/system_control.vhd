@@ -53,6 +53,5 @@ begin
               system_control_FPGA_inout.system_components_FPGA_inout,
               system_components_data_in,
               system_components_data_out);
-
 ------------------------------------------------------------------------
 end rtl;
