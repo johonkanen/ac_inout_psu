@@ -18,7 +18,7 @@
 	set_global_assignment -name REMOVE_REDUNDANT_LOGIC_CELLS ON
 	set_global_assignment -name PRE_MAPPING_RESYNTHESIS ON
 	set_global_assignment -name PROJECT_IP_REGENERATION_POLICY ALWAYS_REGENERATE_IP
-    set_global_assignment -name VHDL_INPUT_VERSION VHDL_1993
+    set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
 	set_global_assignment -name VHDL_SHOW_LMF_MAPPING_MESSAGES OFF
 	set_global_assignment -name DEVICE_FILTER_SPEED_GRADE 7
 	set_global_assignment -name STATE_MACHINE_PROCESSING "ONE-HOT"
